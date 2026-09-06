@@ -1,14 +1,158 @@
-export default function SuiviPage() {
+import prisma from "@/lib/prisma";
+
+const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE"];
+
+export default async function SuiviPage({ searchParams }) {
+  const params = await searchParams;
+  const reference = params?.reference;
+  const don = reference
+    ? await prisma.don.findUnique({
+        where: { reference },
+        include: { donateur: true, photos: true },
+      })
+    : null;
+
   return (
-    <section className="bg-ong-fond py-20">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <h1 className="font-display font-semibold text-ong-bleu">
+    <section className="bg-ong-fond py-8">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
           Suivre ma demande
         </h1>
-        <p className="mt-4 text-[16px] text-ong-texte/85">
-          Le système de suivi détaillé sera disponible prochainement. Utilisez
-          le formulaire de la page d&apos;accueil en attendant.
+        <p className="mt-2 text-[15px] text-ong-texte/85">
+          Entrez votre référence de don pour consulter le statut et les détails de votre dossier.
         </p>
+
+        <form action="/suivi" method="get" className="mt-6">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              name="reference"
+              defaultValue={reference || ""}
+              placeholder="Ex : GAS-2026-00A2F"
+              className="flex-1 h-12 px-4 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-bleu/20 focus:border-ong-bleu"
+              required
+            />
+            <button
+              type="submit"
+              className="h-12 px-6 rounded-md bg-ong-bleu text-white text-[14px] font-semibold hover:bg-ong-bleu-fonce transition-colors"
+            >
+              Suivre ma demande
+            </button>
+          </div>
+        </form>
+
+        {reference && don && (
+          <div className="mt-8 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white border border-ong-bordure rounded-lg p-5">
+                <p className="text-[12px] text-ong-muted uppercase tracking-wider mb-1">
+                  Référence
+                </p>
+                <p className="font-mono text-[20px] font-semibold text-ong-bleu break-all">
+                  {don.reference}
+                </p>
+                <p className="mt-2 text-[13px] text-ong-muted">
+                  Statut actuel du dossier
+                </p>
+                <span className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ong-vert-pale text-ong-vert text-[12px] font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-ong-vert" />
+                  {don.statut}
+                </span>
+              </div>
+
+              <div className="bg-white border border-ong-bordure rounded-lg p-5">
+                <p className="text-[12px] text-ong-muted uppercase tracking-wider mb-1">
+                  Donateur
+                </p>
+                <p className="text-[15px] text-ong-texte font-medium">
+                  {don.donateur.prenom} {don.donateur.nom}
+                </p>
+                <p className="mt-1 text-[13px] text-ong-muted">{don.donateur.email}</p>
+                <p className="text-[13px] text-ong-muted">{don.donateur.telephone}</p>
+                {don.donateur.organisme && (
+                  <p className="text-[13px] text-ong-muted">{don.donateur.organisme}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-white border border-ong-bordure rounded-lg p-5">
+              <h2 className="font-display font-semibold text-ong-bleu text-[15px] mb-4">
+                Détails du don
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[14px]">
+                <div>
+                  <span className="text-ong-muted">Nature</span>
+                  <p className="text-ong-texte font-medium mt-0.5">
+                    {don.nature === "AUTRE" && don.natureAutre ? don.natureAutre : don.nature}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-ong-muted">Localisation</span>
+                  <p className="text-ong-texte font-medium mt-0.5">{don.localisation}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <span className="text-ong-muted">Description</span>
+                  <p className="text-ong-texte mt-0.5">{don.description}</p>
+                </div>
+                <div>
+                  <span className="text-ong-muted">Date de soumission</span>
+                  <p className="text-ong-texte font-medium mt-0.5">
+                    {new Date(don.createdAt).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-ong-bordure rounded-lg p-5">
+              <h2 className="font-display font-semibold text-ong-bleu text-[15px] mb-4">
+                Suivi de la demande
+              </h2>
+              <ol className="space-y-3">
+                {STATUTS.map((statut) => {
+                  const isDone = STATUTS.indexOf(don.statut) >= STATUTS.indexOf(statut);
+                  const isCurrent = don.statut === statut;
+                  return (
+                    <li key={statut} className="flex items-center gap-3">
+                      <span
+                        className={`flex h-7 w-7 items-center justify-center rounded-full border text-[12px] font-medium ${
+                          isDone
+                            ? "bg-ong-vert border-ong-vert text-white"
+                            : "bg-white border-ong-bordure text-ong-muted"
+                        }`}
+                      >
+                        {isDone && !isCurrent ? "✓" : STATUTS.indexOf(statut) + 1}
+                      </span>
+                      <span
+                        className={`text-[14px] ${
+                          isCurrent ? "text-ong-texte font-medium" : isDone ? "text-ong-texte" : "text-ong-muted"
+                        }`}
+                      >
+                        {statut}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </div>
+        )}
+
+        {reference && !don && (
+          <div className="mt-8 bg-white border border-ong-bordure rounded-lg p-6 text-center">
+            <p className="text-[15px] text-ong-texte">
+              Aucun dossier trouvé pour la référence <strong>{reference}</strong>.
+            </p>
+            <p className="mt-2 text-[13px] text-ong-muted">
+              Vérifiez la référence et réessayez.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

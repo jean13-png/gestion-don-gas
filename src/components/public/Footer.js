@@ -3,105 +3,104 @@ import Icon from "@/components/ui/Icon";
 
 export default function Footer() {
   return (
-    <footer className="bg-ong-bleu text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex items-center justify-center h-10 w-10 rounded-md bg-white/10 text-white font-display font-semibold">
-                G
-              </span>
-              <span className="font-display font-semibold text-[17px]">
-                ONG Global Actions Solidarité
-              </span>
-            </div>
-            <p className="text-[14px] text-white/75 leading-relaxed">
-              Projet Informatique Pour Tous (PIPT). Équiper les écoles du Bénin
-              en matériel informatique grâce à la solidarité de partenaires
-              engagés.
-            </p>
-            <ul className="mt-6 space-y-2 text-[14px] text-white/80">
-              <li className="flex items-start gap-2">
-                <Icon name="location-dot" className="mt-1 text-ong-vert" />
-                <span>Abomey-Calavi, République du Bénin</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Icon name="envelope" className="mt-1 text-ong-vert" />
-                <a href="mailto:contact@pipt-ong-gas.bj" className="hover:underline">
-                  contact@pipt-ong-gas.bj
-                </a>
-              </li>
-              <li className="flex items-start gap-2">
-                <Icon name="phone" className="mt-1 text-ong-vert" />
-                <span>+229 00 00 00 00</span>
-              </li>
-            </ul>
-          </div>
+    <footer className="bg-[var(--color-ong-bleu-clair)] pt-[52px]">
+      <div className="container">
+        <div className="flex flex-wrap items-center gap-6 mb-8">
+          <img
+            src="/images/logo-ong-gas.png"
+            alt="Logo ONG-GAS"
+            className="h-[70px] w-auto object-contain"
+          />
+          <img
+            src="/images/logo-projet-ipt.png"
+            alt="Logo Projet PIPT"
+            className="h-[70px] w-auto object-contain"
+          />
+        </div>
+      </div>
 
-          <div>
-            <h3 className="font-display font-semibold text-[15px] mb-4">
-              Plateforme
-            </h3>
-            <ul className="space-y-2 text-[14px] text-white/80">
-              <li>
-                <Link href="/don" className="hover:text-white">
-                  Soumettre un don
-                </Link>
-              </li>
-              <li>
-                <Link href="/suivi" className="hover:text-white">
-                  Suivre ma demande
-                </Link>
-              </li>
-              <li>
-                <Link href="/#types-de-dons" className="hover:text-white">
-                  Types de dons acceptés
-                </Link>
-              </li>
-              <li>
-                <Link href="/#comment-ca-marche" className="hover:text-white">
-                  Processus de vérification
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-display font-semibold text-[15px] mb-4">
-              L&apos;ONG
-            </h3>
-            <ul className="space-y-2 text-[14px] text-white/80">
-              <li>
-                <Link href="/a-propos" className="hover:text-white">
-                  À propos
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-white">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/a-propos" className="hover:text-white">
-                  Statut légal
-                </Link>
-              </li>
-              <li>
-                <Link href="/a-propos" className="hover:text-white">
-                  Transparence financière
-                </Link>
-              </li>
-            </ul>
-          </div>
+      <div className="container grid grid-cols-1 md:grid-cols-[1.2fr_0.85fr_1fr] gap-10 md:gap-[70px] pb-9">
+        <div>
+          <h3 className="m-0 mb-4 text-[18px] font-semibold !text-[var(--color-ong-bleu)]">
+            ONG-GAS
+          </h3>
+          <p className="m-0 mb-2 text-[14px] text-[var(--color-ong-texte-vert)]">
+            Global Actions Solidarité.
+          </p>
+          <p className="m-0 mb-2 text-[14px] text-[var(--color-ong-texte-vert)]">
+            Projet Informatique Pour Tous : plateforme de gestion,
+            de suivi et de traçabilité des dons.
+          </p>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-white/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-          <p className="text-[12px] text-white/65">
-            © {new Date().getFullYear()} ONG Global Actions Solidarité. Tous droits réservés.
-          </p>
-          <p className="text-[12px] text-white/65">
-            Récépissé n° 123/2024 — IFU 3201987654001 — Conforme aux dispositions de la loi 2020-37
-          </p>
+        <div>
+          <h3 className="m-0 mb-4 text-[18px] font-semibold !text-[var(--color-ong-bleu)]">
+            Liens utiles
+          </h3>
+          <ul className="list-none m-0 p-0 space-y-2.5">
+            <li>
+              <Link href="/a-propos" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Le projet PIPT
+              </Link>
+            </li>
+            <li>
+              <Link href="/don" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Faire un don
+              </Link>
+            </li>
+            <li>
+              <Link href="/suivi" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Suivre une demande
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Contact
+              </Link>
+            </li>
+            <li>
+              <a href="https://ongglobalactionsolidarite.com/" target="_blank" rel="noopener noreferrer" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Notre plateforme
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="m-0 mb-4 text-[18px] font-semibold !text-[var(--color-ong-bleu)]">
+            Informations légales
+          </h3>
+          <ul className="list-none m-0 p-0 space-y-2.5">
+            <li>
+              <Link href="/mentions-legales" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Mentions légales
+              </Link>
+            </li>
+            <li>
+              <Link href="/confidentialite" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Politique de confidentialité
+              </Link>
+            </li>
+            <li>
+              <Link href="/conditions-utilisation" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                Conditions d&apos;utilisation
+              </Link>
+            </li>
+              <li>
+               <Link href="/connexion" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+                 Espace gestionnaire
+               </Link>
+             </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="border-t border-[var(--color-ong-ligne)] py-5 text-center text-[13px] text-[var(--color-ong-muted)]">
+        <div className="container">
+          © 2026 ONG Global Actions Solidarité. Tous droits réservés.
+          <span className="block mt-1 text-[12px]">
+            Association immatriculée au Bénin — Abomey-Calavi — N° déclaration : 2025/ONG/GAS/001
+          </span>
         </div>
       </div>
     </footer>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import TrackReferenceForm from "@/components/public/TrackReferenceForm";
@@ -5,500 +6,199 @@ import TrackReferenceForm from "@/components/public/TrackReferenceForm";
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
-      <CommentCaMarcheSection />
-      <TypesDeDonsSection />
-      <ImpactSection />
-      <AProposSection />
-      <CtaFinalSection />
-    </>
-  );
-}
-
-function HeroSection() {
-  return (
-    <section className="bg-ong-fond border-b border-ong-bordure">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-          <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-ong-bordure text-[12px] text-ong-muted">
-              <span className="h-2 w-2 rounded-full bg-ong-vert" />
-              Bénin · Abomey-Calavi · Projet actif depuis 2025
-            </div>
-
-            <h1 className="mt-5 font-display font-semibold text-ong-bleu">
-              Des ordinateurs dans les écoles du Bénin, grâce à votre don.
+      {/* Hero */}
+      <section className="bg-[var(--color-ong-bleu-clair)] overflow-hidden">
+        <div className="container">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.08fr_0.78fr] gap-10 lg:gap-[65px] items-center py-14 lg:py-[55px]">
+            <div>
+            <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
+              Avec le Projet Informatique Pour Tous,
+            </p>
+            <h1 className="max-w-[640px] text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.12] tracking-tight text-[var(--color-ong-texte)] uppercase">
+              L&apos;informatique à l&apos;école devient plus accessible.
             </h1>
-
-            <p className="mt-5 text-[16px] text-ong-texte/85 max-w-xl leading-relaxed">
-              L&apos;ONG-GAS équipe les écoles primaires, maternelles et secondaires
-              en matériel informatique. Soumettez votre contribution et suivez
-              son traitement terrain en temps réel.
-            </p>
-
-            <div className="mt-7 flex flex-col sm:flex-row gap-3">
-              <Link
-                href="/don"
-                className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-md bg-ong-bleu text-white text-[15px] font-medium hover:bg-ong-bleu-clair transition-colors"
-              >
-                <Icon name="hand-holding-heart" />
-                Soumettre un don
-              </Link>
-              <Link
-                href="/suivi"
-                className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-md border border-ong-bleu text-ong-bleu text-[15px] font-medium hover:bg-white transition-colors"
-              >
-                <Icon name="magnifying-glass" />
-                Suivre ma demande
-              </Link>
+              <p className="mt-4 text-[16px] text-[var(--color-ong-texte)] max-w-[620px]">
+                ONG-GAS met en relation les donateurs, les établissements scolaires
+                et les équipes de terrain afin d&apos;équiper les apprenants du Bénin
+                en matériel informatique adapté.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3.5">
+                <Link href="/don" className="button button-outline">
+                  Faire un don
+                </Link>
+                <Link href="/a-propos" className="button">
+                  Découvrir le projet
+                </Link>
+              </div>
             </div>
-
-            <dl className="mt-10 pt-6 border-t border-ong-bordure grid grid-cols-3 gap-6">
-              <div>
-                <dt className="text-[12px] text-ong-muted uppercase tracking-wider">
-                  Dons traités
-                </dt>
-                <dd className="mt-1 font-display font-semibold text-ong-bleu text-[22px]">
-                  128
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[12px] text-ong-muted uppercase tracking-wider">
-                  Écoles bénéficiaires
-                </dt>
-                <dd className="mt-1 font-display font-semibold text-ong-bleu text-[22px]">
-                  14
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[12px] text-ong-muted uppercase tracking-wider">
-                  Vérification terrain
-                </dt>
-                <dd className="mt-1 font-display font-semibold text-ong-bleu text-[22px]">
-                  100%
-                </dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="lg:col-span-5">
-            <div className="bg-white border border-ong-bordure rounded-lg p-6 sm:p-7">
-              <div className="flex items-center gap-2 text-[12px] uppercase tracking-wider text-ong-muted font-medium">
-                <Icon name="circle-check" className="text-ong-vert" />
-                Suivi de dossier
-              </div>
-              <h2 className="mt-3 font-display font-semibold text-ong-bleu text-[22px]">
-                Consultez le statut de votre don
-              </h2>
-              <p className="mt-2 text-[14px] text-ong-muted">
-                Entrez la référence qui vous a été remise lors de la soumission.
-              </p>
-
-              <TrackReferenceForm />
-
-              <div className="my-5 flex items-center gap-3 text-[12px] text-ong-muted">
-                <span className="flex-1 h-px bg-ong-bordure" />
-                <span>ou</span>
-                <span className="flex-1 h-px bg-ong-bordure" />
-              </div>
-
-              <Link
-                href="/don"
-                className="inline-flex w-full items-center justify-center gap-2 h-11 px-4 rounded-md border border-ong-bleu text-ong-bleu text-[14px] font-medium hover:bg-ong-fond transition-colors"
-              >
-                <Icon name="plus" />
-                Soumettre un nouveau don
-              </Link>
-
-              <p className="mt-5 flex items-center gap-2 text-[12px] text-ong-muted">
-                <Icon name="shield-halved" className="text-ong-vert" />
-                Vos données ne sont utilisées que pour le traitement de votre don.
-              </p>
+            <div className="hero-image">
+              <Image
+                src="/images/image-hero.avif"
+                alt="Apprenants dans une salle de formation informatique"
+                width={640}
+                height={345}
+                className="w-full h-[345px] object-cover rounded-[13px]"
+                priority
+              />
             </div>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-function CommentCaMarcheSection() {
-  const etapes = [
-    {
-      titre: "Soumission",
-      description:
-        "Vous remplissez le formulaire en ligne avec la nature du don et vos coordonnées.",
-    },
-    {
-      titre: "Référence unique",
-      description:
-        "Une référence GAS-2026-XXXXX vous est immédiatement remise par e-mail.",
-    },
-    {
-      titre: "Inspection terrain",
-      description:
-        "Notre équipe se déplace pour vérifier le don sur le lieu indiqué.",
-    },
-    {
-      titre: "Attestation PDF",
-      description:
-        "Une fiche officielle signée et tamponnée est générée et transmise.",
-    },
-  ];
-
-  const timeline = [
-    { label: "Soumis", etat: "done" },
-    { label: "En vérification", etat: "done" },
-    { label: "Inspecté", etat: "current" },
-    { label: "Validé", etat: "todo" },
-    { label: "Fiche générée", etat: "todo" },
-  ];
-
-  return (
-    <section
-      id="comment-ca-marche"
-      className="bg-ong-fond py-20 lg:py-24 border-b border-ong-bordure"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <h2 className="font-display font-semibold text-ong-bleu">
-            Comment ça marche
-          </h2>
-          <p className="mt-3 text-[16px] text-ong-texte/80">
-            Quatre étapes, une traçabilité complète. Chaque don est suivi,
-            inspecté et attesté.
-          </p>
-        </div>
-
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-          <ol className="relative">
-            <span
-              aria-hidden="true"
-              className="absolute left-[19px] top-3 bottom-3 w-px bg-ong-bordure"
+      {/* Présentation */}
+      <section className="section">
+        <div className="container presentation">
+          <div className="presentation-image">
+            <Image
+              src="/images/enfant_en_pleine_etude.jpg"
+              alt="Jeunes apprenants réunis autour d'un ordinateur"
+              width={640}
+              height={330}
+              className="w-full h-[330px] object-cover rounded-lg"
             />
-            {etapes.map((etape, i) => (
-              <li key={etape.titre} className="relative pl-14 pb-8 last:pb-0">
-                <span className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-full bg-ong-bleu text-white font-display font-semibold text-[15px]">
-                  {i + 1}
-                </span>
-                <h3 className="font-display font-semibold text-ong-bleu text-[18px]">
-                  {etape.titre}
-                </h3>
-                <p className="mt-1 text-[14px] text-ong-texte/80 max-w-md">
-                  {etape.description}
-                </p>
-              </li>
-            ))}
-          </ol>
+          </div>
+          <div className="presentation-text">
+            <h2 className="text-[31px] font-bold tracking-tight text-[var(--color-ong-texte)]">
+              Un projet pour les écoles maternelles, primaires et secondaires
+            </h2>
+            <p className="text-[15px] text-[var(--color-ong-texte-secondaire)]">
+              Le Projet Informatique Pour Tous vise à susciter l&apos;éveil scientifique
+              et technologique des apprenants tout au long de leur parcours scolaire.
+            </p>
+            <p className="text-[15px] text-[var(--color-ong-texte-secondaire)]">
+              Les équipements reçus sont contrôlés par l&apos;ONG-GAS avant leur intégration
+              dans le programme. Les écoles bénéficient également d&apos;un accompagnement
+              technique et de la maintenance du matériel mis à disposition.
+            </p>
+            <Link href="/a-propos" className="text-link">
+              En savoir plus sur le projet
+            </Link>
+          </div>
+        </div>
+      </section>
 
-          <div className="bg-white border border-ong-bordure rounded-lg p-6">
-            <div className="flex items-center justify-between pb-4 border-b border-ong-bordure">
+      {/* Accès principaux */}
+      <section className="section section-soft">
+        <div className="container">
+          <div className="section-heading">
+            <h2>Une plateforme simple pour les donateurs et les partenaires</h2>
+            <p>
+              Soumettez un don, consultez l&apos;avancement d&apos;un dossier ou prenez contact
+              avec l&apos;équipe du Projet Informatique Pour Tous.
+            </p>
+          </div>
+
+          <div className="actions-grid">
+            <article className="action-item">
+              <div className="action-number">01</div>
               <div>
-                <p className="text-[12px] text-ong-muted uppercase tracking-wider">
-                  Référence
+                <h3>Proposer un don</h3>
+                <p>
+                  Matériel informatique, mobilier, appui financier, maintenance
+                  ou accompagnement logistique.
                 </p>
-                <p className="mt-1 font-display font-semibold text-ong-bleu text-[18px]">
-                  GAS-2026-A1F4B
-                </p>
+                <Link href="/don">Ouvrir le formulaire</Link>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ong-vert-pale text-ong-vert text-[12px] font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-ong-vert" />
-                En cours
-              </span>
-            </div>
+            </article>
 
-            <ol className="mt-5 space-y-4">
-              {timeline.map((step, i) => (
-                <li key={step.label} className="flex items-center gap-3">
-                  <span
-                    className={`flex h-7 w-7 items-center justify-center rounded-full border ${
-                      step.etat === "done"
-                        ? "bg-ong-vert border-ong-vert text-white"
-                        : step.etat === "current"
-                          ? "bg-white border-ong-vert text-ong-vert"
-                          : "bg-white border-ong-bordure text-ong-muted"
-                    }`}
-                  >
-                    {step.etat === "done" ? (
-                      <Icon name="check" className="text-[12px]" />
-                    ) : (
-                      <span className="text-[12px] font-medium">{i + 1}</span>
-                    )}
-                  </span>
-                  <span
-                    className={`text-[14px] ${
-                      step.etat === "todo"
-                        ? "text-ong-muted"
-                        : "text-ong-texte font-medium"
-                    }`}
-                  >
-                    {step.label}
-                  </span>
-                  {step.etat === "current" && (
-                    <span className="ml-auto text-[12px] text-ong-vert font-medium">
-                      En cours
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ol>
+            <article className="action-item">
+              <div className="action-number">02</div>
+              <div>
+                <h3>Suivre une demande</h3>
+                <p>
+                  Consultez le statut de votre don grâce à la référence reçue
+                  au moment de la soumission.
+                </p>
+                <Link href="/suivi">Accéder au suivi</Link>
+              </div>
+            </article>
+
+            <article className="action-item">
+              <div className="action-number">03</div>
+              <div>
+                <h3>Devenir école partenaire</h3>
+                <p>
+                  Découvrez les conditions requises pour intégrer le programme
+                  Informatique Pour Tous.
+                </p>
+                <Link href="/ecoles">Voir les conditions</Link>
+              </div>
+            </article>
+
+            <article className="action-item">
+              <div className="action-number">04</div>
+              <div>
+                <h3>Contacter l&apos;ONG-GAS</h3>
+                <p>
+                  Notre équipe est disponible pour répondre aux demandes
+                  des donateurs, écoles et organisations partenaires.
+                </p>
+                <Link href="/contact">Nous contacter</Link>
+              </div>
+            </article>
           </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-function TypesDeDonsSection() {
-  return (
-    <section
-      id="types-de-dons"
-      className="bg-white py-20 lg:py-24 border-b border-ong-bordure"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <h2 className="font-display font-semibold text-ong-bleu">
-            Les dons que nous acceptons
-          </h2>
-          <p className="mt-3 text-[16px] text-ong-texte/80">
-            Trois grandes catégories couvrent l&apos;essentiel des besoins des
-            écoles. Chaque don est inspecté puis intégré à un laboratoire.
-          </p>
-        </div>
-
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <article className="md:col-span-2 border border-ong-bordure rounded-lg p-7 bg-ong-fond flex flex-col">
-            <div className="flex items-center justify-center h-12 w-12 rounded-md bg-ong-bleu text-white">
-              <Icon name="laptop" className="text-[20px]" />
-            </div>
-            <h3 className="mt-5 font-display font-semibold text-ong-bleu text-[22px]">
-              Matériel informatique
-            </h3>
-            <p className="mt-3 text-[15px] text-ong-texte/85 leading-relaxed flex-1">
-              Ordinateurs, claviers, souris, câbles, imprimantes, projecteurs.
-              Tout équipement en état de fonctionnement est le bienvenu pour
-              équiper les laboratoires scolaires.
+      {/* Dons acceptés */}
+      <section className="section" id="dons">
+        <div className="container">
+          <div className="section-head">
+            <h2>Ce que vous pouvez proposer</h2>
+            <p>
+              Particuliers, entreprises et organisations peuvent contribuer au projet.
             </p>
-            <Link
-              href="/don"
-              className="mt-6 inline-flex items-center gap-2 text-ong-bleu text-[14px] font-medium hover:text-ong-bleu-clair"
-            >
-              Proposer du matériel
-              <Icon name="arrow-right" className="text-[12px]" />
-            </Link>
-          </article>
+          </div>
 
-          <article className="border border-ong-bordure rounded-lg p-7 bg-ong-fond flex flex-col">
-            <div className="flex items-center justify-center h-12 w-12 rounded-md bg-ong-vert text-white">
-              <Icon name="chalkboard-user" className="text-[20px]" />
-            </div>
-            <h3 className="mt-5 font-display font-semibold text-ong-bleu text-[20px]">
-              Équipements pédagogiques
-            </h3>
-            <p className="mt-3 text-[14px] text-ong-texte/80 leading-relaxed flex-1">
-              Tableaux intelligents, onduleurs, câblage réseau, accessoires
-              périphériques. Ces équipements renforcent les infrastructures des
-              salles informatiques.
+          <div className="two-cols">
+            <article className="card">
+              <h3>Dons matériels</h3>
+              <ul>
+                <li>Ordinateurs, écrans, claviers, souris</li>
+                <li>Imprimantes et vidéoprojecteurs</li>
+                <li>Mobilier de salle informatique</li>
+                <li>Onduleurs et accessoires</li>
+              </ul>
+            </article>
+
+            <article className="card">
+              <h3>Autres formes d&apos;appui</h3>
+              <ul>
+                <li>Don financier</li>
+                <li>Appui technique</li>
+                <li>Appui logistique</li>
+                <li>Accompagnement de formation</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {/* Suivi */}
+      <section className="section alt" id="suivi">
+        <div className="container">
+          <div className="suivi-box">
+            <h2>Suivre ma demande</h2>
+            <p>
+              Saisissez la référence reçue après votre soumission, par exemple GAS-2026-X89K2.
             </p>
-            <Link
-              href="/don"
-              className="mt-6 inline-flex items-center gap-2 text-ong-bleu text-[14px] font-medium hover:text-ong-bleu-clair"
-            >
-              Proposer un équipement
-              <Icon name="arrow-right" className="text-[12px]" />
-            </Link>
-          </article>
-
-          <article className="md:col-span-3 border border-ong-bordure rounded-lg p-7 bg-ong-bleu text-white flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
-            <div className="flex items-center justify-center h-14 w-14 rounded-md bg-white/10 text-white shrink-0">
-              <Icon name="money-bill-wave" className="text-[22px]" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-display font-semibold text-[22px]">
-                Don financier
-              </h3>
-              <p className="mt-2 text-[14px] text-white/80 leading-relaxed max-w-2xl">
-                Votre apport monétaire permet d&apos;acheter du matériel ciblé,
-                de financer la maintenance et d&apos;assurer la continuité des
-                formations dans les écoles partenaires.
-              </p>
-            </div>
-            <Link
-              href="/don"
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-md bg-ong-vert text-white text-[14px] font-medium hover:brightness-95 self-start md:self-auto"
-            >
-              Contribuer
-              <Icon name="arrow-right" className="text-[12px]" />
-            </Link>
-          </article>
+            <TrackReferenceForm />
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-function ImpactSection() {
-  const metrics = [
-    {
-      chiffre: "100%",
-      label: "Vérification terrain",
-      description: "Chaque don est inspecté physiquement par notre équipe.",
-    },
-    {
-      chiffre: "48h",
-      label: "Délai de traitement",
-      description: "De la soumission à la prise en charge par l'équipe terrain.",
-    },
-    {
-      chiffre: "PDF",
-      label: "Attestation officielle",
-      description: "Fiche signée, numérotée et transmise par e-mail.",
-    },
-  ];
-
-  return (
-    <section className="bg-ong-bleu py-20 lg:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
-          <h2 className="font-display font-semibold text-white">
-            Impact et transparence
-          </h2>
-          <p className="mt-3 text-[16px] text-white/75">
-            Nous publions les engagements concrets que nous tenons sur chaque
-            dossier.
-          </p>
-        </div>
-
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
-          {metrics.map((m) => (
-            <div
-              key={m.label}
-              className="border-t border-white/15 pt-6 md:border-t-0 md:pt-0 md:border-l md:pl-8 first:border-l-0 first:pl-0"
-            >
-              <p className="font-display font-semibold text-ong-vert text-[44px] leading-none">
-                {m.chiffre}
-              </p>
-              <p className="mt-3 text-white text-[15px] font-medium">
-                {m.label}
-              </p>
-              <p className="mt-2 text-[13px] text-white/70 leading-relaxed">
-                {m.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AProposSection() {
-  const infos = [
-    {
-      icon: "building",
-      label: "Statut légal",
-      value: "ONG reconnue — Récépissé n° 123/2024",
-    },
-    {
-      icon: "location-dot",
-      label: "Siège",
-      value: "Abomey-Calavi, département de l'Atlantique",
-    },
-    {
-      icon: "envelope",
-      label: "Contact officiel",
-      value: "contact@pipt-ong-gas.bj",
-    },
-    {
-      icon: "file-invoice",
-      label: "Enregistrement",
-      value: "IFU 3201987654001",
-    },
-  ];
-
-  return (
-    <section className="bg-ong-fond py-20 lg:py-24 border-b border-ong-bordure">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      {/* CTA */}
+      <section className="cta" id="don">
+        <div className="container cta-inner">
           <div>
-          <h2 className="font-display font-semibold text-ong-bleu">
-            À propos de l&apos;ONG
-          </h2>
-            <p className="mt-4 text-[16px] text-ong-texte/85 leading-relaxed">
-              <strong className="text-ong-bleu">ONG Global Actions Solidarité</strong>{" "}
-              est une organisation à but non lucratif béninoise qui conduit le
-              Projet Informatique Pour Tous (PIPT). Notre mission : réduire la
-              fracture numérique en milieu scolaire en équipant les
-              établissements publics de laboratoires informatiques fonctionnels.
-            </p>
-            <p className="mt-4 text-[16px] text-ong-texte/85 leading-relaxed">
-              Chaque contribution — matériel, logiciel ou financement —
-              transite par une vérification terrain rigoureuse et donne lieu à
-              une attestation officielle.
-            </p>
-            <Link
-              href="/a-propos"
-              className="mt-6 inline-flex items-center gap-2 text-ong-bleu text-[15px] font-medium hover:text-ong-bleu-clair"
-            >
-              Découvrir l&apos;ONG en détail
-              <Icon name="arrow-right" className="text-[12px]" />
-            </Link>
+            <h2>Vous souhaitez soutenir une école ?</h2>
+            <p>La proposition de don se fait sans création de compte.</p>
           </div>
-
-          <div className="bg-white border border-ong-bordure rounded-lg divide-y divide-ong-bordure">
-            {infos.map((info) => (
-              <div
-                key={info.label}
-                className="flex items-start gap-4 p-5 first:rounded-t-lg last:rounded-b-lg"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-ong-fond text-ong-bleu shrink-0">
-                  <Icon name={info.icon} />
-                </span>
-                <div>
-                  <p className="text-[12px] text-ong-muted uppercase tracking-wider">
-                    {info.label}
-                  </p>
-                  <p className="mt-1 text-[15px] text-ong-texte font-medium">
-                    {info.value}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CtaFinalSection() {
-  return (
-    <section className="bg-ong-vert-pale py-16">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="font-display font-semibold text-ong-bleu">
-          Prêt à équiper une école ?
-        </h2>
-        <p className="mt-3 text-[16px] text-ong-texte/85">
-          Soumettez votre don en quelques minutes. Notre équipe prend le relais
-          sur le terrain.
-        </p>
-        <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/don"
-            className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md bg-ong-bleu text-white text-[15px] font-medium hover:bg-ong-bleu-clair transition-colors"
-          >
-            <Icon name="hand-holding-heart" />
-            Soumettre un don
-          </Link>
-          <Link
-            href="/suivi"
-            className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md border border-ong-bleu text-ong-bleu text-[15px] font-medium hover:bg-white transition-colors"
-          >
-            <Icon name="magnifying-glass" />
-            Suivre un don existant
+          <Link href="/don" className="button button-outline">
+            Commencer la proposition
           </Link>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

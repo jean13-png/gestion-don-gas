@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Donateur {
+  id         String   @id @default(cuid())
+  nom        String
+  prenom     String
+  organisme  String?
+  email      String
+  telephone  String
+  createdAt  DateTime @default(now())
+  dons       Don[]
+}
+
+model Don {
+  id          String      @id @default(cuid())
+  reference   String      @unique
+  nature      NatureDon
+  natureAutre String?
+  description String
+  localisation String
+  statut      StatutDon   @default(SOUMIS)
+  donateur    Donateur    @relation(fields: [donateurId], references: [id])
+  donateurId  String
+  photos      Photo[]
+  observations String?
+  ficheUrl    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  validatedAt DateTime?
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  url       String
+  don       Don      @relation(fields: [donId], references: [id])
+  donId     String
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  nom          String
+  createdAt    DateTime @default(now())
+}
+
+enum NatureDon {
+  MATERIEL_INFORMATIQUE
+  EQUIPEMENT_PEDAGOGIQUE
+  DON_FINANCIER
+  AUTRE
+}
+
+enum StatutDon {
+  SOUMIS
+  EN_VERIFICATION
+  INSPECTE
+  VALIDE
+  FICHE_GENEREE
+}

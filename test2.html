@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONG-GAS | Projet Informatique Pour Tous</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root {
+      --vert: #0f7a5a;
+      --vert-fonce: #0a5c43;
+      --vert-clair: #e6f4ef;
+      --vert-doux: #f3faf7;
+      --texte: #2f3638;
+      --gris: #5e6a6e;
+      --ligne: #d9e6e0;
+      --blanc: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--texte);
+      background: var(--blanc);
+      line-height: 1.55;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    ul { margin: 0; padding: 0; list-style: none; }
+
+    .container {
+      width: min(1140px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    /* ========== HEADER ========== */
+    .top-header {
+      background: var(--vert-clair);
+      border-bottom: 1px solid #d3e8de;
+    }
+
+    .top-header-inner {
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand img {
+      width: 54px;
+      height: 54px;
+      object-fit: contain;
+      background: #fff;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 20px;
+      color: var(--vert);
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--gris);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box input {
+      width: 230px;
+      height: 40px;
+      border: 1px solid #c2dbd0;
+      border-right: 0;
+      padding: 0 12px;
+      font-size: 14px;
+      background: #fff;
+      outline: none;
+    }
+
+    .search-box button {
+      width: 42px;
+      height: 40px;
+      border: 0;
+      background: var(--vert);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--vert);
+      background: var(--vert);
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: var(--vert-fonce);
+      border-color: var(--vert-fonce);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--vert);
+    }
+
+    .btn-outline:hover {
+      background: var(--vert);
+      color: #fff;
+    }
+
+    /* ========== NAV ========== */
+    .nav-bar {
+      background: var(--vert);
+    }
+
+    .nav-bar ul {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .nav-bar a {
+      display: block;
+      padding: 13px 15px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .nav-bar a:hover {
+      background: var(--vert-fonce);
+    }
+
+    .menu-toggle {
+      display: none;
+      width: 100%;
+      border: 0;
+      background: var(--vert-fonce);
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    /* ========== HERO ========== */
+    .hero {
+      background: var(--vert-clair);
+      padding: 48px 0;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .hero-kicker {
+      margin: 0 0 10px;
+      color: var(--vert);
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.12;
+      text-transform: uppercase;
+      color: #2a3032;
+    }
+
+    .hero p {
+      margin: 16px 0 0;
+      max-width: 520px;
+      color: var(--gris);
+      font-size: 16px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .hero-photo {
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .hero-photo img {
+      width: 100%;
+      height: 360px;
+      object-fit: cover;
+    }
+
+    /* ========== SECTIONS ========== */
+    .section {
+      padding: 48px 0;
+    }
+
+    .section.alt {
+      background: var(--vert-doux);
+    }
+
+    .section-head {
+      max-width: 720px;
+      margin: 0 auto 28px;
+      text-align: center;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.25;
+      color: #2a3032;
+    }
+
+    .section-head p {
+      margin: 10px 0 0;
+      color: var(--gris);
+      font-size: 15px;
+    }
+
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0eae5;
+      border-radius: 6px;
+      padding: 22px;
+    }
+
+    .card h3 {
+      margin: 0 0 12px;
+      color: var(--vert);
+      font-size: 18px;
+    }
+
+    .card p,
+    .card li {
+      color: var(--gris);
+      font-size: 14px;
+    }
+
+    .card ul {
+      padding-left: 18px;
+      list-style: disc;
+    }
+
+    .card li {
+      margin-bottom: 7px;
+    }
+
+    .card .more {
+      display: inline-block;
+      margin-top: 12px;
+      color: var(--vert);
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .about-grid img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .about-grid h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+      color: #2a3032;
+    }
+
+    .about-grid p {
+      margin: 0 0 12px;
+      color: var(--gris);
+    }
+
+    .levels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .levels span {
+      background: #fff;
+      border: 1px solid var(--ligne);
+      color: var(--vert);
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    /* Suivi */
+    .suivi-box {
+      background: #fff;
+      border: 1px solid #e0eae5;
+      border-radius: 6px;
+      padding: 22px;
+      max-width: 680px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .suivi-box h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+    }
+
+    .suivi-box p {
+      margin: 0 0 16px;
+      color: var(--gris);
+    }
+
+    .suivi-form {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .suivi-form input {
+      width: min(100%, 320px);
+      height: 42px;
+      border: 1px solid #c2dbd0;
+      padding: 0 12px;
+      font-size: 14px;
+    }
+
+    .suivi-form button {
+      height: 42px;
+    }
+
+    /* CTA */
+    .cta {
+      background: var(--vert);
+      color: #fff;
+      padding: 28px 0;
+    }
+
+    .cta-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .cta h2 {
+      margin: 0 0 4px;
+      font-size: 24px;
+    }
+
+    .cta p {
+      margin: 0;
+      color: #d5eee4;
+      font-size: 14px;
+    }
+
+    .cta .btn {
+      background: #fff;
+      color: var(--vert);
+      border-color: #fff;
+    }
+
+    .cta .btn:hover {
+      background: var(--vert-clair);
+      border-color: var(--vert-clair);
+    }
+
+    /* ========== FOOTER ========== */
+    footer {
+      background: var(--vert-clair);
+      padding: 36px 0 0;
+      border-top: 1px solid #d3e8de;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1.1fr;
+      gap: 28px;
+      padding-bottom: 28px;
+    }
+
+    footer h3 {
+      margin: 0 0 14px;
+      color: var(--vert);
+      font-size: 16px;
+    }
+
+    footer p,
+    footer li,
+    footer a {
+      color: var(--gris);
+      font-size: 14px;
+    }
+
+    footer a:hover {
+      color: var(--vert);
+    }
+
+    footer ul li {
+      margin-bottom: 8px;
+    }
+
+    .contact-list li {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .contact-list i {
+      color: var(--vert);
+      margin-top: 3px;
+      width: 14px;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid #d3e8de;
+      padding: 14px 0;
+      text-align: center;
+      color: #7a878b;
+      font-size: 13px;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 900px) {
+      .search-box { display: none; }
+
+      .hero-grid,
+      .about-grid,
+      .two-cols,
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 { font-size: 32px; }
+      .hero-photo img { height: 280px; }
+
+      .menu-toggle { display: block; }
+      .nav-bar ul { display: none; }
+      .nav-bar ul.open { display: block; }
+      .nav-bar a { border-top: 1px solid rgba(255,255,255,.15); }
+    }
+
+    @media (max-width: 560px) {
+      .brand-text span { display: none; }
+      .hero { padding: 32px 0; }
+      .hero h1 { font-size: 28px; }
+      .section { padding: 36px 0; }
+      .header-right .btn span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="top-header">
+    <div class="container top-header-inner">
+      <a class="brand" href="#">
+        <!-- Remplace par images/logo-ong-gas.png -->
+        <img
+          src="images/logo-ong-gas.png"
+          alt="Logo ONG-GAS"
+          onerror="this.onerror=null;this.src='https://dummyimage.com/54x54/0f7a5a/ffffff.png&text=GAS';">
+        <span class="brand-text">
+          <strong>ONG-GAS</strong>
+          <span>Projet Informatique Pour Tous</span>
+        </span>
+      </a>
+
+      <div class="header-right">
+        <form class="search-box" action="#" method="get">
+          <input type="search" name="q" placeholder="Que cherchez-vous...?" aria-label="Rechercher">
+          <button type="submit" aria-label="Lancer la recherche"><i class="fa fa-search"></i></button>
+        </form>
+
+        <a class="btn" href="#don">
+          <i class="fa fa-hand-holding-heart"></i>
+          <span>Proposer un don</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="nav-bar">
+    <div class="container">
+      <button class="menu-toggle" type="button" onclick="document.getElementById('main-menu').classList.toggle('open')">
+        MENU
+      </button>
+      <ul id="main-menu">
+        <li><a href="#">Accueil</a></li>
+        <li><a href="#projet">Le projet</a></li>
+        <li><a href="#demarche">Démarche</a></li>
+        <li><a href="#dons">Dons</a></li>
+        <li><a href="#suivi">Suivre ma demande</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="hero-kicker">Avec le Projet Informatique Pour Tous,</p>
+          <h1>L'informatique à l'école devient plus accessible</h1>
+          <p>
+            La plateforme de l'ONG-GAS permet de proposer un don, de suivre son
+            traitement et d'accompagner les écoles du Bénin dans la mise en place
+            de salles informatiques.
+          </p>
+          <div class="hero-actions">
+            <a class="btn-outline btn" href="#don">Proposer un don</a>
+            <a class="btn" href="#projet">Voir le projet</a>
+          </div>
+        </div>
+
+        <div class="hero-photo">
+          <!-- Remplace par une vraie photo du projet -->
+          <img
+            src="images/hero-pipt.jpg"
+            alt="Apprenants dans une salle informatique"
+            onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1100&q=75';">
+        </div>
+      </div>
+    </section>
+
+    <!-- Présentation -->
+    <section class="section" id="projet">
+      <div class="container about-grid">
+        <div>
+          <h2>Le Projet Informatique Pour Tous</h2>
+          <p>
+            Porté par l'ONG Global Actions Solidarité, le projet vise à susciter
+            l'éveil scientifique et technologique chez les apprenants des écoles
+            maternelles, primaires et secondaires.
+          </p>
+          <p>
+            Les dons collectés sont enregistrés, vérifiés sur le terrain, puis
+            affectés aux besoins des établissements partenaires.
+          </p>
+          <div class="levels">
+            <span>Maternelle</span>
+            <span>Primaire</span>
+            <span>Secondaire</span>
+          </div>
+        </div>
+
+        <div>
+          <img
+            src="images/presentation-pipt.jpg"
+            alt="Matériel informatique destiné aux écoles"
+            onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=75';">
+        </div>
+      </div>
+    </section>
+
+    <!-- Démarche -->
+    <section class="section alt" id="demarche">
+      <div class="container">
+        <div class="section-head">
+          <h2>Comment se passe le traitement d'un don ?</h2>
+          <p>
+            Un parcours simple, transparent, avec une référence unique pour chaque dossier.
+          </p>
+        </div>
+
+        <div class="two-cols">
+          <article class="card">
+            <h3>Pour le donateur</h3>
+            <ul>
+              <li>Remplir le formulaire de proposition de don</li>
+              <li>Recevoir une référence de suivi</li>
+              <li>Attendre la prise de contact de l'équipe</li>
+              <li>Recevoir la fiche de donation après validation</li>
+            </ul>
+            <a class="more" href="#don">Proposer un don</a>
+          </article>
+
+          <article class="card">
+            <h3>Pour l'ONG-GAS</h3>
+            <ul>
+              <li>Enregistrer et examiner la demande</li>
+              <li>Planifier la vérification sur le terrain</li>
+              <li>Prendre les preuves photos officielles</li>
+              <li>Valider le dossier et générer la fiche PDF</li>
+            </ul>
+            <a class="more" href="#suivi">Suivre une demande</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dons acceptés -->
+    <section class="section" id="dons">
+      <div class="container">
+        <div class="section-head">
+          <h2>Ce que vous pouvez proposer</h2>
+          <p>
+            Particuliers, entreprises et organisations peuvent contribuer au projet.
+          </p>
+        </div>
+
+        <div class="two-cols">
+          <article class="card">
+            <h3>Dons matériels</h3>
+            <ul>
+              <li>Ordinateurs, écrans, claviers, souris</li>
+              <li>Imprimantes et vidéoprojecteurs</li>
+              <li>Mobilier de salle informatique</li>
+              <li>Onduleurs et accessoires</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Autres formes d'appui</h3>
+            <ul>
+              <li>Don financier</li>
+              <li>Appui technique</li>
+              <li>Appui logistique</li>
+              <li>Accompagnement de formation</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Suivi -->
+    <section class="section alt" id="suivi">
+      <div class="container">
+        <div class="suivi-box">
+          <h2>Suivre ma demande</h2>
+          <p>
+            Saisissez la référence reçue après votre soumission, par exemple GAS-2026-X89K2.
+          </p>
+          <form class="suivi-form" action="#" method="get">
+            <input type="text" name="ref" placeholder="Votre référence de suivi" required>
+            <button class="btn" type="submit">Consulter</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="don">
+      <div class="container cta-inner">
+        <div>
+          <h2>Vous souhaitez soutenir une école ?</h2>
+          <p>La proposition de don se fait sans création de compte.</p>
+        </div>
+        <a class="btn" href="#">Commencer la proposition</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <div class="container footer-grid">
+
+      <div>
+        <h3>ONG-GAS</h3>
+        <p>
+          Global Actions Solidarité<br>
+          Projet Informatique Pour Tous<br>
+          Abomey-Calavi, Bénin
+        </p>
+      </div>
+
+      <div>
+        <h3>Liens utiles</h3>
+        <ul>
+          <li><a href="#projet">Le projet</a></li>
+          <li><a href="#suivi">Suivre ma demande</a></li>
+          <li><a href="#">Politique de confidentialité</a></li>
+          <li><a href="#">Conditions d'utilisation</a></li>
+          <li><a href="#">Mentions légales</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3>Contact</h3>
+        <ul class="contact-list">
+          <li>
+            <i class="fa fa-envelope"></i>
+            <a href="mailto:infos@ongglobalactionsolidarite.com">infos@ongglobalactionsolidarite.com</a>
+          </li>
+          <li>
+            <i class="fa fa-phone"></i>
+            <span>+229 01 46 46 66 56</span>
+          </li>
+          <li>
+            <i class="fa fa-location-dot"></i>
+            <span>Abomey-Calavi, Bénin</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      Copyright © 2026 ONG Global Actions Solidarité. Tous droits réservés.
+    </div>
+  </footer>
+
+</body>
+</html>

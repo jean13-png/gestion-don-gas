@@ -25,7 +25,7 @@ export default function TrackReferenceForm() {
       <div>
         <label
           htmlFor="reference"
-          className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+          className="block text-[12px] font-medium text-[var(--color-ong-texte-secondaire)] uppercase tracking-wider mb-1.5"
         >
           Référence de suivi
         </label>
@@ -41,8 +41,8 @@ export default function TrackReferenceForm() {
             setReference(e.target.value);
             if (error) setError("");
           }}
-          className={`w-full h-11 px-3 rounded-md border bg-white text-[15px] font-display tracking-wider placeholder:text-ong-muted/60 focus:outline-none focus:ring-2 focus:ring-ong-vert/30 ${
-            error ? "border-red-400" : "border-ong-bordure focus:border-ong-vert"
+          className={`w-full h-11 px-3 rounded-md border bg-white text-[15px] tracking-wider placeholder:text-[var(--color-ong-texte-secondaire)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--color-ong-bleu)]/30 ${
+            error ? "border-red-400" : "border-[var(--color-ong-ligne)] focus:border-[var(--color-ong-bleu)]"
           }`}
         />
         {error ? (
@@ -55,7 +55,7 @@ export default function TrackReferenceForm() {
 
       <button
         type="submit"
-        className="w-full inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md bg-ong-vert text-white text-[14px] font-medium hover:brightness-95 transition"
+        className="w-full inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md bg-[var(--color-ong-bleu)] text-white text-[14px] font-medium hover:brightness-95 transition"
       >
         <Icon name="magnifying-glass" />
         Consulter le statut
