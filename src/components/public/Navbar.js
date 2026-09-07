@@ -8,7 +8,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <>
+    <div className="sticky top-0 z-50">
       {/* Barre d'information */}
       <div className="bg-[var(--color-ong-bleu-clair)] border-b border-[var(--color-ong-bordure)] text-[12px] text-[var(--color-ong-texte)]">
         <div className="container flex flex-wrap justify-between gap-2 py-[7px]">
@@ -148,6 +148,6 @@ export default function Navbar() {
           </ul>
         </div>
       </nav>
-    </>
+    </div>
   );
 }
