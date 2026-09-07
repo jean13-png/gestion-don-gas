@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDonsPage() {
   const dons = await prisma.don.findMany({
     orderBy: { createdAt: "desc" },

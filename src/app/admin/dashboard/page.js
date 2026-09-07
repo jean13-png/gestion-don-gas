@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard() {
   const totalDons = await prisma.don.count();
   const enAttente = await prisma.don.count({

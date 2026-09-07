@@ -7,6 +7,8 @@ import { uploadPhoto } from "@/app/actions/upload";
 import Icon from "@/components/ui/Icon";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDonDetailPage({ params }) {
   const { id } = await params;
   const don = await prisma.don.findUnique({
