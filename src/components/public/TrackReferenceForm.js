@@ -17,7 +17,7 @@ export default function TrackReferenceForm() {
       return;
     }
     setError("");
-    router.push(`/suivi?ref=${encodeURIComponent(value)}`);
+    router.push(`/suivi?reference=${encodeURIComponent(value)}`);
   }
 
   return (

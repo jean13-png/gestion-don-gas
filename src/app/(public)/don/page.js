@@ -123,11 +123,6 @@ export default function DonPage() {
             </div>
           </fieldset>
 
-          <div className="flex items-start gap-2 text-[13px] text-ong-muted bg-white border border-ong-bordure rounded-md p-4">
-            <Icon name="circle-info" className="text-ong-vert mt-0.5" />
-            <span>Aucune photo n&apos;est requise. Notre équipe se déplace sur site pour vérifier votre don.</span>
-          </div>
-
           {serverError && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-[13px] px-4 py-3 rounded-md">
               {serverError}
