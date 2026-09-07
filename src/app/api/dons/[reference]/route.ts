@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 
 export async function GET(request, { params }) {
   try {
-    const { reference } = params;
+    const { reference } = await params;
 
     const don = await prisma.don.findUnique({
       where: { reference },

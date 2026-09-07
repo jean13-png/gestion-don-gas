@@ -11,19 +11,7 @@ export default function DonPage() {
   async function handleSubmit(formData) {
     setServerError("");
 
-    const data = {
-      nom: formData.get("nom"),
-      prenom: formData.get("prenom"),
-      organisme: formData.get("organisme"),
-      email: formData.get("email"),
-      telephone: formData.get("telephone"),
-      nature: formData.get("nature"),
-      natureAutre: formData.get("natureAutre"),
-      description: formData.get("description"),
-      localisation: formData.get("localisation"),
-    };
-
-    const result = await soumettreDon(data);
+    const result = await soumettreDon(formData);
     if (result && !result.success) {
       setServerError("Erreur lors de la soumission. Vérifiez les champs.");
     }
