@@ -37,6 +37,7 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 h1,
@@ -513,4 +514,32 @@ input {
 
 .action-item a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .presentation,
+  .actions-grid,
+  .two-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .presentation {
+    gap: 28px;
+  }
+
+  .hero-image img {
+    height: 260px;
+  }
+
+  .presentation-image img {
+    height: 220px;
+  }
+
+  .action-item {
+    min-height: auto;
+  }
+
+  .about-grid img {
+    height: 220px;
+  }
 }

@@ -55,7 +55,7 @@ export default function TrackReferenceForm() {
 
       <button
         type="submit"
-        className="w-full inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md bg-[var(--color-ong-bleu)] text-white text-[14px] font-medium hover:brightness-95 transition"
+        className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md bg-[var(--color-ong-bleu)] text-white text-[14px] font-medium hover:brightness-95 transition"
       >
         <Icon name="magnifying-glass" />
         Consulter le statut

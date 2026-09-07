@@ -81,10 +81,9 @@ export default function HomePage() {
       <section className="section section-soft">
         <div className="container">
           <div className="section-heading">
-            <h2>Une plateforme simple pour les donateurs et les partenaires</h2>
             <p>
-              Soumettez un don, consultez l&apos;avancement d&apos;un dossier ou prenez contact
-              avec l&apos;équipe du Projet Informatique Pour Tous.
+              Soumettez un don, consultez l'avancement d'un dossier ou prenez contact
+              avec l'équipe du Projet Informatique Pour Tous.
             </p>
           </div>
 
