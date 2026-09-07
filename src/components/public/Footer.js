@@ -24,10 +24,10 @@ export default function Footer() {
           <h3 className="m-0 mb-4 text-[18px] font-semibold !text-[var(--color-ong-bleu)]">
             ONG-GAS
           </h3>
-          <p className="m-0 mb-2 text-[14px] text-[var(--color-ong-texte-vert)]">
+          <p className="m-0 mb-2 text-[14px] text-[var(--color-ong-texte-secondaire)]">
             Global Actions Solidarité.
           </p>
-          <p className="m-0 mb-2 text-[14px] text-[var(--color-ong-texte-vert)]">
+          <p className="m-0 mb-2 text-[14px] text-[var(--color-ong-texte-secondaire)]">
             Projet Informatique Pour Tous : plateforme de gestion,
             de suivi et de traçabilité des dons.
           </p>
@@ -39,27 +39,27 @@ export default function Footer() {
           </h3>
           <ul className="list-none m-0 p-0 space-y-2.5">
             <li>
-              <Link href="/a-propos" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <Link href="/a-propos" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Le projet PIPT
               </Link>
             </li>
             <li>
-              <Link href="/don" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <Link href="/don" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Faire un don
               </Link>
             </li>
             <li>
-              <Link href="/suivi" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <Link href="/suivi" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Suivre une demande
               </Link>
             </li>
             <li>
-              <Link href="/contact" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <Link href="/contact" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Contact
               </Link>
             </li>
             <li>
-              <a href="https://ongglobalactionsolidarite.com/" target="_blank" rel="noopener noreferrer" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <a href="https://ongglobalactionsolidarite.com/" target="_blank" rel="noopener noreferrer" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Notre plateforme
               </a>
             </li>
@@ -72,22 +72,22 @@ export default function Footer() {
           </h3>
           <ul className="list-none m-0 p-0 space-y-2.5">
             <li>
-              <Link href="/mentions-legales" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <Link href="/mentions-legales" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Mentions légales
               </Link>
             </li>
             <li>
-              <Link href="/confidentialite" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <Link href="/confidentialite" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Politique de confidentialité
               </Link>
             </li>
             <li>
-              <Link href="/conditions-utilisation" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+              <Link href="/conditions-utilisation" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                 Conditions d&apos;utilisation
               </Link>
             </li>
               <li>
-               <Link href="/connexion" className="text-[14px] text-[var(--color-ong-texte-vert)] hover:text-[var(--color-ong-bleu)] hover:underline">
+               <Link href="/connexion" className="text-[14px] text-[var(--color-ong-texte-secondaire)] hover:text-[var(--color-ong-bleu)] hover:underline">
                  Espace gestionnaire
                </Link>
              </li>
