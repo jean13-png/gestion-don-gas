@@ -11,6 +11,9 @@ export default function HomePage() {
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-[1.08fr_0.78fr] gap-10 lg:gap-[65px] items-center py-14 lg:py-[55px]">
             <div>
+              <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
+                Avec le Projet Informatique Pour Tous,
+              </p>
             <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
               Avec le Projet Informatique Pour Tous,
             </p>
@@ -81,9 +84,10 @@ export default function HomePage() {
       <section className="section section-soft">
         <div className="container">
           <div className="section-heading">
+            <h2>Une plateforme simple pour les donateurs et les partenaires</h2>
             <p>
-              Soumettez un don, consultez l'avancement d'un dossier ou prenez contact
-              avec l'équipe du Projet Informatique Pour Tous.
+              Soumettez un don, consultez l&apos;avancement d&apos;un dossier ou prenez contact
+              avec l&apos;équipe du Projet Informatique Pour Tous.
             </p>
           </div>
 
