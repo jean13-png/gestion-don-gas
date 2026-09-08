@@ -1,21 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useActionState } from "react";
 import { soumettreDon } from "@/app/actions/donations";
 import Icon from "@/components/ui/Icon";
 
 export default function DonPage() {
   const [nature, setNature] = useState("");
-  const [serverError, setServerError] = useState("");
-
-  async function handleSubmit(formData) {
-    setServerError("");
-
-    const result = await soumettreDon(formData);
-    if (result && !result.success) {
-      setServerError("Erreur lors de la soumission. Vérifiez les champs.");
-    }
-  }
+  const [state, formaAction, isPending] = useActionState(soumettreDon, null)
 
   return (
     <section className="bg-ong-fond py-16">
@@ -28,7 +20,7 @@ export default function DonPage() {
           transmise par e-mail.
         </p>
 
-        <form action={handleSubmit} className="mt-10 space-y-8">
+        <form action={formaAction} className="mt-10 space-y-8">
           <fieldset className="border border-ong-bordure rounded-lg bg-white p-6">
             <legend className="px-2 font-display font-semibold text-ong-bleu text-[15px]">
               Vos coordonnées
@@ -123,18 +115,19 @@ export default function DonPage() {
             </div>
           </fieldset>
 
-          {serverError && (
+          {state?.error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-[13px] px-4 py-3 rounded-md">
-              {serverError}
+              {state.error}
             </div>
           )}
 
           <button
+          disabled={isPending}
             type="submit"
-            className="w-full inline-flex items-center justify-center gap-2 h-12 px-5 rounded-md bg-ong-bleu text-white text-[15px] font-medium hover:bg-ong-bleu-fonce transition-colors"
+            className="cursor-pointer disabled:bg-gray-500 disabled:cursor-not-allowed w-full inline-flex items-center justify-center gap-2 h-12 px-5 rounded-md bg-ong-bleu text-white text-[15px] font-medium hover:bg-ong-bleu-fonce transition-colors"
           >
             <Icon name="paper-plane" />
-            Soumettre ma contribution
+            {isPending ? "En cours d'envoie..." : "Soumettre ma demande"}
           </button>
         </form>
       </div>

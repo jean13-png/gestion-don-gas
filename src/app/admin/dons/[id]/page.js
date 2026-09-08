@@ -1,11 +1,19 @@
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { validateDon } from "@/app/actions/admin";
-import { generateFichePDF } from "@/lib/pdf";
+import { genererFicheReceptionDon } from "@/lib/pdf";
 import { sendEmail } from "@/lib/mail";
 import { uploadPhoto } from "@/app/actions/upload";
 import Icon from "@/components/ui/Icon";
 import path from "path";
+import Supprimer from "./supprimer/Supprimer";
+
+const NATURE_MAP = {
+  MATERIEL_INFORMATIQUE: "MATERIEL",
+  EQUIPEMENT_PEDAGOGIQUE: "MATERIEL",
+  DON_FINANCIER: "ESPECES",
+  AUTRE: "AUTRES",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -34,19 +42,21 @@ export default async function AdminDonDetailPage({ params }) {
 
   async function handleGeneratePDF(formData) {
     "use server";
-    const buffer = await generateFichePDF({
-      reference: don.reference,
+    const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
+    const buffer = await genererFicheReceptionDon({
       donateur: {
-        nom: don.donateur.nom,
-        prenom: don.donateur.prenom,
-        organisme: don.donateur.organisme,
-        email: don.donateur.email,
+        nomRaisonSociale: [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || undefined,
+        representant: don.donateur.organisme || undefined,
+        adresse: don.localisation || undefined,
         telephone: don.donateur.telephone,
+        email: don.donateur.email,
       },
-      nature: don.nature,
+      nature: naturePdf,
+      natureAutresDetail: don.nature === "AUTRE" ? don.natureAutre : undefined,
       description: don.description,
-      localisation: don.localisation,
-      validatedAt: don.validatedAt,
+      faitA: don.localisation || "Abomey-Calavi",
+      dateReception: don.validatedAt ? don.validatedAt.toLocaleDateString("fr-FR") : undefined,
+      responsable: "e la plateforme",
     });
 
     const fichesDir = path.join(process.cwd(), "public", "uploads", "fiches");
@@ -162,8 +172,8 @@ export default async function AdminDonDetailPage({ params }) {
       </div>
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
-        <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
-          Inspection terrain
+        <h2 className="font-display font-semibold text-blue-700 text-[16px] mb-4">
+          Soumission des preuves
         </h2>
 
         <form action={handleUploadPhoto} className="space-y-4">
@@ -171,9 +181,9 @@ export default async function AdminDonDetailPage({ params }) {
             <label className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
               Téléverser une photo (JPG/PNG/WEBP, max 5 MB)
             </label>
-            <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" className="block w-full text-[13px] text-ong-texte" />
+            <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" className="block w-full text-[13px] border p-2 rounded-lg border-slate-400 cursor-pointer text-ong-texte" />
           </div>
-          <button type="submit" className="h-10 px-4 rounded-md border border-ong-bleu text-ong-bleu text-[14px] font-medium hover:bg-ong-fond">
+          <button type="submit" className="h-10 px-4 rounded-md border border-ong-bleu text-ong-bleu text-[14px] cursor-pointer font-medium hover:bg-ong-fond">
             Ajouter la photo
           </button>
         </form>
@@ -191,24 +201,31 @@ export default async function AdminDonDetailPage({ params }) {
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
         <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
-          Validation
+          Validation & Actions
         </h2>
         <form action={handleValidate} className="space-y-4">
           <div>
             <label htmlFor="observations" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
-              Observations
+              Observations &
             </label>
             <textarea id="observations" name="observations" rows={3} className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px]" />
           </div>
           <div className="flex flex-wrap gap-3">
-            <button type="submit" className="h-11 px-5 rounded-md bg-ong-vert text-white text-[14px] font-medium hover:brightness-95">
-              Valider le don
+            <button disabled={don.statut === "VALIDE"} type="submit" 
+              className="disabled:cursor-not-allowed h-11 uppercase px-5 rounded-md bg-ong-vert text-white cursor-pointer text-[14px] font-medium hover:brightness-95">
+              {don.statut === "VALIDE" ? "Don validé" : "Valider le don"}
             </button>
-            <button type="submit" formAction={handleGeneratePDF} className="h-11 px-5 rounded-md bg-ong-bleu text-white text-[14px] font-medium hover:bg-ong-bleu-fonce">
-              Générer l&apos;attestation PDF
+            <button disabled={don.statut === "FICHE_GENEREE" || don.statut === "VALIDE"} type="submit" formAction={handleGeneratePDF} 
+              className="h-11 px-5 disabled:cursor-not-allowed disabled:bg-gray-600 rounded-md uppercase bg-ong-bleu text-white text-[14px] font-medium cursor-pointer hover:bg-ong-bleu-fonce">
+              {don.statut === "FICHE_GENEREE" || don.statut === "VALIDE" ? "FICHE GÉNÉRÉE" : "Générer la fiche de"}
             </button>
+            {/* Pour la suppression d'un don */}
           </div>
         </form>
+        <div className="mt-4">
+          <Supprimer id={don.id} />
+        </div>
+        
       </div>
     </div>
   );

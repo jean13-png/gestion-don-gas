@@ -14,9 +14,6 @@ export default function HomePage() {
               <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
                 Avec le Projet Informatique Pour Tous,
               </p>
-            <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
-              Avec le Projet Informatique Pour Tous,
-            </p>
             <h1 className="max-w-[640px] text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.12] tracking-tight text-[var(--color-ong-texte)] uppercase">
               L&apos;informatique à l&apos;école devient plus accessible.
             </h1>

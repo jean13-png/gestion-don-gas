@@ -27,33 +27,40 @@ export default async function AdminDonsPage() {
                 <th className="px-6 py-3 font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-ong-bordure">
-              {dons.map((don) => (
-                <tr key={don.id} className="hover:bg-ong-fond/50">
-                  <td className="px-6 py-3 font-mono text-[12px]">{don.reference}</td>
-                  <td className="px-6 py-3">
-                    {don.donateur.prenom} {don.donateur.nom}
-                  </td>
-                  <td className="px-6 py-3">{don.nature}</td>
-                  <td className="px-6 py-3 text-ong-muted">
-                    {don.createdAt.toLocaleDateString("fr-FR")}
-                  </td>
-                  <td className="px-6 py-3">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-ong-vert-pale text-ong-vert">
-                      {don.statut}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3">
-                    <Link
-                      href={`/admin/dons/${don.id}`}
-                      className="text-ong-bleu hover:text-ong-bleu-clair font-medium"
-                    >
-                      Voir
-                    </Link>
+            {!dons.length ? (
+              <tbody>
+                <tr>
+                  <td colSpan="6" className="px-6 py-4 text-center text-ong-muted">
+                    Aucun don trouvé.
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              </tbody>
+            ) : (
+              <tbody>
+                {dons.map((don) => (
+                  <tr key={don.id} className="border-b border-ong-bordure hover:bg-ong-fond">
+                    <td className="px-6 py-4 font-medium">{don.reference}</td>
+                    <td className="px-6 py-4">{don.donateur.prenom} {don.donateur.nom}</td>
+                    <td className="px-6 py-4">{don.nature}</td>
+                    <td className="px-6 py-4">{new Date(don.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium ${
+                        don.statut === "Validé" ? "bg-ong-vert-pale text-ong-vert" :
+                        don.statut === "En attente" ? "bg-ong-jaune-pale text-ong-jaune" :
+                        "bg-ong-rouge-pale text-ong-rouge"
+                      }`}>
+                        {don.statut}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link href={`/admin/dons/${don.id}`} className="text-ong-bleu hover:underline">
+                        Voir
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            )}
           </table>
         </div>
       </div>

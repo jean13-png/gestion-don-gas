@@ -184,7 +184,7 @@ function DonMerciContent() {
                     <button
                       type="button"
                       onClick={handleCopy}
-                      className="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-md border border-ong-bordure bg-white text-ong-bleu hover:bg-ong-bleu-tres-clair"
+                      className="cursor-pointer shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-md border border-ong-bordure bg-white text-ong-bleu hover:bg-ong-bleu-tres-clair"
                       title="Copier la référence"
                     >
                       <Icon name={copied ? "circle-check" : "copy"} fixedWidth />
@@ -322,7 +322,7 @@ function DonMerciContent() {
                 <button
                   type="button"
                   onClick={handleDownloadPDF}
-                  className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md bg-ong-bleu text-white text-[14px] font-medium hover:bg-ong-bleu-fonce transition-colors"
+                  className="bcursor-pointer inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md bg-ong-bleu text-white text-[14px] font-medium hover:bg-ong-bleu-fonce transition-colors"
                 >
                   <Icon name="file-pdf" fixedWidth />
                   Télécharger le PDF
@@ -330,7 +330,7 @@ function DonMerciContent() {
                 <button
                   type="button"
                   onClick={handleDownloadImage}
-                  className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md border border-ong-bordure text-ong-bleu text-[14px] font-medium hover:bg-ong-bleu-tres-clair transition-colors"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md border border-ong-bordure text-ong-bleu text-[14px] font-medium hover:bg-ong-bleu-tres-clair transition-colors"
                 >
                   <Icon name="image" fixedWidth />
                   Capturer l&apos;image

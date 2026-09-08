@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE"];
 
 export default async function SuiviPage({ searchParams }) {

@@ -41,14 +41,14 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={handleAccept}
-              className="inline-flex items-center justify-center h-10 px-5 rounded-md bg-ong-bleu text-white text-[14px] font-medium hover:bg-ong-bleu-fonce transition-colors"
+              className="cursor-pointer inline-flex items-center justify-center h-10 px-5 rounded-md bg-ong-bleu text-white text-[14px] font-medium hover:bg-ong-bleu-fonce transition-colors"
             >
               Accepter tout
             </button>
             <button
               type="button"
               onClick={handleRefuse}
-              className="inline-flex items-center justify-center h-10 px-5 rounded-md border border-ong-bordure text-ong-texte text-[14px] font-medium hover:bg-ong-gris-clair transition-colors"
+              className="inline-flex items-center justify-center h-10 px-5 cursor-pointer rounded-md border border-ong-bordure text-ong-texte text-[14px] font-medium hover:bg-ong-gris-clair transition-colors"
             >
               Refuser
             </button>

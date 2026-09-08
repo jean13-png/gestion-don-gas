@@ -135,7 +135,7 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full h-12 px-6 rounded-md bg-ong-bleu text-white text-[14px] font-semibold hover:bg-ong-bleu-fonce transition-colors"
+                  className="w-full h-12 px-6 rounded-md cursor-pointer bg-ong-bleu text-white text-[14px] font-semibold hover:bg-ong-bleu-fonce transition-colors"
                 >
                   Envoyer le message
                 </button>

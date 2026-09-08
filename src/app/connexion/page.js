@@ -108,7 +108,7 @@ function LoginForm() {
 
               <button
                 type="submit"
-                className="w-full h-12 px-6 rounded-md bg-[var(--color-ong-bleu)] text-white text-[14px] font-semibold hover:bg-[var(--color-ong-bleu-fonce)] transition-colors mt-2"
+                className="cursor-pointer w-full h-12 px-6 rounded-md bg-[var(--color-ong-bleu)] text-white text-[14px] font-semibold hover:bg-[var(--color-ong-bleu-fonce)] transition-colors mt-2"
               >
                 Se connecter
               </button>
