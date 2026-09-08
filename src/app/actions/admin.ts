@@ -31,6 +31,23 @@ export type AdminDonsResult = {
   totalPages: number;
 };
 
+export async function validateDon(donId: string, observations?: string) {
+  const updated = await prisma.don.update({
+    where: { id: donId },
+    data: {
+      statut: "VALIDE",
+      validatedAt: new Date(),
+      observations: observations || undefined,
+    },
+  });
+
+  revalidatePath("/admin/dons");
+  revalidatePath("/admin/dashboard");
+  revalidatePath(`/admin/dons/${donId}`);
+
+  return updated;
+}
+
 export async function getAdminDons(filter: AdminDonsFilter = {}): Promise<AdminDonsResult> {
   const page = filter.page && filter.page > 0 ? filter.page : 1;
   const limit = filter.limit && filter.limit > 0 ? filter.limit : 20;
