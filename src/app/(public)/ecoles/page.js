@@ -46,7 +46,7 @@ export default function EcolesPage() {
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
           Écoles partenaires
         </h1>
-        <p className="mt-3 text-[15px] text-ong-texte/85 max-w-3xl">
+        <p className="mt-3 text-[15px] text-ong-texte max-w-3xl">
           Les dons collectés via la plateforme PIPT sont destinés aux écoles partenaires
           de l&apos;ONG-GAS à travers le Bénin. Chaque établissement est sélectionné
           selon des critères d&apos;éligibilité et de besoins urgents.
@@ -75,7 +75,7 @@ export default function EcolesPage() {
                 </div>
               </div>
               <div className="p-6 space-y-3">
-                <p className="text-[14px] text-ong-texte/85 leading-relaxed">
+                <p className="text-[14px] text-ong-texte leading-relaxed">
                   {ecole.description}
                 </p>
                 <div>
@@ -93,7 +93,7 @@ export default function EcolesPage() {
           <h2 className="font-display font-semibold text-ong-bleu text-[20px]">
             Votre établissement peut rejoindre le programme
           </h2>
-          <p className="mt-3 text-[14px] text-ong-texte/85 max-w-2xl mx-auto">
+          <p className="mt-3 text-[14px] text-ong-texte max-w-2xl mx-auto">
             Les écoles sont sélectionnées en fonction des besoins urgents, de la faisabilité
             technique et de l&apos;engagement des équipes éducatives. Pour toute candidature
             ou demande d&apos;information, contactez-nous.

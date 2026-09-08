@@ -15,7 +15,7 @@ export default function DonPage() {
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
           Soumettre un don
         </h1>
-        <p className="mt-3 text-[16px] text-ong-texte/85">
+        <p className="mt-3 text-[16px] text-ong-texte">
           Remplissez le formulaire ci-dessous. Une référence unique vous sera
           transmise par e-mail.
         </p>
@@ -30,31 +30,31 @@ export default function DonPage() {
                 <label htmlFor="prenom" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Prénom
                 </label>
-                <input id="prenom" name="prenom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                <input id="prenom" name="prenom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="nom" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Nom
                 </label>
-                <input id="nom" name="nom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                <input id="nom" name="nom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div className="sm:col-span-2">
                 <label htmlFor="organisme" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
-                  Organisme / Entreprise <span className="text-ong-muted/60">(optionnel)</span>
+                  Organisme / Entreprise <span className="text-ong-muted">(optionnel)</span>
                 </label>
-                <input id="organisme" name="organisme" type="text" className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                <input id="organisme" name="organisme" type="text" className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="email" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Email
                 </label>
-                <input id="email" name="email" type="email" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                <input id="email" name="email" type="email" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="telephone" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Téléphone
                 </label>
-                <input id="telephone" name="telephone" type="tel" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                <input id="telephone" name="telephone" type="tel" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
             </div>
           </fieldset>
@@ -74,7 +74,7 @@ export default function DonPage() {
                   required
                   value={nature}
                   onChange={(e) => setNature(e.target.value)}
-                  className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert"
+                  className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
                 >
                   <option value="">Sélectionner...</option>
                   <option value="MATERIEL_INFORMATIQUE">Matériel informatique</option>
@@ -94,7 +94,7 @@ export default function DonPage() {
                     name="natureAutre"
                     type="text"
                     required
-                    className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert"
+                    className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
                     placeholder="Ex : mobilier, accompagnement logistique..."
                   />
                 </div>
@@ -104,13 +104,13 @@ export default function DonPage() {
                 <label htmlFor="description" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Description
                 </label>
-                <textarea id="description" name="description" rows={4} required className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                <textarea id="description" name="description" rows={4} required className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="localisation" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Localisation d&apos;enlèvement / dépôt
                 </label>
-                <input id="localisation" name="localisation" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                <input id="localisation" name="localisation" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
             </div>
           </fieldset>

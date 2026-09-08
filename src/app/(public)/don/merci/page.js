@@ -162,14 +162,14 @@ function DonMerciContent() {
               <h1 className="font-display font-semibold text-ong-bleu text-[24px]">
                 Don enregistré avec succès
               </h1>
-              <p className="mt-1 text-[15px] text-ong-texte/85">
+              <p className="mt-1 text-[15px] text-ong-texte">
                 Merci pour votre générosité. Voici le récapitulatif de votre demande.
               </p>
             </div>
           </div>
 
           {loading ? (
-            <p className="text-[15px] text-ong-texte/85">Chargement...</p>
+            <p className="text-[15px] text-ong-texte">Chargement...</p>
           ) : don ? (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -365,7 +365,7 @@ function DonMerciContent() {
 
 export default function DonMerciPage() {
   return (
-    <Suspense fallback={<div className="bg-ong-fond py-16"><div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8"><p className="text-[15px] text-ong-texte/85">Chargement...</p></div></div>}>
+    <Suspense fallback={<div className="bg-ong-fond py-16"><div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8"><p className="text-[15px] text-ong-texte">Chargement...</p></div></div>}>
       <DonMerciContent />
     </Suspense>
   );

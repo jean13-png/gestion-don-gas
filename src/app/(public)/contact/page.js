@@ -17,7 +17,7 @@ export default function ContactPage() {
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
           Contact
         </h1>
-        <p className="mt-3 text-[15px] text-ong-texte/85">
+        <p className="mt-3 text-[15px] text-ong-texte">
           Une question sur un don, une demande de partenariat ou une demande d&apos;information ?
           L&apos;équipe ONG-GAS vous répond dans les meilleurs délais.
         </p>
@@ -71,7 +71,7 @@ export default function ContactPage() {
               <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-2">
                 Urgence don ?
               </h2>
-              <p className="text-[14px] text-ong-texte/85">
+              <p className="text-[14px] text-ong-texte">
                 Pour une demande liée à un don en cours, pensez à préciser votre référence
                 <span className="font-mono text-ong-bleu font-semibold"> GAS-2026-XXXXX</span>.
               </p>
@@ -95,13 +95,13 @@ export default function ContactPage() {
                     <label htmlFor="prenom" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                       Prénom
                     </label>
-                    <input id="prenom" name="prenom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                    <input id="prenom" name="prenom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
                   </div>
                   <div>
                     <label htmlFor="nom" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                       Nom
                     </label>
-                    <input id="nom" name="nom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                    <input id="nom" name="nom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
                   </div>
                 </div>
 
@@ -109,14 +109,14 @@ export default function ContactPage() {
                   <label htmlFor="email" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                     Email
                   </label>
-                  <input id="email" name="email" type="email" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                  <input id="email" name="email" type="email" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
                 </div>
 
                 <div>
                   <label htmlFor="sujet" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                     Sujet
                   </label>
-                  <select id="sujet" name="sujet" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert">
+                  <select id="sujet" name="sujet" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert">
                     <option value="">Sélectionner...</option>
                     <option value="DON">Question sur un don</option>
                     <option value="PARTENARIAT">Demande de partenariat</option>
@@ -130,7 +130,7 @@ export default function ContactPage() {
                   <label htmlFor="message" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                     Message
                   </label>
-                  <textarea id="message" name="message" rows={5} required className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert/30 focus:border-ong-vert" />
+                  <textarea id="message" name="message" rows={5} required className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
                 </div>
 
                 <button

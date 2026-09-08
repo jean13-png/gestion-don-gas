@@ -41,7 +41,7 @@ export default function TrackReferenceForm() {
             setReference(e.target.value);
             if (error) setError("");
           }}
-          className={`w-full h-11 px-3 rounded-md border bg-white text-[15px] tracking-wider placeholder:text-[var(--color-ong-texte-secondaire)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--color-ong-bleu)]/30 ${
+          className={`w-full h-11 px-3 rounded-md border bg-white text-[15px] tracking-wider placeholder:text-[var(--color-ong-texte-secondaire)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ong-bleu)] ${
             error ? "border-red-400" : "border-[var(--color-ong-ligne)] focus:border-[var(--color-ong-bleu)]"
           }`}
         />

@@ -8,7 +8,7 @@ export default function MentionsLegalesPage() {
           Mentions légales
         </h1>
 
-        <div className="mt-8 space-y-8 text-[15px] text-ong-texte/85 leading-relaxed">
+        <div className="mt-8 space-y-8 text-[15px] text-ong-texte leading-relaxed">
           <div>
             <h2 className="font-display font-semibold text-ong-bleu text-[20px] mb-3">
               1. Éditeur du site

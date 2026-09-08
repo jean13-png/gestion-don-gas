@@ -14,14 +14,14 @@ export default function AProposPage() {
             <h2 className="font-display font-semibold text-ong-bleu text-[20px] mb-4">
               Notre mission
             </h2>
-            <p className="text-[15px] text-ong-texte/85 leading-relaxed">
+            <p className="text-[15px] text-ong-texte leading-relaxed">
               L&apos;ONG Global Actions Solidarité (ONG-GAS) est une association à but non lucratif
               créée pour réduire la fracture numérique dans les écoles du Bénin. À travers le
               Projet Informatique Pour Tous (PIPT), nous collectons, vérifons et acheminons du
               matériel informatique et pédagogique vers les établissements scolaires de maternelle,
               primaire et secondaire.
             </p>
-            <p className="mt-4 text-[15px] text-ong-texte/85 leading-relaxed">
+            <p className="mt-4 text-[15px] text-ong-texte leading-relaxed">
               Notre approche repose sur trois principes : transparence totale du donateur au
               bénéficiaire, vérification systématique sur site, et accompagnement technique des
               équipes éducatives pour garantir une utilisation durable des équipements.
@@ -76,7 +76,7 @@ export default function AProposPage() {
               <h2 className="font-display font-semibold text-ong-bleu text-[18px] mb-4">
                 Nos engagements
               </h2>
-              <ul className="space-y-3 text-[14px] text-ong-texte/85">
+              <ul className="space-y-3 text-[14px] text-ong-texte">
                 <li className="flex items-start gap-2">
                   <Icon name="circle-check" className="text-ong-vert mt-0.5" />
                   <span>Vérification systématique des dons sur site avant intégration.</span>
@@ -121,13 +121,13 @@ export default function AProposPage() {
             <h2 className="font-display font-semibold text-ong-bleu text-[20px] mb-4">
               Partenaires et reconnaissance
             </h2>
-            <p className="text-[15px] text-ong-texte/85 leading-relaxed">
+            <p className="text-[15px] text-ong-texte leading-relaxed">
               L&apos;ONG-GAS collabore avec les autorités éducatives béninoises, des établissements
               scolaires publics et privés, ainsi que des entreprises et particuliers donateurs.
               La plateforme PIPT est le point de convergence de ces acteurs, garantissant un suivi
               fiable et officiel de chaque don.
             </p>
-            <p className="mt-4 text-[15px] text-ong-texte/85 leading-relaxed">
+            <p className="mt-4 text-[15px] text-ong-texte leading-relaxed">
               Pour toute demande de partenariat ou d&apos;information institutionnelle, contactez-nous
               via la page{" "}
               <Link href="/contact" className="text-ong-bleu underline">

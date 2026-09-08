@@ -1,69 +1,98 @@
 import prisma from "@/lib/prisma";
-import Link from "next/link";
-import Icon from "@/components/ui/Icon";
+import AdminDonsPageClient from "./AdminDonsPageClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDonsPage() {
-  const dons = await prisma.don.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { donateur: true },
+export default async function AdminDonsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const initialFilter = {
+    search: typeof params.search === "string" ? params.search : "",
+    statut: typeof params.statut === "string" ? params.statut : "ALL",
+    nature: typeof params.nature === "string" ? params.nature : "ALL",
+    periode: (typeof params.periode === "string" ? params.periode : "all") as "7j" | "30j" | "90j" | "12m" | "all",
+    page: typeof params.page === "string" ? Number(params.page) : 1,
+    limit: 20,
+  };
+
+  const initialData = await prisma.$transaction(async (tx) => {
+    const where: Record<string, unknown> = {};
+
+    if (initialFilter.search && initialFilter.search.trim()) {
+      const q = initialFilter.search.trim();
+      where.OR = [
+        { reference: { contains: q, mode: "insensitive" } },
+        { donateur: { nom: { contains: q, mode: "insensitive" } } },
+        { donateur: { prenom: { contains: q, mode: "insensitive" } } },
+        { donateur: { email: { contains: q, mode: "insensitive" } } },
+      ];
+    }
+
+    if (initialFilter.statut && initialFilter.statut !== "ALL") {
+      where.statut = initialFilter.statut;
+    }
+
+    if (initialFilter.nature && initialFilter.nature !== "ALL") {
+      where.nature = initialFilter.nature;
+    }
+
+    if (initialFilter.periode && initialFilter.periode !== "all") {
+      const now = new Date();
+      let start: Date;
+      switch (initialFilter.periode) {
+        case "7j":
+          start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "30j":
+          start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case "90j":
+          start = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          break;
+        case "12m":
+          start = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+          break;
+        default:
+          start = new Date(0);
+      }
+      where.createdAt = { gte: start };
+    }
+
+    const skip = ((initialFilter.page || 1) - 1) * initialFilter.limit;
+
+    const [dons, total] = await Promise.all([
+      tx.don.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: initialFilter.limit,
+        include: { donateur: true },
+      }),
+      tx.don.count({ where }),
+    ]);
+
+    return {
+      dons: dons.map((don) => ({
+        id: don.id,
+        reference: don.reference,
+        nature: don.nature,
+        statut: don.statut,
+        createdAt: don.createdAt.toISOString(),
+        donateur: {
+          prenom: don.donateur.prenom,
+          nom: don.donateur.nom,
+          email: don.donateur.email,
+        },
+      })),
+      total,
+      page: initialFilter.page || 1,
+      limit: initialFilter.limit,
+      totalPages: Math.max(1, Math.ceil(total / initialFilter.limit)),
+    };
   });
 
-  return (
-    <div className="max-w-6xl">
-      <h1 className="font-display font-semibold text-ong-bleu text-[28px]">Dons</h1>
-
-      <div className="mt-6 bg-white border border-ong-bordure rounded-lg">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
-            <thead>
-              <tr className="border-b border-ong-bordure text-ong-muted">
-                <th className="px-6 py-3 font-medium">Référence</th>
-                <th className="px-6 py-3 font-medium">Donateur</th>
-                <th className="px-6 py-3 font-medium">Nature</th>
-                <th className="px-6 py-3 font-medium">Date</th>
-                <th className="px-6 py-3 font-medium">Statut</th>
-                <th className="px-6 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            {!dons.length ? (
-              <tbody>
-                <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-ong-muted">
-                    Aucun don trouvé.
-                  </td>
-                </tr>
-              </tbody>
-            ) : (
-              <tbody>
-                {dons.map((don) => (
-                  <tr key={don.id} className="border-b border-ong-bordure hover:bg-ong-fond">
-                    <td className="px-6 py-4 font-medium">{don.reference}</td>
-                    <td className="px-6 py-4">{don.donateur.prenom} {don.donateur.nom}</td>
-                    <td className="px-6 py-4">{don.nature}</td>
-                    <td className="px-6 py-4">{new Date(don.createdAt).toLocaleDateString()}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium ${
-                        don.statut === "Validé" ? "bg-ong-vert-pale text-ong-vert" :
-                        don.statut === "En attente" ? "bg-ong-jaune-pale text-ong-jaune" :
-                        "bg-ong-rouge-pale text-ong-rouge"
-                      }`}>
-                        {don.statut}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Link href={`/admin/dons/${don.id}`} className="text-ong-bleu hover:underline">
-                        Voir
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            )}
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+  return <AdminDonsPageClient initialData={initialData} />;
 }

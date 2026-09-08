@@ -80,7 +80,7 @@ function LoginForm() {
                   type="email"
                   required
                   autoComplete="email"
-                  className="w-full h-12 px-4 rounded-md border border-[var(--color-ong-bordure)] bg-white text-[15px] text-[var(--color-ong-texte)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ong-bleu)]/20 focus:border-[var(--color-ong-bleu)] transition-colors"
+                  className="w-full h-12 px-4 rounded-md border border-[var(--color-ong-bordure)] bg-white text-[15px] text-[var(--color-ong-texte)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ong-bleu)] focus:border-[var(--color-ong-bleu)] transition-colors"
                   placeholder="exemple@ong-gas.org"
                 />
               </div>
@@ -95,7 +95,7 @@ function LoginForm() {
                   type="password"
                   required
                   autoComplete="current-password"
-                  className="w-full h-12 px-4 rounded-md border border-[var(--color-ong-bordure)] bg-white text-[15px] text-[var(--color-ong-texte)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ong-bleu)]/20 focus:border-[var(--color-ong-bleu)] transition-colors"
+                  className="w-full h-12 px-4 rounded-md border border-[var(--color-ong-bordure)] bg-white text-[15px] text-[var(--color-ong-texte)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ong-bleu)] focus:border-[var(--color-ong-bleu)] transition-colors"
                   placeholder="Votre mot de passe"
                 />
               </div>

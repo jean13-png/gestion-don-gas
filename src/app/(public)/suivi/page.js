@@ -20,7 +20,7 @@ export default async function SuiviPage({ searchParams }) {
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
           Suivre ma demande
         </h1>
-        <p className="mt-2 text-[15px] text-ong-texte/85">
+        <p className="mt-2 text-[15px] text-ong-texte">
           Entrez votre référence de don pour consulter le statut et les détails de votre dossier.
         </p>
 
@@ -31,7 +31,7 @@ export default async function SuiviPage({ searchParams }) {
               name="reference"
               defaultValue={reference || ""}
               placeholder="Ex : GAS-2026-00A2F"
-              className="flex-1 h-12 px-4 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-bleu/20 focus:border-ong-bleu"
+              className="flex-1 h-12 px-4 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-bleu focus:border-ong-bleu"
               required
             />
             <button
