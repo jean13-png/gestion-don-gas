@@ -1,9 +1,24 @@
+/**
+ * ============================================================================
+ * GÉNÉRATEUR — « FICHE DE RECEPTION DE DON » (ONG-GAS · Projet PIPT)
+ * ============================================================================
+ * Reproduit EXACTEMENT le modèle officiel `modele-reference.pdf` (A4, 1 page).
+ * Spécification : SPEC-GENERATION-FICHE-RECEPTION-DE-DON.md
+ * Toutes les coordonnées sont en points PDF, origine en HAUT-GAUCHE,
+ * mesurées sur le modèle (fichier de vérité).
+ *
+ * Usage :
+ *   const pdf = await genererFicheReceptionDon(data);
+ *   → Buffer PDF prêt pour téléchargement / pièce jointe e-mail.
+ *
+ * Avec `data` vide {}, la fiche vierge générée est superposable au modèle
+ * (les libellés pointillés « Fait à … », « Responsable d… » sont conservés).
+ * ============================================================================
+ */
+
 import PDFDocument from "pdfkit";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /* ---------------------------------------------------------------------------
  * TYPES — champs dynamiques (cf. spec §6)
@@ -31,30 +46,51 @@ export interface DonFicheData {
   faitA?: string;
   /** Format « JJ/MM/AAAA » */
   dateReception?: string;
-  /** Texte écrit après « Responsable d » (ex. « e la plateforme — M. TOSSA »). */
+  /** Nom du responsable de la plateforme, écrit après « Responsable : ». */
   responsable?: string;
+  /**
+   * Photos preuves (validation du don par l'admin) — chemins de fichiers
+   * image accessibles côté serveur. 1 à 2 photos placées dans la colonne
+   * droite du cadre « PHOTOS PREUVES » (1 = grande, 2 = côte à côte).
+   */
+  photosPreuves?: string[];
+  /** Cachet du Secrétaire Général (défaut : apposé). Mettre false pour l'omettre. */
+  apposerCachet?: boolean;
 }
 
 /* ---------------------------------------------------------------------------
  * RÉSOLUTION DES FICHIERS (polices & images)
  * ------------------------------------------------------------------------- */
 
-const FONTS = path.join(process.cwd(), "public", "fiche-don", "fonts");
-const ASSETS = path.join(process.cwd(), "public", "fiche-don");
+const DIR = __dirname;
 
-const FALLBACK_FONTS = path.join(__dirname, "fonts");
-const FALLBACK_ASSETS = path.join(__dirname, "assets");
+/**
+ * Résolution des assets et polices :
+ *  1. en priorité `public/fiche-don/` à la racine du projet (Next.js —
+ *     contenu du zip assets-fiche-don.zip extrait dans `public/`) ;
+ *  2. sinon `lib/pdf/{assets,fonts}` à côté de ce fichier (exécution autonome).
+ */
+function resolveBase(sousDossier: string, sonde: string): string {
+  const pub = path.join(process.cwd(), "public", "fiche-don", sousDossier);
+  if (fs.existsSync(path.join(pub, sonde))) return pub;
+  return path.join(DIR, sousDossier || "assets");
+}
+const FONTS = resolveBase("fonts", "TimesNewRoman-subset.ttf");
+const ASSETS = resolveBase("", "logo-ong-gas.jpg");
 
-function resolveFont(candidates: string[]): string | null {
+/**
+ * Polices du texte STATIQUE : sous-ensembles extraits du PDF modèle.
+ * (fidélité glyphique maximale — tous les glyphes du texte fixe)
+ * Polices du texte DYNAMIQUE : police complète si présente, sinon
+ * substitut métriquement compatible (spec §7) :
+ *   Times New Roman → Liberation Serif · Berlin Sans FB → Carlito
+ */
+function resolveFont(candidates: string[]): string {
   for (const c of candidates) {
     const p = path.join(FONTS, c);
     if (fs.existsSync(p)) return p;
   }
-  for (const c of candidates) {
-    const p = path.join(FALLBACK_FONTS, c);
-    if (fs.existsSync(p)) return p;
-  }
-  return null;
+  throw new Error(`Police introuvable (candidates: ${candidates.join(", ")})`);
 }
 
 const F = {
@@ -66,6 +102,7 @@ const F = {
   Georgia: resolveFont(["Georgia-subset.ttf", "Gelasio-Regular.ttf", "LiberationSerif-Regular.ttf"]),
   GeorgiaBold: resolveFont(["Georgia-Bold-subset.ttf", "Gelasio-Bold.ttf", "LiberationSerif-Bold.ttf"]),
   Berlin: resolveFont(["BerlinSansFB-subset.ttf", "BRLNSR.TTF", "Carlito-Regular.ttf"]),
+  /** Polices COMPLÈTES pour les valeurs dynamiques (jamais les subsets). */
   Dyn: resolveFont(["TimesNewRoman.ttf", "times.ttf", "LiberationSerif-Regular.ttf"]),
   DynBold: resolveFont(["TimesNewRoman-Bold.ttf", "timesbd.ttf", "LiberationSerif-Bold.ttf"]),
   DynBerlin: resolveFont(["BerlinSansFB.ttf", "BRLNSR.TTF", "Carlito-Regular.ttf"]),
@@ -79,15 +116,8 @@ const IMG = {
   bandeauTitre: path.join(ASSETS, "bandeau-titre.png"),
   colonneCreme: path.join(ASSETS, "fond-colonne-creme.png"),
   colonneLilas: path.join(ASSETS, "fond-colonne-lilas.png"),
+  cachet: path.join(ASSETS, "cachet-ong-gas.png"),
 };
-
-function resolveAsset(name: string): string {
-  const primary = path.join(ASSETS, name);
-  const fallback = path.join(FALLBACK_ASSETS, name);
-  if (fs.existsSync(primary)) return primary;
-  if (fs.existsSync(fallback)) return fallback;
-  return primary;
-}
 
 /* ---------------------------------------------------------------------------
  * CONSTANTES DE MISE EN PAGE (mesurées sur le modèle — spec §4/§5)
@@ -122,26 +152,6 @@ const Y_ADJ: Record<string, number> = {
 
 /* Textes statiques des colonnes — [x, y, texte, police] (spec §5) */
 type Ligne = [number, number, string, keyof typeof F | null];
-
-const BUILT_IN: Record<string, string> = {
-  Calibri: "Helvetica",
-  CalibriBold: "Helvetica-Bold",
-  CalibriBoldItalic: "Helvetica-BoldOblique",
-  Times: "Times-Roman",
-  TimesBold: "Times-Bold",
-  Georgia: "Times-Roman",
-  GeorgiaBold: "Times-Bold",
-  Berlin: "Helvetica",
-  Dyn: "Times-Roman",
-  DynBold: "Times-Bold",
-  DynBerlin: "Helvetica",
-};
-
-function safeFont(key: keyof typeof F | null | undefined): string {
-  if (key && F[key]) return F[key]!;
-  if (key && BUILT_IN[key]) return BUILT_IN[key]!;
-  return "Helvetica";
-}
 
 const COL_ACC: Ligne[] = [
   [83.8, 193.3, "•Secours", "Times"],
@@ -221,7 +231,7 @@ const CASES_OBJECTIF: Record<ObjectifDon, [number, number, number, number, strin
  * GÉNÉRATION
  * ------------------------------------------------------------------------- */
 
-export function genererFicheReceptionDon(data: DonFicheData = {}): Promise<Buffer> {
+export function genererFicheReceptionDon(data: DonFicheData = { donateur: {} }): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: [PAGE.W, PAGE.H],
@@ -244,11 +254,11 @@ export function genererFicheReceptionDon(data: DonFicheData = {}): Promise<Buffe
 
 /* --- Helpers de dessin ----------------------------------------------------- */
 
-type Doc = PDFKit.PDFDocument;
+type Doc = InstanceType<typeof PDFDocument>;
 
 /** Texte positionné au point près (jamais de flux automatique). */
 function texte(doc: Doc, t: string, x: number, y: number, f: keyof typeof F, size: number, color = C.noir) {
-  const file = safeFont(f);
+  const file = F[f];
   doc.font(file).fontSize(size).fillColor(color)
      .text(t, x, y + (Y_ADJ[f] ?? 0), { lineBreak: false });
 }
@@ -263,14 +273,12 @@ function texte(doc: Doc, t: string, x: number, y: number, f: keyof typeof F, siz
 function texteMixte(doc: Doc, prefixe: string, valeur: string, x: number, y: number,
                     fStat: keyof typeof F, fDyn: keyof typeof F, size: number,
                     color = C.noir, maxDynPt = Infinity): number {
-  const statFont = safeFont(fStat);
-  const dynFont = safeFont(fDyn);
-  doc.font(statFont).fontSize(size).fillColor(color);
+  doc.font(F[fStat]).fontSize(size).fillColor(color);
   doc.text(prefixe, x, y + (Y_ADJ[fStat] ?? 0), { lineBreak: false });
   let cx = x + doc.widthOfString(prefixe);
   let v = valeur.trim();
   if (v) {
-    doc.font(dynFont);
+    doc.font(F[fDyn]);
     while (v.length > 1 && doc.widthOfString(v) > maxDynPt) v = v.slice(0, -1);
     doc.text(v, cx, y + (Y_ADJ[fDyn] ?? 0), { lineBreak: false });
     cx += doc.widthOfString(v);
@@ -291,20 +299,13 @@ function trait(doc: Doc, x1: number, y1: number, x2: number, y2: number, color: 
 }
 
 function image(doc: Doc, file: string, x: number, y: number, w: number, h: number) {
-  const resolved = resolveAsset(path.basename(file));
-  try {
-    if (fs.existsSync(resolved)) {
-      doc.image(resolved, x, y, { width: w, height: h });
-    }
-  } catch (e) {
-    console.warn(`[pdf] Image introuvable ou illisible: ${resolved}`);
-  }
+  doc.image(file, x, y, { width: w, height: h });
 }
 
 /** Croix de coche centrée dans une case. */
 function cocher(doc: Doc, box: [number, number, number, number]) {
   const [x, y, w, h] = box;
-  doc.font(safeFont("DynBold")).fontSize(11.04).fillColor(C.noir)
+  doc.font(F.DynBold).fontSize(11.04).fillColor(C.noir)
      .text("X", x - 4, y + (h - 11) / 2 - 1, { width: w + 8, align: "center", lineBreak: false });
 }
 
@@ -396,37 +397,73 @@ function dessiner(doc: Doc, d: DonFicheData): void {
     texte(doc, "Autres……………………………………", 403.9, 517.5, "Berlin", 11.04);
   }
 
-  /* 7. Cadre « DESCRIPTION DU DON : » */
-  texte(doc, "DESCRIPTION DU DON :", 215.9, 535.9, "TimesBold", 13.92);
-  trait(doc, 216, 550.5, 371, 550.5, C.noir, 1);
-  rectContour(doc, 57, 556, 481, 121, C.marine, 2.16);
+  /* 7. Cadre « DESCRIPTION DU DON : » + « PHOTOS PREUVES : » (2 colonnes)
+   * (évolution validée par l'ONG : la zone description du modèle est divisée —
+   *  gauche : description du don ; droite : photos preuves de la validation) */
+  const CADRE = { x: 57, y: 556, w: 481, h: 121 };
+  const XMILIEU = CADRE.x + CADRE.w / 2; // 297,5 — trait de séparation
+  const centreGauche = (CADRE.x + XMILIEU) / 2;
+  const centreDroite = (XMILIEU + CADRE.x + CADRE.w) / 2;
 
+  // titres centrés sur chaque colonne — police COMPLÈTE (DynBold : Liberation Serif
+  // Bold, clone métrique de Times Bold) car le subset du modèle ne contient pas
+  // tous les glyphes (ex. « H » de PHOTOS est absent du subset).
+  doc.font(F.DynBold).fontSize(13.92);
+  const titreDesc = "DESCRIPTION DU DON :";
+  const xTitreDesc = centreGauche - doc.widthOfString(titreDesc) / 2;
+  texte(doc, titreDesc, xTitreDesc, 535.9, "DynBold", 13.92);
+  trait(doc, xTitreDesc + 0.1, 550.5, xTitreDesc + doc.widthOfString(titreDesc), 550.5, C.noir, 1);
+
+  const titrePhotos = "PHOTOS PREUVES :";
+  const xTitrePhotos = centreDroite - doc.widthOfString(titrePhotos) / 2;
+  texte(doc, titrePhotos, xTitrePhotos, 535.9, "DynBold", 13.92);
+  trait(doc, xTitrePhotos + 0.1, 550.5, xTitrePhotos + doc.widthOfString(titrePhotos), 550.5, C.noir, 1);
+
+  rectContour(doc, CADRE.x, CADRE.y, CADRE.w, CADRE.h, C.marine, 2.16);
+  trait(doc, XMILIEU, CADRE.y, XMILIEU, CADRE.y + CADRE.h, C.marine, 2.16);
+
+  // --- colonne GAUCHE : description multi-lignes (police complète, réduction auto) ---
   if (d.description?.trim()) {
-    // texte multi-lignes dans le cadre : max 7 lignes, réduction puis troncature
-    const maxLignes = 7;
+    const maxLignes = 6;
+    const largeurTxt = XMILIEU - 9 - (CADRE.x + 9); // marges 9 pt de chaque côté
+    const decouper = (taille: number): string[] => {
+      const lignes: string[] = [];
+      let courant = "";
+      doc.font(F.Dyn).fontSize(taille);
+      for (const mot of d.description!.trim().split(/\s+/)) {
+        const essai = courant ? `${courant} ${mot}` : mot;
+        if (doc.widthOfString(essai) > largeurTxt && courant) {
+          lignes.push(courant); courant = mot;
+        } else courant = essai;
+      }
+      if (courant) lignes.push(courant);
+      return lignes;
+    };
     let size = 11.04;
-    let coupe = d.description.trim();
-    const largeur = 462;
-    // estimation simple de découpage par mots (PDFKit fait le rendu final)
-    const lignes: string[] = [];
-    let courant = "";
-    for (const mot of coupe.split(/\s+/)) {
-      const essai = courant ? `${courant} ${mot}` : mot;
-      if (essai.length > Math.floor(largeur / (size * 0.45))) { // ~ caractère Times ≈ 0.45×taille
-        lignes.push(courant); courant = mot;
-      } else courant = essai;
+    let lignes = decouper(size);
+    while (lignes.length > maxLignes && size > 7.5) { size -= 0.5; lignes = decouper(size); }
+    if (lignes.length > maxLignes) {
+      lignes = lignes.slice(0, maxLignes);
+      lignes[maxLignes - 1] = lignes[maxLignes - 1].slice(0, -1) + "…";
     }
-    if (courant) lignes.push(courant);
-    if (lignes.length > maxLignes) { size = 10; }
-    while (lignes.length > maxLignes && size > 8) { size -= 0.5; }
-    const lignesFinales = lignes.slice(0, maxLignes);
-    if (lignes.length > maxLignes) lignesFinales[maxLignes - 1] = lignesFinales[maxLignes - 1].slice(0, -1) + "…";
     doc.font(F.Dyn).fontSize(size).fillColor(C.noir);
     let yy = 566;
-    for (const l of lignesFinales) {
-      doc.text(l, 66, yy, { lineBreak: false });
-      yy += 16;
-    }
+    for (const l of lignes) { doc.text(l, CADRE.x + 9, yy, { lineBreak: false }); yy += size * 1.45; }
+  }
+
+  // --- colonne DROITE : photos preuves (1 grande · 2 côte à côte) ---
+  const photos = (d.photosPreuves ?? []).filter((p) => p && fs.existsSync(p)).slice(0, 2);
+  if (photos.length > 0) {
+    const PX0 = XMILIEU + 7.5, PX1 = CADRE.x + CADRE.w - 7.5;
+    const PY0 = CADRE.y + 6, PY1 = CADRE.y + CADRE.h - 6;
+    const places = photos.length === 1
+      ? [[PX0, PY0, PX1 - PX0, PY1 - PY0]]
+      : [[PX0 + 4, PY0 + 4, (PX1 - PX0) / 2 - 8, PY1 - PY0 - 8],
+         [PX0 + (PX1 - PX0) / 2 + 4, PY0 + 4, (PX1 - PX0) / 2 - 8, PY1 - PY0 - 8]];
+    photos.forEach((p, i) => {
+      const [x, y, w, h] = places[i];
+      doc.image(p, x, y, { fit: [w, h], align: "center", valign: "center" });
+    });
   }
 
   /* 8. Ligne « OBJECTIF DU DON : » */
@@ -446,17 +483,30 @@ function dessiner(doc: Doc, d: DonFicheData): void {
   }
 
   /* 9. Signature, responsable, pied de page */
+  /* Ligne « Fait à {lieu} le {date} », puis à la ligne suivante « ONG-GAS »
+   * (position du modèle) ; le cachet du SG est posé sur la mention ONG-GAS,
+   * poussé au bas de la zone signature (2 pt au-dessus du pied de page). */
   if (d.faitA?.trim()) {
-    const cx = texteMixte(doc, "Fait à ", d.faitA, 304.9, 702.5, "TimesBold", "DynBold", 12, C.noir, 120);
-    texteMixte(doc, " le ", d.dateReception ?? "…./…./…….", cx, 702.5, "TimesBold", "DynBold", 12, C.noir, 60);
+    const c1 = texteMixte(doc, "Fait à ", d.faitA, 304.9, 702.5, "TimesBold", "DynBold", 12, C.noir, 120);
+    texteMixte(doc, " le ", d.dateReception ?? "…./…./…….", c1, 702.5, "TimesBold", "DynBold", 12, C.noir, 60);
   } else {
     texte(doc, "Fait à ……..………………….. le…./…./…….", 304.9, 702.5, "TimesBold", 12);
   }
   texte(doc, "ONG-GAS", 444.7, 722.7, "TimesBold", 12);
+
+  // cachet : poussé au bas de la page, chevauchant « ONG-GAS » et le pied de
+  // page (tampon réel) — opacité légèrement réduite pour laisser lire le N° officiel
+  if (d.apposerCachet !== false) {
+    const D = 88; // diamètre (pt)
+    doc.opacity(0.88);
+    doc.image(IMG.cachet, 474 - D / 2, 770 - D / 2, { width: D, height: D });
+    doc.opacity(1);
+  }
+
   if (d.responsable?.trim()) {
-    texteMixte(doc, "Responsable d", d.responsable, 56.7, 726.3, "TimesBold", "DynBold", 12, C.noir, 280);
+    texteMixte(doc, "Responsable : ", d.responsable, 56.7, 726.3, "TimesBold", "DynBold", 12, C.noir, 360);
   } else {
-    texte(doc, "Responsable d……………………………", 56.7, 726.3, "TimesBold", 12);
+    texte(doc, "Responsable : ………………………", 56.7, 726.3, "TimesBold", 12);
   }
 
   texte(doc, "N°: ", 152.2, 795.7, "CalibriBold", 9.12);

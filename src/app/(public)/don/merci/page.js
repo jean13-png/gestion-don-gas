@@ -12,16 +12,18 @@ const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENER
 function DonMerciContent() {
   const searchParams = useSearchParams();
   const reference = searchParams.get("reference");
+  const emailFailed = searchParams.get("email") === "failed";
   const [don, setDon] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => Boolean(reference));
   const [copied, setCopied] = useState(false);
   const captureRef = useRef(null);
 
   useEffect(() => {
     if (!reference) {
-      setLoading(false);
       return;
     }
+
+    let isActive = true;
 
     fetch(`/api/dons/${encodeURIComponent(reference)}`)
       .then((res) => {
@@ -29,12 +31,21 @@ function DonMerciContent() {
         return res.json();
       })
       .then((data) => {
-        setDon(data);
-        setLoading(false);
+        if (isActive) {
+          setDon(data);
+          setLoading(false);
+        }
       })
       .catch(() => {
-        setLoading(false);
+        if (isActive) {
+          setDon(null);
+          setLoading(false);
+        }
       });
+
+    return () => {
+      isActive = false;
+    };
   }, [reference]);
 
   useEffect(() => {
@@ -61,6 +72,17 @@ function DonMerciContent() {
     }
   }, [loading, reference, don]);
 
+  useEffect(() => {
+    if (emailFailed && don) {
+      Swal.fire({
+        title: "Don enregistré",
+        text: "L’email de confirmation n’a pas pu être envoyé. Conservez votre référence affichée ci-dessous.",
+        icon: "warning",
+        confirmButtonColor: "#4278E1",
+      });
+    }
+  }, [emailFailed, don]);
+
   async function handleCopy() {
     if (!reference) return;
     try {
@@ -79,12 +101,30 @@ function DonMerciContent() {
     }
   }
 
+  function sanitizeClone(clonedDoc) {
+    clonedDoc.querySelectorAll("style").forEach((styleEl) => {
+      if (styleEl.textContent.includes("oklab")) {
+        styleEl.textContent = styleEl.textContent.replace(/::placeholder\s*\{[^}]*\}/g, "");
+      }
+    });
+  }
+
   async function handleDownloadPDF() {
-    if (!captureRef.current) return;
+    if (!captureRef.current || !reference) {
+      Swal.fire({
+        title: "Erreur",
+        text: "Impossible de générer le PDF pour le moment.",
+        icon: "error",
+      });
+      return;
+    }
     try {
       const canvas = await html2canvas(captureRef.current, {
         scale: 2,
         backgroundColor: "#ffffff",
+        useCORS: true,
+        allowTaint: true,
+        onclone: sanitizeClone,
       });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
@@ -113,7 +153,7 @@ function DonMerciContent() {
         showConfirmButton: false,
       });
     } catch (err) {
-      console.error(err);
+      console.error("[merci] PDF error:", err);
       Swal.fire({
         title: "Erreur",
         text: "Impossible de générer le PDF.",
@@ -123,16 +163,28 @@ function DonMerciContent() {
   }
 
   async function handleDownloadImage() {
-    if (!captureRef.current) return;
+    if (!captureRef.current || !reference) {
+      Swal.fire({
+        title: "Erreur",
+        text: "Impossible de générer l'image pour le moment.",
+        icon: "error",
+      });
+      return;
+    }
     try {
       const canvas = await html2canvas(captureRef.current, {
         scale: 2,
         backgroundColor: "#ffffff",
+        useCORS: true,
+        allowTaint: true,
+        onclone: sanitizeClone,
       });
       const link = document.createElement("a");
       link.download = `recu-don-${reference}.png`;
       link.href = canvas.toDataURL("image/png");
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       Swal.fire({
         title: "Image téléchargée",
         text: "Votre récapitulatif a été enregistré.",
@@ -141,7 +193,7 @@ function DonMerciContent() {
         showConfirmButton: false,
       });
     } catch (err) {
-      console.error(err);
+      console.error("[merci] Image error:", err);
       Swal.fire({
         title: "Erreur",
         text: "Impossible de générer l'image.",
@@ -227,19 +279,9 @@ function DonMerciContent() {
                     </span>
                   </div>
                   <div className="flex justify-between text-[14px]">
-                    <span className="text-ong-muted">Email</span>
-                    <span className="text-ong-texte font-medium">{don.donateur.email}</span>
+                    <span className="text-ong-muted">Statut</span>
+                    <span className="text-ong-texte font-medium">{don.statut}</span>
                   </div>
-                  <div className="flex justify-between text-[14px]">
-                    <span className="text-ong-muted">Téléphone</span>
-                    <span className="text-ong-texte font-medium">{don.donateur.telephone}</span>
-                  </div>
-                  {don.donateur.organisme && (
-                    <div className="flex justify-between text-[14px]">
-                      <span className="text-ong-muted">Organisme</span>
-                      <span className="text-ong-texte font-medium">{don.donateur.organisme}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between text-[14px]">
                     <span className="text-ong-muted">Nature du don</span>
                     <span className="text-ong-texte font-medium">
@@ -319,11 +361,11 @@ function DonMerciContent() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleDownloadPDF}
-                  className="bcursor-pointer inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md bg-ong-bleu text-white text-[14px] font-medium hover:bg-ong-bleu-fonce transition-colors"
-                >
+                 <button
+                   type="button"
+                   onClick={handleDownloadPDF}
+                   className="cursor-pointer inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md bg-ong-bleu text-white text-[14px] font-medium hover:bg-ong-bleu-fonce transition-colors"
+                 >
                   <Icon name="file-pdf" fixedWidth />
                   Télécharger le PDF
                 </button>

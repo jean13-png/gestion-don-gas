@@ -3,23 +3,19 @@ import AdminDonsPageClient from "./AdminDonsPageClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDonsPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function AdminDonsPage({ searchParams }) {
   const params = await searchParams;
   const initialFilter = {
     search: typeof params.search === "string" ? params.search : "",
     statut: typeof params.statut === "string" ? params.statut : "ALL",
     nature: typeof params.nature === "string" ? params.nature : "ALL",
-    periode: (typeof params.periode === "string" ? params.periode : "all") as "7j" | "30j" | "90j" | "12m" | "all",
+    periode: typeof params.periode === "string" ? params.periode : "all",
     page: typeof params.page === "string" ? Number(params.page) : 1,
     limit: 20,
   };
 
   const initialData = await prisma.$transaction(async (tx) => {
-    const where: Record<string, unknown> = {};
+    const where = {};
 
     if (initialFilter.search && initialFilter.search.trim()) {
       const q = initialFilter.search.trim();
@@ -41,7 +37,7 @@ export default async function AdminDonsPage({
 
     if (initialFilter.periode && initialFilter.periode !== "all") {
       const now = new Date();
-      let start: Date;
+      let start;
       switch (initialFilter.periode) {
         case "7j":
           start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

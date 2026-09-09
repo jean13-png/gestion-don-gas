@@ -2,31 +2,29 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getAdminDons, exportAdminDonsCsv, type AdminDonsFilter } from "@/app/actions/admin";
+import { getAdminDons, exportAdminDonsCsv } from "@/app/actions/admin";
 
-type State = {
-  data: Awaited<ReturnType<typeof getAdminDons>> | null;
-  error?: string;
+const State = {
+  data: null,
 };
 
-const STATUTS = ["ALL", "SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE"] as const;
-const NATURES = ["ALL", "MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE", "DON_FINANCIER", "AUTRE"] as const;
+const STATUTS = ["ALL", "SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE"];
+const NATURES = ["ALL", "MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE", "DON_FINANCIER", "AUTRE"];
 const PERIODES = [
   { value: "all", label: "Toutes" },
   { value: "7j", label: "7 jours" },
-  { value: "30j", label: "30 jours" },
   { value: "90j", label: "3 mois" },
   { value: "12m", label: "12 mois" },
-] as const;
+];
 
-export default function AdminDonsPageClient({ initialData }: { initialData: Awaited<ReturnType<typeof getAdminDons>> }) {
+export default function AdminDonsPageClient({ initialData }) {
   const searchParams = useSearchParams();
-  const [state, formAction] = useActionState<State, FormData>(async (_prev, formData) => {
-    const filter: AdminDonsFilter = {
-      search: (formData.get("search") as string) || "",
-      statut: (formData.get("statut") as string) || "ALL",
-      nature: (formData.get("nature") as string) || "ALL",
-      periode: ((formData.get("periode") as string) || "all") as AdminDonsFilter["periode"],
+  const [state, formAction] = useActionState(async (_prev, formData) => {
+    const filter = {
+      search: formData.get("search") || "",
+      statut: formData.get("statut") || "ALL",
+      nature: formData.get("nature") || "ALL",
+      periode: formData.get("periode") || "all",
       page: 1,
       limit: 20,
     };
@@ -50,7 +48,7 @@ export default function AdminDonsPageClient({ initialData }: { initialData: Awai
   }, [currentPage]);
 
   const pageNumbers = useMemo(() => {
-    const pages: (number | string)[] = [];
+    const pages = [];
     const maxVisible = 5;
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let end = Math.min(totalPages, start + maxVisible - 1);
@@ -68,14 +66,14 @@ export default function AdminDonsPageClient({ initialData }: { initialData: Awai
     return pages;
   }, [currentPage, totalPages]);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.set("page", "1");
     await formAction(formData);
   }
 
-  async function handlePage(next: number) {
+  async function handlePage(next) {
     const formData = new FormData();
     formData.set("search", search);
     formData.set("statut", statut);
@@ -104,7 +102,7 @@ export default function AdminDonsPageClient({ initialData }: { initialData: Awai
     }
   }
 
-  const statutLabel = (s: string) => {
+  const statutLabel = (s) => {
     switch (s) {
       case "SOUMIS":
         return "Soumis";

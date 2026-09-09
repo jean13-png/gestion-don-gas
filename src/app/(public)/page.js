@@ -38,6 +38,7 @@ export default function HomePage() {
                 width={640}
                 height={345}
                 className="w-full h-[345px] object-cover rounded-[13px]"
+                style={{ width: "100%", height: "345px" }}
                 priority
               />
             </div>
@@ -55,6 +56,7 @@ export default function HomePage() {
               width={640}
               height={330}
               className="w-full h-[330px] object-cover rounded-lg"
+              style={{ width: "100%", height: "330px" }}
             />
           </div>
           <div className="presentation-text">

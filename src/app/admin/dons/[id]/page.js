@@ -1,12 +1,15 @@
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { validateDon } from "@/app/actions/admin";
+import { validateDon, mettreAJourDonDetails } from "@/app/actions/admin";
 import { genererFicheReceptionDon } from "@/lib/pdf";
 import { sendEmail } from "@/lib/mail";
 import { uploadPhoto } from "@/app/actions/upload";
 import Icon from "@/components/ui/Icon";
 import path from "path";
+import fs from "fs";
 import Supprimer from "./supprimer/Supprimer";
+import GenererFicheButton from "./generer-fiche/GenererFicheButton";
+import PhotoUploadForm from "./PhotoUploadForm";
 
 const NATURE_MAP = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -37,12 +40,20 @@ export default async function AdminDonDetailPage({ params }) {
   async function handleUploadPhoto(formData) {
     "use server";
     formData.set("donId", don.id);
-    await uploadPhoto(formData);
+    return uploadPhoto(formData);
   }
 
   async function handleGeneratePDF(formData) {
     "use server";
     const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
+    const photosPreuves = don.photos.map((photo) => {
+      const relativePath = photo.url.replace(/^[/\\]+/, "");
+      const absolutePath = path.resolve(process.cwd(), "public", relativePath);
+      if (!absolutePath.startsWith(path.resolve(process.cwd(), "public") + path.sep) || !fs.existsSync(absolutePath)) {
+        throw new Error(`Photo de preuve introuvable: ${photo.url}`);
+      }
+      return absolutePath;
+    });
     const buffer = await genererFicheReceptionDon({
       donateur: {
         nomRaisonSociale: [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || undefined,
@@ -54,9 +65,12 @@ export default async function AdminDonDetailPage({ params }) {
       nature: naturePdf,
       natureAutresDetail: don.nature === "AUTRE" ? don.natureAutre : undefined,
       description: don.description,
-      faitA: don.localisation || "Abomey-Calavi",
-      dateReception: don.validatedAt ? don.validatedAt.toLocaleDateString("fr-FR") : undefined,
-      responsable: "e la plateforme",
+      objectif: don.objectif,
+      objectifAutresDetail: don.objectif === "AUTRES" && don.objectifAutre ? don.objectifAutre : undefined,
+      faitA: don.faitA || undefined,
+      dateReception: don.dateReception ? don.dateReception.toLocaleDateString("fr-FR") : undefined,
+      responsable: don.responsable || undefined,
+      photosPreuves,
     });
 
     const fichesDir = path.join(process.cwd(), "public", "uploads", "fiches");
@@ -87,6 +101,11 @@ export default async function AdminDonDetailPage({ params }) {
     }
 
     redirect(`/admin/dons/${don.id}`);
+  }
+
+  async function handleUpdateDetails(formData) {
+    "use server";
+    await mettreAJourDonDetails(don.id, formData);
   }
 
   return (
@@ -161,8 +180,14 @@ export default async function AdminDonDetailPage({ params }) {
               <div>
                 <dt className="text-ong-muted">Attestation PDF</dt>
                 <dd>
-                  <a href={don.ficheUrl} target="_blank" rel="noreferrer" className="text-ong-bleu underline">
-                    Télécharger la fiche
+                  <a
+                    href={don.ficheUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-ong-bleu text-white text-[13px] font-medium hover:bg-ong-bleu-fonce transition-colors"
+                  >
+                    <Icon className="text-white" name="file-pdf" fixedWidth />
+                    Voir / Télécharger la fiche
                   </a>
                 </dd>
               </div>
@@ -176,17 +201,11 @@ export default async function AdminDonDetailPage({ params }) {
           Soumission des preuves
         </h2>
 
-        <form action={handleUploadPhoto} className="space-y-4">
-          <div>
-            <label className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
-              Téléverser une photo (JPG/PNG/WEBP, max 5 MB)
-            </label>
-            <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" className="block w-full text-[13px] border p-2 rounded-lg border-slate-400 cursor-pointer text-ong-texte" />
-          </div>
-          <button type="submit" className="h-10 px-4 rounded-md border border-ong-bleu text-ong-bleu text-[14px] cursor-pointer font-medium hover:bg-ong-fond">
-            Ajouter la photo
-          </button>
-        </form>
+        {don.photos.length >= 2 ? (
+          <p className="text-[13px] text-ong-muted">Limite de 2 photos atteinte.</p>
+        ) : (
+          <PhotoUploadForm action={handleUploadPhoto} existingCount={don.photos.length} />
+        )}
 
         {don.photos.length > 0 && (
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -201,12 +220,64 @@ export default async function AdminDonDetailPage({ params }) {
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
         <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
+          Détails de la fiche PDF
+        </h2>
+        <form action={handleUpdateDetails} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="objectif" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                Objectif du don
+              </label>
+              <select id="objectif" name="objectif" defaultValue={don.objectif} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert">
+                <option value="EDUCATION">Soutien à l&apos;éducation</option>
+                <option value="AIDE_SOCIALE">Aide sociale / Humanitaire</option>
+                <option value="FORMATION">Formation</option>
+                <option value="AUTRES">Autres</option>
+              </select>
+            </div>
+            {don.objectif === "AUTRES" && (
+              <div>
+                <label htmlFor="objectifAutre" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                  Préciser l&apos;objectif
+                </label>
+                <input id="objectifAutre" name="objectifAutre" type="text" defaultValue={don.objectifAutre || ""} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+              </div>
+            )}
+            <div>
+              <label htmlFor="responsable" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                Responsable
+              </label>
+              <input id="responsable" name="responsable" type="text" defaultValue={don.responsable || "HEDJE ZINSOU RAOUL"} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+            </div>
+            <div>
+              <label htmlFor="faitA" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                Fait à (lieu)
+              </label>
+              <input id="faitA" name="faitA" type="text" defaultValue={don.faitA || "Abomey-Calavi"} placeholder="Ex : Abomey-Calavi" className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+            </div>
+            <div>
+              <label htmlFor="dateReception" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                Date de réception
+              </label>
+              <input id="dateReception" name="dateReception" type="date" defaultValue={don.dateReception ? don.dateReception.toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button type="submit" className="h-10 px-5 rounded-md border border-ong-bleu text-ong-bleu text-[14px] font-medium cursor-pointer hover:bg-ong-fond">
+              Enregistrer les détails
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
+        <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
           Validation & Actions
         </h2>
         <form action={handleValidate} className="space-y-4">
           <div>
             <label htmlFor="observations" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
-              Observations &
+              Observations
             </label>
             <textarea id="observations" name="observations" rows={3} className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px]" />
           </div>
@@ -215,11 +286,7 @@ export default async function AdminDonDetailPage({ params }) {
               className="disabled:cursor-not-allowed h-11 uppercase px-5 rounded-md bg-ong-vert text-white cursor-pointer text-[14px] font-medium hover:brightness-95">
               {don.statut === "VALIDE" ? "Don validé" : "Valider le don"}
             </button>
-            <button disabled={don.statut === "FICHE_GENEREE" || don.statut === "VALIDE"} type="submit" formAction={handleGeneratePDF} 
-              className="h-11 px-5 disabled:cursor-not-allowed disabled:bg-gray-600 rounded-md uppercase bg-ong-bleu text-white text-[14px] font-medium cursor-pointer hover:bg-ong-bleu-fonce">
-              {don.statut === "FICHE_GENEREE" || don.statut === "VALIDE" ? "FICHE GÉNÉRÉE" : "Générer la fiche de"}
-            </button>
-            {/* Pour la suppression d'un don */}
+            <GenererFicheButton don={don} formAction={handleGeneratePDF} />
           </div>
         </form>
         <div className="mt-4">

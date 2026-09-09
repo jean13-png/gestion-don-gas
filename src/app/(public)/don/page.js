@@ -7,7 +7,17 @@ import Icon from "@/components/ui/Icon";
 
 export default function DonPage() {
   const [nature, setNature] = useState("");
-  const [state, formaAction, isPending] = useActionState(soumettreDon, null)
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
+  const [organisme, setOrganisme] = useState("");
+  const [email, setEmail] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [natureAutre, setNatureAutre] = useState("");
+  const [description, setDescription] = useState("");
+  const [localisation, setLocalisation] = useState("");
+  const [objectif, setObjectif] = useState("");
+  const [objectifAutre, setObjectifAutre] = useState("");
+  const [state, formaAction, isPending] = useActionState(soumettreDon, null);
 
   return (
     <section className="bg-ong-fond py-16">
@@ -30,31 +40,31 @@ export default function DonPage() {
                 <label htmlFor="prenom" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Prénom
                 </label>
-                <input id="prenom" name="prenom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <input id="prenom" name="prenom" type="text" required value={prenom} onChange={(e) => setPrenom(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="nom" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Nom
                 </label>
-                <input id="nom" name="nom" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <input id="nom" name="nom" type="text" required value={nom} onChange={(e) => setNom(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div className="sm:col-span-2">
                 <label htmlFor="organisme" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Organisme / Entreprise <span className="text-ong-muted">(optionnel)</span>
                 </label>
-                <input id="organisme" name="organisme" type="text" className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <input id="organisme" name="organisme" type="text" value={organisme} onChange={(e) => setOrganisme(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="email" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Email
                 </label>
-                <input id="email" name="email" type="email" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <input id="email" name="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="telephone" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Téléphone
                 </label>
-                <input id="telephone" name="telephone" type="tel" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <input id="telephone" name="telephone" type="tel" required value={telephone} onChange={(e) => setTelephone(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
             </div>
           </fieldset>
@@ -89,13 +99,53 @@ export default function DonPage() {
                   <label htmlFor="natureAutre" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                     Préciser la nature du don
                   </label>
+                     <input
+                     id="natureAutre"
+                     name="natureAutre"
+                     type="text"
+                     required
+                     value={natureAutre}
+                     onChange={(e) => setNatureAutre(e.target.value)}
+                     className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+                     placeholder="Ex : mobilier, accompagnement logistique..."
+                   />
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="objectif" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                  Objectif du don
+                </label>
+                <select
+                  id="objectif"
+                  name="objectif"
+                  required
+                  value={objectif}
+                  onChange={(e) => setObjectif(e.target.value)}
+                  className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+                >
+                  <option value="">Sélectionner...</option>
+                  <option value="EDUCATION">Soutien à l'éducation</option>
+                  <option value="AIDE_SOCIALE">Aide sociale / Humanitaire</option>
+                  <option value="FORMATION">Formation</option>
+                  <option value="AUTRES">Autres</option>
+                </select>
+              </div>
+
+              {objectif === "AUTRES" && (
+                <div>
+                  <label htmlFor="objectifAutre" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                    Préciser l'objectif du don
+                  </label>
                   <input
-                    id="natureAutre"
-                    name="natureAutre"
+                    id="objectifAutre"
+                    name="objectifAutre"
                     type="text"
                     required
+                    value={objectifAutre}
+                    onChange={(e) => setObjectifAutre(e.target.value)}
                     className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
-                    placeholder="Ex : mobilier, accompagnement logistique..."
+                    placeholder="Ex : construction d'un puits..."
                   />
                 </div>
               )}
@@ -104,13 +154,13 @@ export default function DonPage() {
                 <label htmlFor="description" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Description
                 </label>
-                <textarea id="description" name="description" rows={4} required className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <textarea id="description" name="description" rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
               <div>
                 <label htmlFor="localisation" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                   Localisation d&apos;enlèvement / dépôt
                 </label>
-                <input id="localisation" name="localisation" type="text" required className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <input id="localisation" name="localisation" type="text" required value={localisation} onChange={(e) => setLocalisation(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
             </div>
           </fieldset>

@@ -1,10 +1,11 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-const STATUT_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
+const STATUT_STYLES = {
   SOUMIS: { bg: "bg-yellow-50", text: "text-yellow-700", border: "border border-yellow-200", label: "Soumis" },
   EN_VERIFICATION: { bg: "bg-blue-50", text: "text-blue-700", border: "border border-blue-200", label: "En vérification" },
   INSPECTE: { bg: "bg-purple-50", text: "text-purple-700", border: "border border-purple-200", label: "Inspecté" },
@@ -13,6 +14,7 @@ const STATUT_STYLES: Record<string, { bg: string; text: string; border: string; 
 };
 
 export default async function AdminDashboard() {
+  await requireAdmin();
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);

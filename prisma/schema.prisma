@@ -25,6 +25,11 @@ model Don {
   natureAutre String?
   description String
   localisation String
+  objectif    ObjectifDon @default(AUTRES)
+  objectifAutre String?
+  responsable String @default("HEDJE ZINSOU RAOUL")
+  faitA       String?
+  dateReception DateTime? @default(now())
   statut      StatutDon   @default(SOUMIS)
   donateur    Donateur    @relation(fields: [donateurId], references: [id])
   donateurId  String
@@ -52,6 +57,13 @@ model Admin {
   createdAt    DateTime @default(now())
 }
 
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+}
+
 enum NatureDon {
   MATERIEL_INFORMATIQUE
   EQUIPEMENT_PEDAGOGIQUE
@@ -65,4 +77,11 @@ enum StatutDon {
   INSPECTE
   VALIDE
   FICHE_GENEREE
+}
+
+enum ObjectifDon {
+  EDUCATION
+  AIDE_SOCIALE
+  FORMATION
+  AUTRES
 }

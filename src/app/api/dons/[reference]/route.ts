@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+async function getClientIp(request) {
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || request.headers.get("x-real-ip")
+    || "unknown";
+}
 
 export async function GET(request, { params }) {
   try {
     const { reference } = await params;
+    const allowed = await checkRateLimit(`tracking:${await getClientIp(request)}`, 15 * 60 * 1000, 30);
+
+    if (!allowed) {
+      return NextResponse.json({ error: "Trop de demandes. Réessayez plus tard." }, { status: 429 });
+    }
 
     const don = await prisma.don.findUnique({
       where: { reference },
@@ -24,9 +36,6 @@ export async function GET(request, { params }) {
       donateur: {
         nom: don.donateur.nom,
         prenom: don.donateur.prenom,
-        email: don.donateur.email,
-        telephone: don.donateur.telephone,
-        organisme: don.donateur.organisme,
       },
       createdAt: don.createdAt,
     });

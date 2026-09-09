@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import path from "path";
+import { requireAdmin } from "@/lib/auth";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "photos");
 
@@ -11,6 +12,8 @@ if (!existsSync(UPLOAD_DIR)) {
 }
 
 export async function uploadPhoto(formData: FormData) {
+  await requireAdmin();
+
   const file = formData.get("photo") as File | null;
   const donId = formData.get("donId") as string | null;
 
@@ -35,6 +38,10 @@ export async function uploadPhoto(formData: FormData) {
 
   if (!don) {
     return { success: false, error: "Don introuvable." };
+  }
+
+  if (don.photos.length >= 2) {
+    return { success: false, error: "Limite de 2 photos atteinte." };
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());

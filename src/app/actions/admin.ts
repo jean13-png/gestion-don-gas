@@ -1,7 +1,9 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { adminDonDetailsSchema } from "@/lib/validation";
 
 export type AdminDonsFilter = {
   search?: string;
@@ -32,6 +34,8 @@ export type AdminDonsResult = {
 };
 
 export async function validateDon(donId: string, observations?: string) {
+  await requireAdmin();
+
   const updated = await prisma.don.update({
     where: { id: donId },
     data: {
@@ -48,7 +52,52 @@ export async function validateDon(donId: string, observations?: string) {
   return updated;
 }
 
+export async function mettreAJourDonDetails(donId: string, formData: FormData) {
+  await requireAdmin();
+
+  const parsed = adminDonDetailsSchema.safeParse({
+    objectif: formData.get("objectif")?.toString().trim() || "AUTRES",
+    objectifAutre: formData.get("objectifAutre")?.toString().trim() || "",
+    responsable: formData.get("responsable")?.toString().trim() || "HEDJE ZINSOU RAOUL",
+    faitA: formData.get("faitA")?.toString().trim() || "",
+    dateReception: formData.get("dateReception")?.toString().trim() || new Date().toISOString(),
+  });
+
+  if (!parsed.success) {
+    throw new Error("DON_DETAILS_INVALID");
+  }
+
+  const { objectif, objectifAutre, responsable, faitA, dateReception } = parsed.data;
+
+  const data: Record<string, unknown> = {
+    objectif,
+    responsable,
+  };
+
+  if (objectif === "AUTRES") {
+    data.objectifAutre = objectifAutre;
+  } else {
+    data.objectifAutre = null;
+  }
+
+  data.faitA = faitA || null;
+  data.dateReception = dateReception;
+
+  const updated = await prisma.don.update({
+    where: { id: donId },
+    data,
+  });
+
+  revalidatePath("/admin/dons");
+  revalidatePath("/admin/dashboard");
+  revalidatePath(`/admin/dons/${donId}`);
+
+  return updated;
+}
+
 export async function getAdminDons(filter: AdminDonsFilter = {}): Promise<AdminDonsResult> {
+  await requireAdmin();
+
   const page = filter.page && filter.page > 0 ? filter.page : 1;
   const limit = filter.limit && filter.limit > 0 ? filter.limit : 20;
   const skip = (page - 1) * limit;
@@ -127,6 +176,8 @@ export async function getAdminDons(filter: AdminDonsFilter = {}): Promise<AdminD
 }
 
 export async function exportAdminDonsCsv(filter: Omit<AdminDonsFilter, "page" | "limit"> = {}) {
+  await requireAdmin();
+
   const result = await getAdminDons({ ...filter, page: 1, limit: 1000 });
 
   const rows = [["Reference", "Nature", "Statut", "Date", "Donateur", "Email"]];

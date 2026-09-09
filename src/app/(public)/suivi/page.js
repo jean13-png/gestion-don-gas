@@ -43,6 +43,13 @@ export default async function SuiviPage({ searchParams }) {
           </div>
         </form>
 
+        <div className="mt-5 rounded-lg border border-ong-bordure bg-ong-bleu-tres-clair p-4 text-[13px] text-ong-texte">
+          <p className="font-medium text-ong-bleu">Protection des données</p>
+          <p className="mt-1 text-ong-texte-secondaire">
+            La référence suffit pour consulter le statut de votre dossier. Les coordonnées complètes restent visibles uniquement au service de gestion du projet.
+          </p>
+        </div>
+
         {reference && don && (
           <div className="mt-8 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -69,11 +76,9 @@ export default async function SuiviPage({ searchParams }) {
                 <p className="text-[15px] text-ong-texte font-medium">
                   {don.donateur.prenom} {don.donateur.nom}
                 </p>
-                <p className="mt-1 text-[13px] text-ong-muted">{don.donateur.email}</p>
-                <p className="text-[13px] text-ong-muted">{don.donateur.telephone}</p>
-                {don.donateur.organisme && (
-                  <p className="text-[13px] text-ong-muted">{don.donateur.organisme}</p>
-                )}
+                <p className="mt-2 text-[13px] text-ong-muted">
+                  Les coordonnées complètes restent accessibles uniquement à l’équipe de gestion du projet.
+                </p>
               </div>
             </div>
 

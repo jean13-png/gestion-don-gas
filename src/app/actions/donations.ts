@@ -6,10 +6,12 @@ import prisma from "@/lib/prisma";
 import { generateReference } from "@/lib/reference";
 import { sendEmail } from "@/lib/mail";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { donationSchema } from "@/lib/validation";
 
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 heure
 const RATE_LIMIT_MAX = 5; // 5 soumissions max
-const submissions = new Map();
 
 async function getClientIp() { 
   const headerList = await headers(); 
@@ -20,27 +22,14 @@ async function getClientIp() {
   return headerList.get("x-real-ip") || "unknown";
 }
 
-async function checkRateLimit() {
+async function checkDonationRateLimit() {
   const ip = await getClientIp();
-  const now = Date.now();
-  const record = submissions.get(ip);
-
-  if (!record || now - record.countReset > RATE_LIMIT_WINDOW) {
-    submissions.set(ip, { count: 1, countReset: now });
-    return true;
-  }
-
-  if (record.count >= RATE_LIMIT_MAX) {
-    return false;
-  }
-
-  record.count += 1;
-  return true;
+  return checkRateLimit(`donation:${ip}`, RATE_LIMIT_WINDOW, RATE_LIMIT_MAX);
 }
 
 export async function soumettreDon(prevState, formData) {
   // 1. Rate Limit
-  const allowed = await checkRateLimit();
+  const allowed = await checkDonationRateLimit();
   if (!allowed) {
     return { error: "Trop de soumissions. Veuillez réessayer dans quelques minutes." };
   }
@@ -56,58 +45,57 @@ export async function soumettreDon(prevState, formData) {
   const natureAutre = formData.get("natureAutre")?.toString().trim() || "";
   const description = formData.get("description")?.toString().trim() || "";
   const localisation = formData.get("localisation")?.toString().trim() || "";
+  const objectif = formData.get("objectif")?.toString().trim() || "";
+  const objectifAutre = formData.get("objectifAutre")?.toString().trim() || "";
 
-  // 3. Validation : Champs obligatoires
-  if (!nom ||!prenom ||!email ||!telephone ||!nature ||!description ||!localisation) {
-    return { error: "Veuillez remplir tous les champs obligatoires" };
+  const parsed = donationSchema.safeParse({
+    nom,
+    prenom,
+    organisme,
+    email,
+    telephone,
+    nature,
+    natureAutre,
+    description,
+    localisation,
+    objectif,
+    objectifAutre,
+  });
+
+  if (!parsed.success) {
+    return { error: "Veuillez vérifier les informations saisies." };
   }
 
-  // 4. Validation : Email
-  if (!email.includes("@") ||!email.includes(".")) {
-    return { error: "L'adresse email est invalide" };
-  }
-
-  // 5. Validation : Téléphone
-  if (telephone.length < 8) {
-    return { error: "Le numéro de téléphone est invalide" };
-  }
-
-  // 6. Validation : Description
-  if (description.length < 10) {
-    return { error: "La description doit faire au moins 10 caractères" };
-  }
-
-  // 7. Validation : Si AUTRE
-  if (nature === "AUTRE" &&!natureAutre) {
+  if (nature === "AUTRE" && !natureAutre) {
     return { error: "Veuillez préciser la nature du don" };
   }
 
-  // 8. Validation : Nature valide
-  const naturesValides = ["MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE", "DON_FINANCIER", "AUTRE"];
-  if (!naturesValides.includes(nature)) {
-    return { error: "Nature du don invalide" };
+  if (objectif === "AUTRES" && !objectifAutre) {
+    return { error: "Veuillez préciser l'objectif du don" };
   }
 
   try {
-    // 9. Enregistrement en DB
-    const donateur = await prisma.donateur.create({
-      data: { nom, prenom, organisme: organisme || null, email, telephone },
-    });
-
     const reference = generateReference();
+    await prisma.$transaction(async (transaction) => {
+      const donateur = await transaction.donateur.create({
+        data: { nom, prenom, organisme: organisme || null, email, telephone },
+      });
 
-    await prisma.don.create({
-      data: {
-        reference,
-        nature,
-        natureAutre: nature === "AUTRE"? natureAutre : null,
-        description,
-        localisation,
-        donateurId: donateur.id,
-      },
+      await transaction.don.create({
+        data: {
+          reference,
+          nature,
+          natureAutre: nature === "AUTRE" ? natureAutre : null,
+          description,
+          localisation,
+          objectif,
+          objectifAutre: objectif === "AUTRES" ? objectifAutre : null,
+          donateurId: donateur.id,
+        },
+      });
     });
 
-    //On tente l'envoie de mail
+    let emailFailed = false;
     try {
       await sendEmail({
         to: email,
@@ -122,11 +110,10 @@ export async function soumettreDon(prevState, formData) {
       });
 
     } catch (mailError) {
-      console.log("Une erreur est survenue lors de l'envoie du mail");
-      
+      emailFailed = true;
+      console.error("[soumettreDon] Email de confirmation échoué:", mailError);
     }
-    // 11. Redirection
-    redirect(`/don/merci?reference=${encodeURIComponent(reference)}`);
+    redirect(`/don/merci?reference=${encodeURIComponent(reference)}${emailFailed ? "&email=failed" : ""}`);
 
   } catch (error) {
     if (error.digest?.includes('NEXT_REDIRECT')) {
@@ -138,6 +125,20 @@ export async function soumettreDon(prevState, formData) {
 }
 // Fonction pour supprimer un don
 export async function supprimerDon(prevState, formData) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { error: "Accès interdit" };
+  }
+
+  const admin = await prisma.admin.findUnique({
+    where: { id: session.user.id as string },
+  });
+
+  if (!admin) {
+    return { error: "Accès interdit" };
+  }
+
   const donId = formData.get("donId")?.toString().trim();
 
   if (!donId) {
