@@ -1,6 +1,6 @@
 "use server";
 
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import sharp from "sharp";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
@@ -62,4 +62,28 @@ export async function uploadPhoto(formData: FormData) {
   });
 
   return { success: true, photo };
+}
+
+export async function deletePhoto(formData: FormData) {
+  await requireAdmin();
+
+  const photoId = formData.get("photoId") as string | null;
+  const donId = formData.get("donId") as string | null;
+
+  if (!photoId || !donId) {
+    return { success: false, error: "Photo ou don manquant." };
+  }
+
+  const photo = await prisma.photo.findFirst({
+    where: { id: photoId, donId },
+  });
+
+  if (!photo) {
+    return { success: false, error: "Photo introuvable." };
+  }
+
+  await del(photo.url);
+  await prisma.photo.delete({ where: { id: photo.id } });
+
+  return { success: true };
 }

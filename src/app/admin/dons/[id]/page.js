@@ -4,7 +4,7 @@ import { put } from "@vercel/blob";
 import { validateDon, mettreAJourDonDetails } from "@/app/actions/admin";
 import { genererFicheReceptionDon } from "@/lib/pdf";
 import { sendEmail } from "@/lib/mail";
-import { uploadPhoto } from "@/app/actions/upload";
+import { deletePhoto, uploadPhoto } from "@/app/actions/upload";
 import Icon from "@/components/ui/Icon";
 import fs from "fs/promises";
 import os from "os";
@@ -13,6 +13,7 @@ import sharp from "sharp";
 import Supprimer from "./supprimer/Supprimer";
 import GenererFicheButton from "./generer-fiche/GenererFicheButton";
 import PhotoUploadForm from "./PhotoUploadForm";
+import PhotoProofs from "./PhotoProofs";
 
 const NATURE_MAP = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -44,6 +45,12 @@ export default async function AdminDonDetailPage({ params }) {
     "use server";
     formData.set("donId", don.id);
     return uploadPhoto(formData);
+  }
+
+  async function handleDeletePhoto(formData) {
+    "use server";
+    formData.set("donId", don.id);
+    return deletePhoto(formData);
   }
 
   async function handleGeneratePDF(formData) {
@@ -238,13 +245,7 @@ export default async function AdminDonDetailPage({ params }) {
         )}
 
         {don.photos.length > 0 && (
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {don.photos.map((photo) => (
-              <div key={photo.id} className="aspect-video bg-ong-fond rounded-md border border-ong-bordure overflow-hidden">
-                <img src={photo.url} alt={`Photo ${photo.id}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
-          </div>
+          <PhotoProofs photos={don.photos} deleteAction={handleDeletePhoto} />
         )}
       </div>
 
