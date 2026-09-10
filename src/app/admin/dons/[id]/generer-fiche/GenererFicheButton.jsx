@@ -1,12 +1,30 @@
 'use client';
 import { useState } from "react";
+import { useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
 import { startTransition } from "react";
 
 export default function GenererFicheButton({ don, formAction }) {
   const [pending, setPending] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const hasPhotos = don.photos && don.photos.length > 0;
   const isGeneratedOrValidated = don.statut === "FICHE_GENEREE" || don.statut === "VALIDE";
+
+  useEffect(() => {
+    if (searchParams.get("generated") !== "1") return;
+
+    Swal.fire({
+      title: "Fiche générée",
+      text: "La fiche de don a été générée avec succès.",
+      icon: "success",
+      confirmButtonColor: "#4278E1",
+      confirmButtonText: "OK",
+    });
+    router.replace(pathname);
+  }, [pathname, router, searchParams]);
 
   const handleClick = async () => {
     if (isGeneratedOrValidated || pending) return;

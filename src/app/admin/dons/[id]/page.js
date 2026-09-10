@@ -111,7 +111,7 @@ export default async function AdminDonDetailPage({ params }) {
       console.error("[admin] Email notification failed:", emailError);
     }
 
-    redirect(`/admin/dons/${don.id}`);
+    redirect(`/admin/dons/${don.id}?generated=1`);
   }
 
   async function handleUpdateDetails(formData) {
