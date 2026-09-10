@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Icon from "@/components/ui/Icon";
+import Swal from "sweetalert2";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
@@ -9,20 +10,47 @@ export default function ContactPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSent(true);
+    await Swal.fire({
+      title: "Message pris en compte",
+      text: "L'équipe ONG-GAS vous répondra dans les meilleurs délais.",
+      icon: "success",
+      confirmButtonColor: "#4278E1",
+    });
   }
 
   return (
     <section className="bg-ong-fond py-16">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
-          Contact
-        </h1>
-        <p className="mt-3 text-[15px] text-ong-texte">
-          Une question sur un don, une demande de partenariat ou une demande d&apos;information ?
-          L&apos;équipe ONG-GAS vous répond dans les meilleurs délais.
-        </p>
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-8 lg:gap-12 items-center">
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ong-bleu">
+              ONG Global Actions Solidarité
+            </p>
+            <h1 className="mt-2 font-display font-semibold text-ong-bleu text-[32px] sm:text-[38px] leading-tight">
+              Contactez notre équipe
+            </h1>
+            <p className="mt-4 max-w-2xl text-[15px] text-ong-texte">
+              Une question sur un don, une demande de partenariat ou une demande d&apos;information ?
+              L&apos;équipe ONG-GAS vous répond dans les meilleurs délais.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4" aria-label="Actions de terrain de l'ONG-GAS">
+            <img
+              src="/images/images-dons/don-enfant.jpg"
+              alt="Enfants bénéficiaires accompagnés par l'ONG-GAS"
+              loading="eager"
+              className="h-40 sm:h-52 w-full object-cover rounded-xl border border-ong-bordure"
+            />
+            <img
+              src="/images/images-dons/don-informatique.jpg"
+              alt="Matériel informatique destiné aux écoles"
+              loading="eager"
+              className="mt-7 h-40 sm:h-52 w-full object-cover rounded-xl border border-ong-bordure"
+            />
+          </div>
+        </div>
 
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-8">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-[0.9fr_1.4fr] gap-8 lg:gap-10 items-start">
           <div className="space-y-6">
             <div className="bg-white border border-ong-bordure rounded-lg p-6">
               <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">

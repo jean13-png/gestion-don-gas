@@ -246,7 +246,7 @@ export default async function HomePage() {
                         src={partenaire.logoUrl}
                         alt={`Logo ${partenaire.nom}`}
                         loading="lazy"
-                        className="h-16 w-full object-contain grayscale hover:grayscale-0 transition-[filter]"
+                        className="h-20 w-full object-contain"
                       />
                     );
                     return partenaire.siteWeb ? (
@@ -257,7 +257,12 @@ export default async function HomePage() {
                   })}
                 </div>
               </div>
-              <img src="/images/partenaire-remerciement.jpg" alt="Partenaire soutenant les actions de l'ONG-GAS" loading="lazy" className="w-full h-64 object-cover rounded-lg" />
+              <img
+                src="/images/1788544339134-IMG-20260901-WA0028(1).jpg"
+                alt="Présentation du Projet Informatique Pour Tous et de l'ONG-GAS"
+                loading="lazy"
+                className="w-full h-72 object-cover rounded-lg border border-ong-bordure"
+              />
             </div>
             <div className="mt-10">
               <div className="flex flex-wrap justify-center items-end gap-3 max-w-[960px] mx-auto">
