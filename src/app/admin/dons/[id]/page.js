@@ -1,12 +1,14 @@
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { put } from "@vercel/blob";
 import { validateDon, mettreAJourDonDetails } from "@/app/actions/admin";
 import { genererFicheReceptionDon } from "@/lib/pdf";
 import { sendEmail } from "@/lib/mail";
 import { uploadPhoto } from "@/app/actions/upload";
 import Icon from "@/components/ui/Icon";
+import fs from "fs/promises";
+import os from "os";
 import path from "path";
-import fs from "fs";
 import Supprimer from "./supprimer/Supprimer";
 import GenererFicheButton from "./generer-fiche/GenererFicheButton";
 import PhotoUploadForm from "./PhotoUploadForm";
@@ -46,14 +48,20 @@ export default async function AdminDonDetailPage({ params }) {
   async function handleGeneratePDF(formData) {
     "use server";
     const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
-    const photosPreuves = don.photos.map((photo) => {
-      const relativePath = photo.url.replace(/^[/\\]+/, "");
-      const absolutePath = path.resolve(process.cwd(), "public", relativePath);
-      if (!absolutePath.startsWith(path.resolve(process.cwd(), "public") + path.sep) || !fs.existsSync(absolutePath)) {
-        throw new Error(`Photo de preuve introuvable: ${photo.url}`);
-      }
-      return absolutePath;
-    });
+    const temporaryPhotos = await Promise.all(
+      don.photos.slice(0, 4).map(async (photo, index) => {
+        const response = await fetch(photo.url);
+        if (!response.ok) {
+          throw new Error(`Photo de preuve introuvable: ${photo.url}`);
+        }
+        const temporaryPath = path.join(
+          os.tmpdir(),
+          `don-${don.id}-photo-${index}`,
+        );
+        await fs.writeFile(temporaryPath, Buffer.from(await response.arrayBuffer()));
+        return temporaryPath;
+      }),
+    );
     const buffer = await genererFicheReceptionDon({
       donateur: {
         nomRaisonSociale: [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || undefined,
@@ -70,19 +78,22 @@ export default async function AdminDonDetailPage({ params }) {
       faitA: don.faitA || undefined,
       dateReception: don.dateReception ? don.dateReception.toLocaleDateString("fr-FR") : undefined,
       responsable: don.responsable || undefined,
-      photosPreuves,
+      photosPreuves: temporaryPhotos,
     });
 
-    const fichesDir = path.join(process.cwd(), "public", "uploads", "fiches");
-    const fs = await import("fs");
-    if (!fs.existsSync(fichesDir)) fs.mkdirSync(fichesDir, { recursive: true });
-    const filename = `fiche-${don.reference}.pdf`;
-    const filepath = path.join(fichesDir, filename);
-    fs.writeFileSync(filepath, buffer);
+    const fiche = await put(
+      `dons/${don.reference}/fiche-${don.reference}.pdf`,
+      buffer,
+      {
+        access: "public",
+        addRandomSuffix: true,
+        contentType: "application/pdf",
+      },
+    );
 
     await prisma.don.update({
       where: { id: don.id },
-      data: { ficheUrl: `/uploads/fiches/${filename}`, statut: "FICHE_GENEREE" },
+      data: { ficheUrl: fiche.url, statut: "FICHE_GENEREE" },
     });
 
     try {
@@ -201,8 +212,8 @@ export default async function AdminDonDetailPage({ params }) {
           Soumission des preuves
         </h2>
 
-        {don.photos.length >= 2 ? (
-          <p className="text-[13px] text-ong-muted">Limite de 2 photos atteinte.</p>
+        {don.photos.length >= 4 ? (
+          <p className="text-[13px] text-ong-muted">Limite de 4 photos atteinte.</p>
         ) : (
           <PhotoUploadForm action={handleUploadPhoto} existingCount={don.photos.length} />
         )}

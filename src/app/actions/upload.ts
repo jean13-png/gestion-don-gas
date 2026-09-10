@@ -1,15 +1,8 @@
 "use server";
 
+import { put } from "@vercel/blob";
 import prisma from "@/lib/prisma";
-import { writeFileSync, mkdirSync, existsSync } from "fs";
-import path from "path";
 import { requireAdmin } from "@/lib/auth";
-
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "photos");
-
-if (!existsSync(UPLOAD_DIR)) {
-  mkdirSync(UPLOAD_DIR, { recursive: true });
-}
 
 export async function uploadPhoto(formData: FormData) {
   await requireAdmin();
@@ -40,20 +33,24 @@ export async function uploadPhoto(formData: FormData) {
     return { success: false, error: "Don introuvable." };
   }
 
-  if (don.photos.length >= 2) {
-    return { success: false, error: "Limite de 2 photos atteinte." };
+  if (don.photos.length >= 4) {
+    return { success: false, error: "Limite de 4 photos atteinte." };
   }
 
-  const bytes = Buffer.from(await file.arrayBuffer());
   const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  const filename = `photo-${don.reference}-${Date.now()}.${ext}`;
-  const filepath = path.join(UPLOAD_DIR, filename);
-
-  writeFileSync(filepath, bytes);
+  const blob = await put(
+    `dons/${don.reference}/photo-${Date.now()}.${ext}`,
+    file,
+    {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: file.type,
+    },
+  );
 
   const photo = await prisma.photo.create({
     data: {
-      url: `/uploads/photos/${filename}`,
+      url: blob.url,
       donId: don.id,
     },
   });

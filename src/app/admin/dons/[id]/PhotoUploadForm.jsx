@@ -16,7 +16,7 @@ export default function PhotoUploadForm({ action, existingCount }) {
 
   function handleChange(event) {
     const files = Array.from(event.target.files || []);
-    const available = Math.max(0, 2 - existingCount);
+    const available = Math.max(0, 4 - existingCount);
     const nextFiles = files.slice(0, available);
 
     if (files.length > available) {

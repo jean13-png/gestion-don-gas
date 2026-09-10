@@ -50,8 +50,8 @@ export interface DonFicheData {
   responsable?: string;
   /**
    * Photos preuves (validation du don par l'admin) — chemins de fichiers
-   * image accessibles côté serveur. 1 à 2 photos placées dans la colonne
-   * droite du cadre « PHOTOS PREUVES » (1 = grande, 2 = côte à côte).
+   * image accessibles côté serveur. Jusqu'à 4 photos placées dans la colonne
+   * droite du cadre « PHOTOS PREUVES ».
    */
   photosPreuves?: string[];
   /** Cachet du Secrétaire Général (défaut : apposé). Mettre false pour l'omettre. */
@@ -451,15 +451,28 @@ function dessiner(doc: Doc, d: DonFicheData): void {
     for (const l of lignes) { doc.text(l, CADRE.x + 9, yy, { lineBreak: false }); yy += size * 1.45; }
   }
 
-  // --- colonne DROITE : photos preuves (1 grande · 2 côte à côte) ---
-  const photos = (d.photosPreuves ?? []).filter((p) => p && fs.existsSync(p)).slice(0, 2);
+  // --- colonne DROITE : photos preuves (jusqu'à 4 en grille) ---
+  const photos = (d.photosPreuves ?? []).filter((p) => p && fs.existsSync(p)).slice(0, 4);
   if (photos.length > 0) {
     const PX0 = XMILIEU + 7.5, PX1 = CADRE.x + CADRE.w - 7.5;
     const PY0 = CADRE.y + 6, PY1 = CADRE.y + CADRE.h - 6;
     const places = photos.length === 1
       ? [[PX0, PY0, PX1 - PX0, PY1 - PY0]]
-      : [[PX0 + 4, PY0 + 4, (PX1 - PX0) / 2 - 8, PY1 - PY0 - 8],
-         [PX0 + (PX1 - PX0) / 2 + 4, PY0 + 4, (PX1 - PX0) / 2 - 8, PY1 - PY0 - 8]];
+      : photos.map((_, index) => {
+          const columns = 2;
+          const rows = Math.ceil(photos.length / columns);
+          const gap = 8;
+          const cellWidth = (PX1 - PX0 - gap * (columns + 1)) / columns;
+          const cellHeight = (PY1 - PY0 - gap * (rows + 1)) / rows;
+          const column = index % columns;
+          const row = Math.floor(index / columns);
+          return [
+            PX0 + gap + column * (cellWidth + gap),
+            PY0 + gap + row * (cellHeight + gap),
+            cellWidth,
+            cellHeight,
+          ];
+        });
     photos.forEach((p, i) => {
       const [x, y, w, h] = places[i];
       doc.image(p, x, y, { fit: [w, h], align: "center", valign: "center" });
