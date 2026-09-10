@@ -37,9 +37,10 @@ export default function PhotoProofs({ photos, deleteAction }) {
       });
       router.refresh();
     } catch (error) {
+      console.error("[admin/photos] Suppression échouée:", error);
       await Swal.fire({
         title: "Suppression impossible",
-        text: error.message || "Veuillez réessayer.",
+        text: "Nous n'avons pas pu supprimer cette photo. Veuillez réessayer.",
         icon: "error",
         confirmButtonColor: "#4278E1",
       });

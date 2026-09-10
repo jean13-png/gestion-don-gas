@@ -38,30 +38,38 @@ export async function uploadPhoto(formData: FormData) {
     return { success: false, error: "Limite de 4 photos atteinte." };
   }
 
-  const normalized = await sharp(Buffer.from(await file.arrayBuffer()))
-    .rotate()
-    .resize(1600, 1600, { fit: "inside", withoutEnlargement: true })
-    .jpeg({ quality: 85 })
-    .toBuffer();
+  try {
+    const normalized = await sharp(Buffer.from(await file.arrayBuffer()))
+      .rotate()
+      .resize(1600, 1600, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
 
-  const blob = await put(
-    `dons/${don.reference}/photo-${Date.now()}.jpg`,
-    normalized,
-    {
-      access: "public",
-      addRandomSuffix: true,
-      contentType: "image/jpeg",
-    },
-  );
+    const blob = await put(
+      `dons/${don.reference}/photo-${Date.now()}.jpg`,
+      normalized,
+      {
+        access: "public",
+        addRandomSuffix: true,
+        contentType: "image/jpeg",
+      },
+    );
 
-  const photo = await prisma.photo.create({
-    data: {
-      url: blob.url,
-      donId: don.id,
-    },
-  });
+    const photo = await prisma.photo.create({
+      data: {
+        url: blob.url,
+        donId: don.id,
+      },
+    });
 
-  return { success: true, photo };
+    return { success: true, photo };
+  } catch (error) {
+    console.error("[uploadPhoto] Échec du traitement:", error);
+    return {
+      success: false,
+      error: "Nous n'avons pas pu ajouter cette photo. Vérifiez le fichier puis réessayez.",
+    };
+  }
 }
 
 export async function deletePhoto(formData: FormData) {

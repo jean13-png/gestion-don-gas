@@ -35,7 +35,8 @@ export default function PhotoUploadForm({ action, existingCount }) {
 
       router.refresh();
     } catch (uploadError) {
-      setError(uploadError.message || "Impossible d’ajouter la photo.");
+      console.error(uploadError);
+      setError("Nous n'avons pas pu ajouter cette photo. Vérifiez le fichier puis réessayez.");
     } finally {
       URL.revokeObjectURL(previewUrl);
       setPreview(null);

@@ -29,7 +29,13 @@ async function checkDonationRateLimit() {
 
 export async function soumettreDon(prevState, formData) {
   // 1. Rate Limit
-  const allowed = await checkDonationRateLimit();
+  let allowed;
+  try {
+    allowed = await checkDonationRateLimit();
+  } catch (error) {
+    console.error("[soumettreDon] Rate limit indisponible:", error);
+    return { error: "Le service est momentanément indisponible. Veuillez réessayer." };
+  }
   if (!allowed) {
     return { error: "Trop de soumissions. Veuillez réessayer dans quelques minutes." };
   }
@@ -120,7 +126,7 @@ export async function soumettreDon(prevState, formData) {
       throw error 
     }
     console.error("[soumettreDon] Erreur:", error);
-    return { error: "Erreur serveur lors de la soumission. Veuillez réessayer." };
+    return { error: "Nous n'avons pas pu enregistrer votre demande. Veuillez réessayer." };
   }
 }
 // Fonction pour supprimer un don

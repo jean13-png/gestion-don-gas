@@ -20,16 +20,21 @@ const PERIODES = [
 export default function AdminDonsPageClient({ initialData }) {
   const searchParams = useSearchParams();
   const [state, formAction] = useActionState(async (_prev, formData) => {
-    const filter = {
-      search: formData.get("search") || "",
-      statut: formData.get("statut") || "ALL",
-      nature: formData.get("nature") || "ALL",
-      periode: formData.get("periode") || "all",
-      page: 1,
-      limit: 20,
-    };
-    const data = await getAdminDons(filter);
-    return { data };
+    try {
+      const filter = {
+        search: formData.get("search") || "",
+        statut: formData.get("statut") || "ALL",
+        nature: formData.get("nature") || "ALL",
+        periode: formData.get("periode") || "all",
+        page: Number(formData.get("page") || 1),
+        limit: 20,
+      };
+      const data = await getAdminDons(filter);
+      return { data, error: "" };
+    } catch (actionError) {
+      console.error("[admin/dons] Chargement échoué:", actionError);
+      return { data: initialData, error: "Nous n'avons pas pu charger les dons. Veuillez réessayer." };
+    }
   }, { data: initialData });
 
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -38,6 +43,8 @@ export default function AdminDonsPageClient({ initialData }) {
   const [periode, setPeriode] = useState(searchParams.get("periode") || "all");
   const [page, setPage] = useState(Number(searchParams.get("page") || 1));
   const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState("");
+  const displayedError = state.error || error;
 
   const current = state.data || initialData;
   const totalPages = current?.totalPages || 1;
@@ -68,12 +75,19 @@ export default function AdminDonsPageClient({ initialData }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
     const formData = new FormData(e.currentTarget);
     formData.set("page", "1");
-    await formAction(formData);
+    try {
+      await formAction(formData);
+    } catch (actionError) {
+      console.error("[admin/dons] Recherche échouée:", actionError);
+      setError("Nous n'avons pas pu charger les dons. Veuillez réessayer.");
+    }
   }
 
   async function handlePage(next) {
+    setError("");
     const formData = new FormData();
     formData.set("search", search);
     formData.set("statut", statut);
@@ -81,11 +95,17 @@ export default function AdminDonsPageClient({ initialData }) {
     formData.set("periode", periode);
     formData.set("page", String(next));
     formData.set("limit", "20");
-    await formAction(formData);
+    try {
+      await formAction(formData);
+    } catch (actionError) {
+      console.error("[admin/dons] Changement de page échoué:", actionError);
+      setError("Nous n'avons pas pu charger cette page. Veuillez réessayer.");
+    }
   }
 
   async function handleExport() {
     setExporting(true);
+    setError("");
     try {
       const result = await exportAdminDonsCsv({ search, statut, nature, periode });
       const blob = new Blob([result.content], { type: result.contentType });
@@ -97,6 +117,9 @@ export default function AdminDonsPageClient({ initialData }) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    } catch (exportError) {
+      console.error("[admin/dons] Export échoué:", exportError);
+      setError("Nous n'avons pas pu exporter les dons. Veuillez réessayer.");
     } finally {
       setExporting(false);
     }
@@ -191,6 +214,11 @@ export default function AdminDonsPageClient({ initialData }) {
           </button>
         </div>
       </form>
+      {displayedError && (
+        <p role="alert" className="mt-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+          {displayedError}
+        </p>
+      )}
 
       <div className="mt-4 bg-white border border-ong-bordure rounded-lg">
         <div className="px-6 py-3 border-b border-ong-bordure flex items-center justify-between">

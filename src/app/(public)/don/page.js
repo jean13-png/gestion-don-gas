@@ -166,7 +166,7 @@ export default function DonPage() {
           </fieldset>
 
           {state?.error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-[13px] px-4 py-3 rounded-md">
+            <div role="alert" className="bg-red-50 border border-red-200 text-red-700 text-[13px] px-4 py-3 rounded-md">
               {state.error}
             </div>
           )}
@@ -177,7 +177,7 @@ export default function DonPage() {
             className="cursor-pointer disabled:bg-gray-500 disabled:cursor-not-allowed w-full inline-flex items-center justify-center gap-2 h-12 px-5 rounded-md bg-ong-bleu text-white text-[15px] font-medium hover:bg-ong-bleu-fonce transition-colors"
           >
             <Icon name="paper-plane" />
-            {isPending ? "En cours d'envoie..." : "Soumettre ma demande"}
+            {isPending ? "Envoi en cours..." : "Soumettre ma demande"}
           </button>
         </form>
       </div>
