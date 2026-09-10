@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const isActive = (path) => pathname === path || pathname.startsWith(`${path}/`);
 
   return (
     <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r border-ong-bordure flex flex-col">
@@ -13,15 +14,39 @@ export default function Sidebar() {
         <span className="font-display font-semibold text-ong-bleu">ONG-GAS Admin</span>
       </div>
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-        <Link href="/admin/dashboard" className={`flex items-center gap-3 px-3 py-2 rounded-md text-[14px] font-medium ${pathname === "/admin/dashboard" ? "bg-ong-fond text-ong-bleu" : "text-ong-texte hover:bg-ong-fond"}`}>
+        <Link
+          href="/admin/dashboard"
+          aria-current={isActive("/admin/dashboard") ? "page" : undefined}
+          className={`flex items-center gap-3 px-3 py-2 rounded-md border-l-4 text-[14px] font-medium transition-colors ${
+            isActive("/admin/dashboard")
+              ? "border-ong-bleu bg-ong-bleu-pale text-ong-bleu"
+              : "border-transparent text-ong-texte hover:border-ong-bleu-pale hover:bg-ong-fond"
+          }`}
+        >
           <Icon name="gauge-high" />
           Dashboard
         </Link>
-        <Link href="/admin/dons" className={`flex items-center gap-3 px-3 py-2 rounded-md text-[14px] font-medium ${pathname === "/admin/dons" ? "bg-ong-fond text-ong-bleu" : "text-ong-texte hover:bg-ong-fond"}`}>
+        <Link
+          href="/admin/dons"
+          aria-current={isActive("/admin/dons") ? "page" : undefined}
+          className={`flex items-center gap-3 px-3 py-2 rounded-md border-l-4 text-[14px] font-medium transition-colors ${
+            isActive("/admin/dons")
+              ? "border-ong-bleu bg-ong-bleu-pale text-ong-bleu"
+              : "border-transparent text-ong-texte hover:border-ong-bleu-pale hover:bg-ong-fond"
+          }`}
+        >
           <Icon name="boxes-stacked" />
           Dons
         </Link>
-        <Link href="/admin/partenaires" className={`flex items-center gap-3 px-3 py-2 rounded-md text-[14px] font-medium ${pathname === "/admin/partenaires" ? "bg-ong-fond text-ong-bleu" : "text-ong-texte hover:bg-ong-fond"}`}>
+        <Link
+          href="/admin/partenaires"
+          aria-current={isActive("/admin/partenaires") ? "page" : undefined}
+          className={`flex items-center gap-3 px-3 py-2 rounded-md border-l-4 text-[14px] font-medium transition-colors ${
+            isActive("/admin/partenaires")
+              ? "border-ong-bleu bg-ong-bleu-pale text-ong-bleu"
+              : "border-transparent text-ong-texte hover:border-ong-bleu-pale hover:bg-ong-fond"
+          }`}
+        >
           <Icon name="handshake" />
           Partenaires
         </Link>
