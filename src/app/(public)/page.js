@@ -2,8 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import TrackReferenceForm from "@/components/public/TrackReferenceForm";
+import prisma from "@/lib/prisma";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  let partenaires = [];
+  try {
+    partenaires = await prisma.partenaire.findMany({
+      where: { visible: true, consentementLogo: true },
+      orderBy: [{ ordre: "asc" }, { createdAt: "asc" }],
+    });
+  } catch (error) {
+    console.error("[accueil] Partenaires indisponibles:", error);
+  }
+
   return (
     <>
       {/* Hero */}
@@ -12,15 +25,15 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.08fr_0.78fr] gap-10 lg:gap-[65px] items-center py-14 lg:py-[55px]">
             <div>
               <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
-                Avec le Projet Informatique Pour Tous,
+                ONG Global Actions Solidarité — Abomey-Calavi, Bénin
               </p>
             <h1 className="max-w-[640px] text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.12] tracking-tight text-[var(--color-ong-texte)] uppercase">
-              L&apos;informatique à l&apos;école devient plus accessible.
+              Pour la santé, l&apos;éducation et l&apos;amélioration des conditions de vie pour tous.
             </h1>
               <p className="mt-4 text-[16px] text-[var(--color-ong-texte)] max-w-[620px]">
-                ONG-GAS met en relation les donateurs, les établissements scolaires
-                et les équipes de terrain afin d&apos;équiper les apprenants du Bénin
-                en matériel informatique adapté.
+                À travers ses projets, dont le Projet Informatique Pour Tous, l&apos;ONG-GAS agit
+                auprès des enfants, des écoles et des familles du Bénin : dons de matériel
+                scolaire et informatique, équipements, et appui aux communautés.
               </p>
               <div className="mt-7 flex flex-wrap gap-3.5">
                 <Link href="/don" className="button button-outline">
@@ -42,6 +55,30 @@ export default function HomePage() {
                 priority
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Actions de terrain */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <h2>Nos actions de terrain</h2>
+            <p>Chaque don change concrètement le quotidien des enfants, des écoles et des familles que nous accompagnons.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              ["don-enfant.jpg", "La joie des enfants bénéficiaires"],
+              ["don-sacs-scolaires.jpg", "Des sacs scolaires pour bien démarrer l'année"],
+              ["don-tables-bancs.jpg", "Des salles de classe équipées"],
+              ["don-habits.jpg", "Des vêtements pour les enfants"],
+              ["don-informatique.jpg", "Du matériel informatique pour les écoles"],
+            ].map(([image, title]) => (
+              <figure key={image} className="overflow-hidden rounded-lg border border-ong-bordure bg-white">
+                <img src={`/images/images-dons/${image}`} alt={title} loading="lazy" className="w-full h-56 object-cover" />
+                <figcaption className="px-4 py-3 text-[15px] font-semibold text-ong-texte">{title}</figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       </section>
@@ -188,6 +225,58 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {partenaires.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.72fr] gap-10 items-center">
+              <div>
+                <div className="section-head text-left mx-0">
+                  <h2>Nos sincères remerciements</h2>
+                  <p>
+                    Nos sincères remerciements aux entreprises et organisations qui soutiennent nos
+                    actions sur le terrain. Leur confiance nous permet d&apos;aller plus loin, chaque
+                    jour, pour les enfants et les familles du Bénin.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 items-center">
+                  {partenaires.map((partenaire) => {
+                    const logo = (
+                      <img
+                        src={partenaire.logoUrl}
+                        alt={`Logo ${partenaire.nom}`}
+                        loading="lazy"
+                        className="h-16 w-full object-contain grayscale hover:grayscale-0 transition-[filter]"
+                      />
+                    );
+                    return partenaire.siteWeb ? (
+                      <a key={partenaire.id} href={partenaire.siteWeb} target="_blank" rel="noopener noreferrer" aria-label={`Visiter le site de ${partenaire.nom}`}>
+                        {logo}
+                      </a>
+                    ) : <div key={partenaire.id}>{logo}</div>;
+                  })}
+                </div>
+              </div>
+              <img src="/images/partenaire-remerciement.jpg" alt="Partenaire soutenant les actions de l'ONG-GAS" loading="lazy" className="w-full h-64 object-cover rounded-lg" />
+            </div>
+            <div className="mt-10">
+              <div className="flex flex-wrap justify-center items-end gap-3 max-w-[960px] mx-auto">
+                {[
+                  ["amerique-nord.png", "Amérique du Nord"],
+                  ["amerique-sud.png", "Amérique du Sud"],
+                  ["europe.png", "Europe"],
+                  ["afrique.png", "Afrique"],
+                  ["asie.png", "Asie"],
+                  ["oceanie.png", "Océanie"],
+                ].map(([image, label]) => (
+                  <img key={image} src={`/images/continents/${image}`} alt={label} loading="lazy" className="h-[110px] w-[145px] object-contain" />
+                ))}
+              </div>
+              <p className="mt-3 text-center text-[16px] font-semibold text-ong-bleu">Une solidarité sans frontières.</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="cta" id="don">

@@ -15,8 +15,8 @@ export default function PhotoUploadForm({ action, existingCount }) {
     event.target.value = "";
     if (!file) return;
 
-    if (existingCount >= 4) {
-      setError("Limite de 4 photos atteinte.");
+    if (existingCount >= 10) {
+      setError("Limite de 10 photos atteinte.");
       return;
     }
 
@@ -48,7 +48,7 @@ export default function PhotoUploadForm({ action, existingCount }) {
     <div className="space-y-4">
       <div>
         <label htmlFor="photo-upload" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
-          Sélectionner une photo (JPG/PNG/WEBP, max 5 MB)
+          Sélectionner une photo (JPG/PNG/WEBP, max 5 MB — 10 maximum)
         </label>
         <input
           ref={inputRef}

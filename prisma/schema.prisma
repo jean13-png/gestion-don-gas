@@ -65,6 +65,19 @@ model RateLimitBucket {
   updatedAt DateTime @updatedAt
 }
 
+model Partenaire {
+  id               String   @id @default(cuid())
+  nom              String
+  logoUrl          String
+  siteWeb          String?
+  consentementLogo Boolean
+  ordre            Int      @default(0)
+  visible          Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  @@map("partenaires")
+}
+
 enum NatureDon {
   MATERIEL_INFORMATIQUE
   EQUIPEMENT_PEDAGOGIQUE

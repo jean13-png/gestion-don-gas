@@ -58,7 +58,7 @@ export default async function AdminDonDetailPage({ params }) {
     const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
     const temporaryPhotos = (
       await Promise.all(
-        don.photos.slice(0, 4).map(async (photo, index) => {
+        don.photos.slice(0, 10).map(async (photo, index) => {
           try {
             const response = await fetch(photo.url);
             if (!response.ok) {

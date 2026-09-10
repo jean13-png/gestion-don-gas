@@ -34,8 +34,8 @@ export async function uploadPhoto(formData: FormData) {
     return { success: false, error: "Don introuvable." };
   }
 
-  if (don.photos.length >= 4) {
-    return { success: false, error: "Limite de 4 photos atteinte." };
+  if (don.photos.length >= 10) {
+    return { success: false, error: "Limite de 10 photos atteinte." };
   }
 
   try {

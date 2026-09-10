@@ -50,8 +50,8 @@ export interface DonFicheData {
   responsable?: string;
   /**
    * Photos preuves (validation du don par l'admin) — chemins de fichiers
-   * image accessibles côté serveur. Jusqu'à 4 photos placées dans la colonne
-   * droite du cadre « PHOTOS PREUVES ».
+   * image accessibles côté serveur. Jusqu'à 2 photos restent dans la première
+   * page ; au-delà, elles sont placées sur des pages dédiées.
    */
   photosPreuves?: string[];
   /** Cachet du Secrétaire Général (défaut : apposé). Mettre false pour l'omettre. */
@@ -312,6 +312,8 @@ function cocher(doc: Doc, box: [number, number, number, number]) {
 /* --- Le document ----------------------------------------------------------- */
 
 function dessiner(doc: Doc, d: DonFicheData): void {
+  const photos = (d.photosPreuves ?? []).filter((p) => p && fs.existsSync(p)).slice(0, 10);
+
   /* 1. Image de fond centrale (derrière tout) */
   image(doc, IMG.fondCentral, 56.7, 180.5, 481.8, 480.6);
 
@@ -451,9 +453,8 @@ function dessiner(doc: Doc, d: DonFicheData): void {
     for (const l of lignes) { doc.text(l, CADRE.x + 9, yy, { lineBreak: false }); yy += size * 1.45; }
   }
 
-  // --- colonne DROITE : photos preuves (jusqu'à 4 en grille) ---
-  const photos = (d.photosPreuves ?? []).filter((p) => p && fs.existsSync(p)).slice(0, 4);
-  if (photos.length > 0) {
+  // --- colonne DROITE : photos preuves (une ou deux sur la première page) ---
+  if (photos.length > 0 && photos.length <= 2) {
     const PX0 = XMILIEU + 7.5, PX1 = CADRE.x + CADRE.w - 7.5;
     const PY0 = CADRE.y + 6, PY1 = CADRE.y + CADRE.h - 6;
     const places = photos.length === 1
@@ -539,13 +540,7 @@ function dessiner(doc: Doc, d: DonFicheData): void {
   texte(doc, "OAPI : N°003/MIC/DDI/C-SPPI/S-DDI ", 321.7, 796.6, "CalibriBold", 7.92);
 
   /* 10. En-tête institutionnel (textes) */
-  texte(doc, "ONG Global Actions Solidarité – Projet Informatique Pour Tous", 141.9, 21.7, "CalibriBoldItalic", 12, C.bleuTitre);
-  texte(doc, "Mail : infos@ongglobalactionsolidarite.com", 206.5, 35.7, "CalibriBold", 10.08);
-  texte(doc, "+229-01-46-46-66-56", 254.0, 47.9, "CalibriBold", 10.08);
-  texte(doc, "N°OAPI : 003/MIC/DDI/C-SPPI/S-DDI", 129.2, 60.9, "CalibriBold", 9.12);
-  texte(doc, "Siège : ", 276.4, 60.1, "CalibriBold", 10.08);
-  texte(doc, "Abomey-Calavi République du Bénin", 305.6, 58.7, "TimesBold", 10.08);
-
+  dessinerEnteteInstitutionnel(doc);
   texte(doc, "FICHE DE RECEPTION DE DON", 163.5, 125.6, "Georgia", 18);
 
   /* 11. Listes des colonnes */
@@ -558,4 +553,60 @@ function dessiner(doc: Doc, d: DonFicheData): void {
   image(doc, IMG.logo, 489.8, 14.9, 73.2, 78.2); // droite (même image)
   image(doc, IMG.iconeMail, 214.1, 45.1, 13.7, 13.92);
   image(doc, IMG.iconeTel, 229.7, 45.1, 13.2, 13.5);
+
+  if (photos.length > 2) {
+    dessinerPagesPhotos(doc, photos);
+  }
+}
+
+function dessinerEnteteInstitutionnel(doc: Doc): void {
+  texte(doc, "ONG Global Actions Solidarité – Projet Informatique Pour Tous", 141.9, 21.7, "CalibriBoldItalic", 12, C.bleuTitre);
+  texte(doc, "Mail : infos@ongglobalactionsolidarite.com", 206.5, 35.7, "CalibriBold", 10.08);
+  texte(doc, "+229-01-46-46-66-56", 254.0, 47.9, "CalibriBold", 10.08);
+  texte(doc, "N°OAPI : 003/MIC/DDI/C-SPPI/S-DDI", 129.2, 60.9, "CalibriBold", 9.12);
+  texte(doc, "Siège : ", 276.4, 60.1, "CalibriBold", 10.08);
+  texte(doc, "Abomey-Calavi République du Bénin", 305.6, 58.7, "TimesBold", 10.08);
+  image(doc, IMG.logo, 31.4, 11.0, 73.0, 78.3); // gauche
+  image(doc, IMG.logo, 489.8, 14.9, 73.2, 78.2); // droite (même image)
+  image(doc, IMG.iconeMail, 214.1, 45.1, 13.7, 13.92);
+  image(doc, IMG.iconeTel, 229.7, 45.1, 13.2, 13.5);
+}
+
+function dessinerPagesPhotos(doc: Doc, photos: string[]): void {
+  const parPage = 6;
+  for (let offset = 0; offset < photos.length; offset += parPage) {
+    doc.addPage({ size: [PAGE.W, PAGE.H], margins: 0 });
+    dessinerEnteteInstitutionnel(doc);
+    texte(doc, "PHOTOS PREUVES DU DON", 169, 112, "Georgia", 18);
+
+    const pagePhotos = photos.slice(offset, offset + parPage);
+    const left = 45;
+    const right = PAGE.W - 45;
+    const top = 145;
+    const bottom = PAGE.H - 55;
+    const columns = 2;
+    const rows = Math.ceil(pagePhotos.length / columns);
+    const gap = 16;
+    const cellWidth = (right - left - gap) / columns;
+    const cellHeight = (bottom - top - gap * (rows - 1)) / rows;
+
+    pagePhotos.forEach((photo, index) => {
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      const x = left + column * (cellWidth + gap);
+      const y = top + row * (cellHeight + gap);
+      try {
+        const signature = fs.readFileSync(photo).subarray(0, 8);
+        const isJpeg = signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff;
+        const isPng = signature[0] === 0x89 && signature[1] === 0x50 && signature[2] === 0x4e && signature[3] === 0x47;
+        if (!isJpeg && !isPng) {
+          console.error(`[pdf] Photo preuve ignorée: format non supporté (${photo})`);
+          return;
+        }
+        doc.image(photo, x, y, { fit: [cellWidth, cellHeight], align: "center", valign: "center" });
+      } catch (error) {
+        console.error(`[pdf] Photo preuve ignorée (${photo}):`, error);
+      }
+    });
+  }
 }

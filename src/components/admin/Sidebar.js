@@ -21,6 +21,10 @@ export default function Sidebar() {
           <Icon name="boxes-stacked" />
           Dons
         </Link>
+        <Link href="/admin/partenaires" className={`flex items-center gap-3 px-3 py-2 rounded-md text-[14px] font-medium ${pathname === "/admin/partenaires" ? "bg-ong-fond text-ong-bleu" : "text-ong-texte hover:bg-ong-fond"}`}>
+          <Icon name="handshake" />
+          Partenaires
+        </Link>
       </nav>
       <div className="p-4 border-t border-ong-bordure">
         <form action={signOutAction}>
