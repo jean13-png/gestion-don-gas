@@ -33,8 +33,8 @@ body {
   background-color: var(--color-ong-fond);
   color: var(--color-ong-texte);
   font-family: var(--font-sans);
-  font-size: 17px;
-  line-height: 1.7;
+  font-size: 18px;
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
