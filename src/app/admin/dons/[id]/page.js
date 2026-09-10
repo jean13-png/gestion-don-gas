@@ -9,6 +9,7 @@ import Icon from "@/components/ui/Icon";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
+import sharp from "sharp";
 import Supprimer from "./supprimer/Supprimer";
 import GenererFicheButton from "./generer-fiche/GenererFicheButton";
 import PhotoUploadForm from "./PhotoUploadForm";
@@ -48,20 +49,38 @@ export default async function AdminDonDetailPage({ params }) {
   async function handleGeneratePDF(formData) {
     "use server";
     const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
-    const temporaryPhotos = await Promise.all(
-      don.photos.slice(0, 4).map(async (photo, index) => {
-        const response = await fetch(photo.url);
-        if (!response.ok) {
-          throw new Error(`Photo de preuve introuvable: ${photo.url}`);
-        }
-        const temporaryPath = path.join(
-          os.tmpdir(),
-          `don-${don.id}-photo-${index}`,
-        );
-        await fs.writeFile(temporaryPath, Buffer.from(await response.arrayBuffer()));
-        return temporaryPath;
-      }),
-    );
+    const temporaryPhotos = (
+      await Promise.all(
+        don.photos.slice(0, 4).map(async (photo, index) => {
+          try {
+            const response = await fetch(photo.url);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+            const source = Buffer.from(await response.arrayBuffer());
+            const preview = source.subarray(0, 100).toString("utf8");
+            if (preview.startsWith("{") || preview.startsWith("<")) {
+              console.error(`[admin] Réponse Blob non-image (${photo.url}):`, preview);
+              throw new Error("Réponse Blob invalide");
+            }
+            const temporaryPath = path.join(
+              os.tmpdir(),
+              `don-${don.id}-photo-${index}.jpg`,
+            );
+            const normalized = await sharp(source)
+              .rotate()
+              .resize(1600, 1600, { fit: "inside", withoutEnlargement: true })
+              .jpeg({ quality: 85 })
+              .toBuffer();
+            await fs.writeFile(temporaryPath, normalized);
+            return temporaryPath;
+          } catch (error) {
+            console.error(`[admin] Photo de preuve ignorée (${photo.url}):`, error);
+            return null;
+          }
+        }),
+      )
+    ).filter(Boolean);
     const buffer = await genererFicheReceptionDon({
       donateur: {
         nomRaisonSociale: [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || undefined,

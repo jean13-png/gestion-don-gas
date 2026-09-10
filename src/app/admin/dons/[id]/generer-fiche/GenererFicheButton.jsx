@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
-import { startTransition } from "react";
 
 export default function GenererFicheButton({ don, formAction }) {
   const [pending, setPending] = useState(false);
@@ -48,9 +47,18 @@ export default function GenererFicheButton({ don, formAction }) {
 
     setPending(true);
     const formData = new FormData();
-    startTransition(() => {
-      formAction(formData);
-    });
+    try {
+      await formAction(formData);
+    } catch (generationError) {
+      setPending(false);
+      await Swal.fire({
+        title: "Génération impossible",
+        text: "Nous n'avons pas pu générer le fichier. Veuillez réessayer.",
+        icon: "error",
+        confirmButtonColor: "#4278E1",
+        confirmButtonText: "Fermer",
+      });
+    }
   };
 
   return (

@@ -475,7 +475,18 @@ function dessiner(doc: Doc, d: DonFicheData): void {
         });
     photos.forEach((p, i) => {
       const [x, y, w, h] = places[i];
-      doc.image(p, x, y, { fit: [w, h], align: "center", valign: "center" });
+      try {
+        const signature = fs.readFileSync(p).subarray(0, 8);
+        const isJpeg = signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff;
+        const isPng = signature[0] === 0x89 && signature[1] === 0x50 && signature[2] === 0x4e && signature[3] === 0x47;
+        if (!isJpeg && !isPng) {
+          console.error(`[pdf] Photo preuve ignorée: format non supporté (${p})`);
+          return;
+        }
+        doc.image(p, x, y, { fit: [w, h], align: "center", valign: "center" });
+      } catch (error) {
+        console.error(`[pdf] Photo preuve ignorée (${p}):`, error);
+      }
     });
   }
 

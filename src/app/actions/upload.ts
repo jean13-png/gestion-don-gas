@@ -1,6 +1,7 @@
 "use server";
 
 import { put } from "@vercel/blob";
+import sharp from "sharp";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 
@@ -37,14 +38,19 @@ export async function uploadPhoto(formData: FormData) {
     return { success: false, error: "Limite de 4 photos atteinte." };
   }
 
-  const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const normalized = await sharp(Buffer.from(await file.arrayBuffer()))
+    .rotate()
+    .resize(1600, 1600, { fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 85 })
+    .toBuffer();
+
   const blob = await put(
-    `dons/${don.reference}/photo-${Date.now()}.${ext}`,
-    file,
+    `dons/${don.reference}/photo-${Date.now()}.jpg`,
+    normalized,
     {
       access: "public",
       addRandomSuffix: true,
-      contentType: file.type,
+      contentType: "image/jpeg",
     },
   );
 
