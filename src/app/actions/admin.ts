@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { adminDonDetailsSchema } from "@/lib/validation";
+import { ADMIN_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
 
 export type AdminDonsFilter = {
   search?: string;
@@ -60,7 +61,7 @@ const STATUS_TRANSITIONS = {
 };
 
 export async function updateDonStatus(donId: string, nextStatus: string, observations?: string) {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   if (!Object.hasOwn(STATUS_TRANSITIONS, nextStatus) && nextStatus !== "VALIDE") {
     throw new Error("DON_STATUS_INVALID");
@@ -80,6 +81,18 @@ export async function updateDonStatus(donId: string, nextStatus: string, observa
     },
   });
 
+  const detail = await prisma.don.findUnique({ where: { id: donId }, include: { donateur: true } });
+  if (detail) {
+    const label = nextStatus.replaceAll("_", " ");
+    await envoyerMail({
+      to: ADMIN_EMAIL,
+      sujet: `[${label}] Don ${detail.reference}`,
+      html: templateEmail(`<p>Le don <strong>${detail.reference}</strong> est passé au statut « ${label} » le ${new Date().toLocaleString("fr-FR")} par ${admin.nom}.</p>`),
+      donId,
+    });
+    await journaliserAction(donId, `Statut changé de ${don.statut} à ${nextStatus} par ${admin.nom}`);
+  }
+
   revalidatePath("/admin/dons");
   revalidatePath("/admin/dashboard");
   revalidatePath(`/admin/dons/${donId}`);
@@ -87,13 +100,23 @@ export async function updateDonStatus(donId: string, nextStatus: string, observa
 }
 
 export async function markDonFicheGenerated(donId: string, ficheUrl: string) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   if (!ficheUrl) throw new Error("DON_FICHE_URL_INVALID");
 
+  const don = await prisma.don.findUnique({ where: { id: donId } });
   const updated = await prisma.don.update({
     where: { id: donId, statut: "VALIDE" },
     data: { ficheUrl, statut: "FICHE_GENEREE" },
   });
+  if (don) {
+    await envoyerMail({
+      to: ADMIN_EMAIL,
+      sujet: `[FICHE_GENEREE] Don ${don.reference}`,
+      html: templateEmail(`<p>Le don <strong>${don.reference}</strong> est passé au statut « FICHE GENEREE » le ${new Date().toLocaleString("fr-FR")} par ${admin.nom}.</p>`),
+      donId,
+    });
+  }
+  await journaliserAction(donId, `Fiche générée par ${admin.nom}`);
 
   revalidatePath("/admin/dons");
   revalidatePath("/admin/dashboard");

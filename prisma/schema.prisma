@@ -78,6 +78,24 @@ model Partenaire {
   @@map("partenaires")
 }
 
+model Parametre {
+  cle    String @id
+  valeur String
+}
+
+model Historique {
+  id           String   @id @default(cuid())
+  type         String
+  donId        String?
+  destinataire String?
+  sujet        String?
+  contenuHtml  String?
+  statut       String
+  erreur       String?
+  message      String?
+  createdAt    DateTime @default(now())
+}
+
 enum NatureDon {
   MATERIEL_INFORMATIQUE
   EQUIPEMENT_PEDAGOGIQUE

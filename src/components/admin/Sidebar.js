@@ -57,6 +57,14 @@ export default function Sidebar() {
           <Icon name="gauge-high" />
           Dashboard
         </Link>
+        <Link href="/admin/parametres" onClick={() => setOpen(false)} className={`flex items-center gap-3 px-3 py-2 rounded-md border-l-4 text-[14px] font-medium transition-colors ${isActive("/admin/parametres") ? "border-ong-bleu bg-ong-bleu-pale text-ong-bleu" : "border-transparent text-ong-texte hover:border-ong-bleu-pale hover:bg-ong-fond"}`}>
+          <Icon name="gear" />
+          Paramètres
+        </Link>
+        <Link href="/admin/historique" onClick={() => setOpen(false)} className={`flex items-center gap-3 px-3 py-2 rounded-md border-l-4 text-[14px] font-medium transition-colors ${isActive("/admin/historique") ? "border-ong-bleu bg-ong-bleu-pale text-ong-bleu" : "border-transparent text-ong-texte hover:border-ong-bleu-pale hover:bg-ong-fond"}`}>
+          <Icon name="clock-rotate-left" />
+          Historique
+        </Link>
         <Link
           onClick={() => setOpen(false)}
           href="/admin/dons"

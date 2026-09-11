@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
 import { markDonFicheGenerated, mettreAJourDonDetails, updateDonStatus } from "@/app/actions/admin";
 import { genererFicheReceptionDon } from "@/lib/pdf";
-import { sendEmail } from "@/lib/mail";
+import { envoyerMail, templateEmail } from "@/lib/mail";
 import { deletePhoto, uploadPhoto } from "@/app/actions/upload";
 import Icon from "@/components/ui/Icon";
 import fs from "fs/promises";
@@ -40,10 +40,36 @@ export default async function AdminDonDetailPage({ params }) {
     "use server";
     const observations = formData.get("observations");
     await updateDonStatus(don.id, "VALIDE", observations);
+    const validationPdf = await genererFicheReceptionDon({
+      donateur: {
+        nomRaisonSociale: [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || undefined,
+        representant: don.donateur.organisme || undefined,
+        adresse: don.localisation || undefined,
+        telephone: don.donateur.telephone,
+        email: don.donateur.email,
+      },
+      nature: NATURE_MAP[don.nature] || "AUTRES",
+      natureAutresDetail: don.nature === "AUTRE" ? don.natureAutre : undefined,
+      description: don.description,
+      objectif: don.objectif,
+      objectifAutresDetail: don.objectif === "AUTRES" ? don.objectifAutre : undefined,
+      responsable: don.responsable || undefined,
+    });
+    await envoyerMail({
+      to: don.donateur.email,
+      sujet: `Votre don ${don.reference} a été validé`,
+      html: templateEmail(`<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Bonne nouvelle : votre don (réf. ${don.reference}) vient d'être validé par notre équipe.</p><p>Vous trouverez en pièce jointe la fiche officielle de réception de votre don.</p><p>Au nom des enfants, des écoles et des familles que nous accompagnons : merci.</p><p>L'équipe ONG-GAS</p>`),
+      pieceJointe: { nom: `fiche-${don.reference}.pdf`, contenu: validationPdf },
+      donId: don.id,
+    });
   }
 
   async function handleStatusChange(formData) {
     "use server";
+    if (formData.get("nextStatus") === "VALIDE") {
+      await handleValidate(formData);
+      return;
+    }
     await updateDonStatus(don.id, formData.get("nextStatus"), formData.get("observations"));
   }
 
@@ -133,15 +159,12 @@ export default async function AdminDonDetailPage({ params }) {
     await markDonFicheGenerated(don.id, fiche.url);
 
     try {
-      await sendEmail({
+      await envoyerMail({
         to: don.donateur.email,
-        subject: `Attestation PDF — Don ${don.reference}`,
-        html: `
-          <p>Bonjour ${don.donateur.prenom},</p>
-          <p>Votre attestation officielle est disponible.</p>
-          <p>Référence : ${don.reference}</p>
-          <p>Cordialement,<br/>ONG Global Actions Solidarité</p>
-        `,
+        sujet: `Attestation PDF — Don ${don.reference}`,
+        html: templateEmail(`<p>Bonjour ${don.donateur.prenom},</p><p>Votre attestation officielle est disponible.</p><p>Référence : ${don.reference}</p><p>Cordialement,<br/>ONG Global Actions Solidarité</p>`),
+        pieceJointe: { nom: `fiche-${don.reference}.pdf`, contenu: buffer },
+        donId: don.id,
       });
     } catch (emailError) {
       console.error("[admin] Email notification failed:", emailError);

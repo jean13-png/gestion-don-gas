@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { generateReference } from "@/lib/reference";
-import { sendEmail } from "@/lib/mail";
+import { ADMIN_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -101,25 +101,19 @@ export async function soumettreDon(prevState, formData) {
       });
     });
 
-    let emailFailed = false;
-    try {
-      await sendEmail({
-        to: email,
-        subject: `Votre don ONG-GAS — Référence ${reference}`,
-        html: `
-          <p>Bonjour ${prenom},</p>
-          <p>Votre don a été enregistré avec succès.</p>
-          <p><strong>Référence :</strong> ${reference}</p>
-          <p>Conservez cette référence pour suivre votre dossier.</p>
-          <p>Cordialement,<br/>ONG Global Actions Solidarité</p>
-        `,
-      });
-
-    } catch (mailError) {
-      emailFailed = true;
-      console.error("[soumettreDon] Email de confirmation échoué:", mailError);
-    }
-    redirect(`/don/merci?reference=${encodeURIComponent(reference)}${emailFailed ? "&email=failed" : ""}`);
+    const recap = `<p>Bonjour ${prenom} ${nom},</p><p>Nous avons bien reçu votre proposition de don. Voici le récapitulatif :</p><ul><li>Référence : ${reference}</li><li>Nature : ${nature}</li><li>Objectif : ${objectif}</li><li>Description : ${description}</li></ul><p>Conservez précieusement votre référence : elle vous permet de suivre l'avancement de votre dossier à tout moment.</p><p><a href="https://gestion-don-gas.vercel.app/suivi">➜ Suivre mon dossier</a></p><p>Notre équipe examine chaque proposition et revient vers vous rapidement.<br/>Merci pour votre solidarité.</p><p>L'équipe ONG-GAS</p>`;
+    await envoyerMail({
+      to: email,
+      sujet: `Accusé de réception de votre don — Réf. ${reference}`,
+      html: templateEmail(recap),
+    });
+    await envoyerMail({
+      to: ADMIN_EMAIL,
+      sujet: `Nouveau don soumis — ${reference} (${nature})`,
+      html: templateEmail(`<p>Nouveau don soumis : <strong>${reference}</strong></p><p>Donateur : ${prenom} ${nom}<br/>Organisme : ${organisme || "—"}<br/>E-mail : ${email}<br/>Téléphone : ${telephone}<br/>Localisation : ${localisation}</p><p>Nature : ${nature}<br/>Objectif : ${objectif}<br/>Description : ${description}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons">Ouvrir le back-office</a></p>`),
+    });
+    await journaliserAction(undefined, `Don ${reference} soumis`);
+    redirect(`/don/merci?reference=${encodeURIComponent(reference)}`);
 
   } catch (error) {
     if (error.digest?.includes('NEXT_REDIRECT')) {
