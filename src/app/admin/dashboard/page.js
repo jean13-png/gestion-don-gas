@@ -127,7 +127,7 @@ export default async function AdminDashboard() {
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
+          <table className="min-w-[760px] w-full text-left text-[13px]">
             <thead>
               <tr className="border-b border-ong-bordure text-ong-muted">
                 <th className="px-6 py-3 font-medium">Référence</th>

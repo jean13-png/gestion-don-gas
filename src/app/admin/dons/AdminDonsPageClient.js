@@ -227,7 +227,7 @@ export default function AdminDonsPageClient({ initialData }) {
           </p>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
+          <table className="min-w-[760px] w-full text-left text-[13px]">
             <thead>
               <tr className="border-b border-ong-bordure text-ong-muted">
                 <th className="px-6 py-3 font-medium">Référence</th>
@@ -272,7 +272,7 @@ export default function AdminDonsPageClient({ initialData }) {
         </div>
 
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-ong-bordure flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-center gap-3 border-t border-ong-bordure px-4 py-4 sm:justify-between sm:px-6">
             <button
               type="button"
               disabled={currentPage <= 1}

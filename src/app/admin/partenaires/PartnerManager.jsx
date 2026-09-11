@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function PartnerManager({ initialPartenaires }) {
+  const formRef = useRef(null);
   const [partenaires, setPartenaires] = useState(initialPartenaires);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -17,16 +19,31 @@ export default function PartnerManager({ initialPartenaires }) {
 
   async function create(event) {
     event.preventDefault();
+    const form = event.currentTarget;
     setSaving(true);
     setError("");
     setMessage("");
     try {
-      const result = await send("/api/admin/partenaires", { method: "POST", body: new FormData(event.currentTarget) });
+      const result = await send("/api/admin/partenaires", { method: "POST", body: new FormData(form) });
       setPartenaires((items) => [...items, result].sort((a, b) => a.ordre - b.ordre));
-      event.currentTarget.reset();
+      form.reset();
       setMessage("Partenaire enregistré.");
+      await Swal.fire({
+        title: "Partenaire ajouté",
+        text: "Le logo sera affiché selon sa visibilité.",
+        icon: "success",
+        confirmButtonColor: "#4278E1",
+      });
     } catch (createError) {
-      setError(createError.message);
+      console.error("[admin/partenaires] Création échouée:", createError);
+      const message = "Nous n'avons pas pu enregistrer ce partenaire. Vérifiez les informations puis réessayez.";
+      setError(message);
+      await Swal.fire({
+        title: "Ajout impossible",
+        text: message,
+        icon: "error",
+        confirmButtonColor: "#4278E1",
+      });
     } finally {
       setSaving(false);
     }
@@ -40,13 +57,37 @@ export default function PartnerManager({ initialPartenaires }) {
         body: JSON.stringify({ id, ...data }),
       });
       setPartenaires((items) => items.map((item) => item.id === id ? result : item).sort((a, b) => a.ordre - b.ordre));
+      await Swal.fire({
+        title: "Modification enregistrée",
+        text: "Les paramètres du partenaire ont été mis à jour.",
+        icon: "success",
+        confirmButtonColor: "#4278E1",
+      });
     } catch (updateError) {
-      setError(updateError.message);
+      console.error("[admin/partenaires] Modification échouée:", updateError);
+      const message = "Nous n'avons pas pu modifier ce partenaire. Veuillez réessayer.";
+      setError(message);
+      await Swal.fire({
+        title: "Modification impossible",
+        text: message,
+        icon: "error",
+        confirmButtonColor: "#4278E1",
+      });
     }
   }
 
   async function remove(id) {
-    if (!window.confirm("Supprimer ce partenaire et son logo ?")) return;
+    const confirmation = await Swal.fire({
+      title: "Supprimer ce partenaire ?",
+      text: "Son logo sera également retiré du stockage.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#4278E1",
+      confirmButtonText: "Oui, supprimer",
+      cancelButtonText: "Annuler",
+    });
+    if (!confirmation.isConfirmed) return;
     try {
       await send("/api/admin/partenaires", {
         method: "DELETE",
@@ -54,8 +95,22 @@ export default function PartnerManager({ initialPartenaires }) {
         body: JSON.stringify({ id }),
       });
       setPartenaires((items) => items.filter((item) => item.id !== id));
+      await Swal.fire({
+        title: "Partenaire supprimé",
+        text: "Le partenaire et son logo ont été retirés.",
+        icon: "success",
+        confirmButtonColor: "#4278E1",
+      });
     } catch (deleteError) {
-      setError(deleteError.message);
+      console.error("[admin/partenaires] Suppression échouée:", deleteError);
+      const message = "Nous n'avons pas pu supprimer ce partenaire. Veuillez réessayer.";
+      setError(message);
+      await Swal.fire({
+        title: "Suppression impossible",
+        text: message,
+        icon: "error",
+        confirmButtonColor: "#4278E1",
+      });
     }
   }
 
@@ -65,7 +120,7 @@ export default function PartnerManager({ initialPartenaires }) {
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">Partenaires</h1>
         <p className="mt-1 text-[14px] text-ong-muted">Gérez les logos affichés dans la section de remerciements.</p>
       </div>
-      <form onSubmit={create} className="bg-white border border-ong-bordure rounded-lg p-6 space-y-4">
+      <form ref={formRef} onSubmit={create} className="bg-white border border-ong-bordure rounded-lg p-6 space-y-4">
         <h2 className="font-semibold text-ong-bleu text-[18px]">Ajouter un partenaire</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input name="nom" required placeholder="Nom du partenaire" className="h-11 px-3 rounded-md border border-ong-bordure" />
@@ -81,7 +136,7 @@ export default function PartnerManager({ initialPartenaires }) {
         {error && <p role="alert" className="text-red-700">{error}</p>}
       </form>
       <div className="bg-white border border-ong-bordure rounded-lg overflow-x-auto">
-        <table className="w-full text-left text-[14px]">
+        <table className="min-w-[760px] w-full text-left text-[14px]">
           <thead><tr className="border-b border-ong-bordure text-ong-muted"><th className="px-5 py-3">Logo</th><th className="px-5 py-3">Nom</th><th className="px-5 py-3">Site web</th><th className="px-5 py-3">Ordre</th><th className="px-5 py-3">Visible</th><th className="px-5 py-3">Actions</th></tr></thead>
           <tbody>
             {partenaires.map((item, index) => (
