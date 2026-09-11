@@ -258,8 +258,8 @@ export default async function HomePage() {
                 </div>
               </div>
               <img
-                src="/images/1788544339134-IMG-20260901-WA0028(1).jpg"
-                alt="Présentation du Projet Informatique Pour Tous et de l'ONG-GAS"
+                src="/images/enfant_en_pleine_etude.jpg"
+                alt="Jeune apprenant accompagné dans son parcours scolaire"
                 loading="lazy"
                 className="w-full h-72 object-cover rounded-lg border border-ong-bordure"
               />

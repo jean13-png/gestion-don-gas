@@ -34,18 +34,12 @@ export default function ContactPage() {
               L&apos;équipe ONG-GAS vous répond dans les meilleurs délais.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4" aria-label="Actions de terrain de l'ONG-GAS">
+          <div className="flex justify-center lg:justify-end" aria-label="Action de terrain de l'ONG-GAS">
             <img
               src="/images/images-dons/don-enfant.jpg"
               alt="Enfants bénéficiaires accompagnés par l'ONG-GAS"
               loading="eager"
-              className="h-40 sm:h-52 w-full object-cover rounded-xl border border-ong-bordure"
-            />
-            <img
-              src="/images/images-dons/don-informatique.jpg"
-              alt="Matériel informatique destiné aux écoles"
-              loading="eager"
-              className="mt-7 h-40 sm:h-52 w-full object-cover rounded-xl border border-ong-bordure"
+              className="h-56 w-full max-w-md object-cover rounded-xl border border-ong-bordure sm:h-64 lg:h-72"
             />
           </div>
         </div>
