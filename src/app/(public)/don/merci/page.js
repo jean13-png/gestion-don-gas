@@ -113,21 +113,50 @@ function DonMerciContent() {
       return;
     }
     try {
-      const headerResponse = await fetch("/images/entete-mail.png");
-      if (!headerResponse.ok) throw new Error(`En-tête indisponible (${headerResponse.status})`);
-      const headerBlob = await headerResponse.blob();
-      const headerData = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error("Lecture de l'en-tête impossible"));
-        reader.readAsDataURL(headerBlob);
-      });
+      const loadImage = async (source) => {
+        const response = await fetch(source);
+        if (!response.ok) throw new Error(`Image indisponible (${response.status})`);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Lecture de l'en-tête impossible"));
+          reader.readAsDataURL(blob);
+        });
+      };
+      const [logoOng, logoIpt, mailIcon, phoneIcon] = await Promise.all([
+        loadImage("/images/logo-ong-gas.png"),
+        loadImage("/images/logo-projet-ipt.png"),
+        loadImage("/fiche-don/icone-mail.png"),
+        loadImage("/fiche-don/icone-telephone.png"),
+      ]);
 
       const pdf = new jsPDF("p", "mm", "a4");
       const margin = 18;
       const contentWidth = 210 - margin * 2;
-      let y = 58;
-      pdf.addImage(headerData, "PNG", 0, 0, 210, 52.5);
+      let y = 49;
+      // En-tête institutionnel identique au modèle de fiche validée.
+      pdf.addImage(logoOng, "PNG", 8, 4, 25, 27);
+      pdf.addImage(logoIpt, "PNG", 178, 5, 24, 25);
+      pdf.setTextColor(46, 116, 181);
+      pdf.setFont("helvetica", "bolditalic");
+      pdf.setFontSize(12);
+      pdf.text("ONG Global Actions Solidarité – Projet Informatique Pour Tous", 105, 9, { align: "center" });
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.addImage(mailIcon, "PNG", 75, 11.5, 4.2, 3.8);
+      pdf.text("Mail : infos@ongglobalactionsolidarite.com", 105, 15, { align: "center" });
+      pdf.addImage(phoneIcon, "PNG", 84, 16.5, 4, 3.7);
+      pdf.text("+229-01-46-46-66-56", 105, 20, { align: "center" });
+      pdf.setFontSize(8);
+      pdf.text("N°OAPI : 003/MIC/DDI/C-SPPI/S-DDI", 45, 26, { align: "center" });
+      pdf.text("Siège : Abomey-Calavi République du Bénin", 157, 26, { align: "center" });
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.35);
+      pdf.line(14, 33.5, 196, 33.5);
+      pdf.setLineWidth(0.8);
+      pdf.line(14, 34.2, 196, 34.2);
       pdf.setTextColor(34, 50, 59);
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(15);
