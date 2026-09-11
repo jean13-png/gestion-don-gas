@@ -9,6 +9,14 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { donationSchema } from "@/lib/validation";
+import { genererFicheReceptionDon, type NatureDon, type ObjectifDon } from "@/lib/pdf";
+
+const NATURE_MAP: Record<string, NatureDon> = {
+  MATERIEL_INFORMATIQUE: "MATERIEL",
+  EQUIPEMENT_PEDAGOGIQUE: "MATERIEL",
+  DON_FINANCIER: "ESPECES",
+  AUTRE: "AUTRES",
+};
 
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 heure
 const RATE_LIMIT_MAX = 5; // 5 soumissions max
@@ -82,30 +90,53 @@ export async function soumettreDon(prevState, formData) {
 
   try {
     const reference = generateReference();
-    await prisma.$transaction(async (transaction) => {
+    const don = await prisma.$transaction(async (transaction) => {
       const donateur = await transaction.donateur.create({
         data: { nom, prenom, organisme: organisme || null, email, telephone },
       });
 
-      await transaction.don.create({
+      return transaction.don.create({
         data: {
           reference,
           nature,
           natureAutre: nature === "AUTRE" ? natureAutre : null,
           description,
           localisation,
-          objectif,
+          objectif: objectif as ObjectifDon,
           objectifAutre: objectif === "AUTRES" ? objectifAutre : null,
           donateurId: donateur.id,
         },
       });
     });
 
+    let pieceJointe;
+    try {
+      const contenu = await genererFicheReceptionDon({
+        donateur: {
+          nomRaisonSociale: [prenom, nom].filter(Boolean).join(" ") || undefined,
+          representant: organisme || undefined,
+          adresse: localisation || undefined,
+          telephone,
+          email,
+        },
+        nature: NATURE_MAP[nature] || "AUTRES",
+        natureAutresDetail: nature === "AUTRE" ? natureAutre : undefined,
+        description,
+        objectif,
+        objectifAutresDetail: objectif === "AUTRES" ? objectifAutre : undefined,
+      });
+      pieceJointe = { nom: `fiche-${reference}.pdf`, contenu };
+    } catch (error) {
+      console.error("[soumettreDon] Génération du PDF jointe échouée:", error);
+    }
+
     const recap = `<p>Bonjour ${prenom} ${nom},</p><p>Nous avons bien reçu votre proposition de don. Voici le récapitulatif :</p><ul><li>Référence : ${reference}</li><li>Nature : ${nature}</li><li>Objectif : ${objectif}</li><li>Description : ${description}</li></ul><p>Conservez précieusement votre référence : elle vous permet de suivre l'avancement de votre dossier à tout moment.</p><p><a href="https://gestion-don-gas.vercel.app/suivi">➜ Suivre mon dossier</a></p><p>Notre équipe examine chaque proposition et revient vers vous rapidement.<br/>Merci pour votre solidarité.</p><p>L'équipe ONG-GAS</p>`;
     await envoyerMail({
       to: email,
       sujet: `Accusé de réception de votre don — Réf. ${reference}`,
       html: templateEmail(recap),
+      pieceJointe,
+      donId: don.id,
     });
     await envoyerMail({
       to: OWNER_EMAIL,
