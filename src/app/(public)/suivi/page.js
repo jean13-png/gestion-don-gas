@@ -2,7 +2,11 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE"];
+const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE", "REJETE"];
+const STATUT_LABELS = {
+  SOUMIS: "Soumis", EN_VERIFICATION: "En vérification", INSPECTE: "Inspecté",
+  VALIDE: "Validé", FICHE_GENEREE: "Fiche générée", REJETE: "Rejeté",
+};
 
 export default async function SuiviPage({ searchParams }) {
   const params = await searchParams;
@@ -65,7 +69,7 @@ export default async function SuiviPage({ searchParams }) {
                 </p>
                 <span className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-ong-vert-pale text-ong-vert text-[12px] font-medium">
                   <span className="h-1.5 w-1.5 rounded-full bg-ong-vert" />
-                  {don.statut}
+                  {STATUT_LABELS[don.statut] || "Statut inconnu"}
                 </span>
               </div>
 
@@ -122,6 +126,7 @@ export default async function SuiviPage({ searchParams }) {
               </h2>
               <ol className="space-y-3">
                 {STATUTS.map((statut) => {
+                  if (don.statut === "REJETE" && statut !== "REJETE") return null;
                   const isDone = STATUTS.indexOf(don.statut) >= STATUTS.indexOf(statut);
                   const isCurrent = don.statut === statut;
                   return (
@@ -140,7 +145,7 @@ export default async function SuiviPage({ searchParams }) {
                           isCurrent ? "text-ong-texte font-medium" : isDone ? "text-ong-texte" : "text-ong-muted"
                         }`}
                       >
-                        {statut}
+                        {STATUT_LABELS[statut]}
                       </span>
                     </li>
                   );

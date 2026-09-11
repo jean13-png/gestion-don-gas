@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { requireAdmin } from "@/lib/auth";
+import { DON_STATUS_LABELS, DON_STATUS_STYLES } from "@/lib/don-status";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ const STATUT_STYLES = {
   INSPECTE: { bg: "bg-purple-50", text: "text-purple-700", border: "border border-purple-200", label: "Inspecté" },
   VALIDE: { bg: "bg-green-50", text: "text-green-700", border: "border border-green-200", label: "Validé" },
   FICHE_GENEREE: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border border-emerald-200", label: "Fiche générée" },
+  REJETE: { bg: "bg-red-50", text: "text-red-700", border: "border border-red-200", label: "Rejeté" },
 };
 
 export default async function AdminDashboard() {
@@ -97,7 +99,7 @@ export default async function AdminDashboard() {
           <div className="space-y-2">
             {parStatut.map((item) => (
               <div key={item.statut} className="flex items-center justify-between text-[14px]">
-                <span className="text-ong-muted">{STATUT_STYLES[item.statut]?.label || item.statut}</span>
+                <span className="text-ong-muted">{DON_STATUS_LABELS[item.statut] || "Statut inconnu"}</span>
                 <span className="font-semibold text-ong-texte">{item._count.statut}</span>
               </div>
             ))}
@@ -140,7 +142,7 @@ export default async function AdminDashboard() {
             </thead>
             <tbody className="divide-y divide-ong-bordure">
               {donsRecents.map((don) => {
-                const style = STATUT_STYLES[don.statut] || { bg: "bg-gray-50", text: "text-gray-700", border: "border border-gray-200" };
+                const style = STATUT_STYLES[don.statut] || { bg: "bg-gray-50", text: "text-gray-700", border: "border border-gray-200", label: "Statut inconnu" };
                 return (
                   <tr key={don.id} className="hover:bg-ong-fond">
                     <td className="px-6 py-3 font-mono text-[12px]">{don.reference}</td>

@@ -3,12 +3,13 @@
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getAdminDons, exportAdminDonsCsv } from "@/app/actions/admin";
+import { DON_STATUS_LABELS } from "@/lib/don-status";
 
 const State = {
   data: null,
 };
 
-const STATUTS = ["ALL", "SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE"];
+const STATUTS = ["ALL", ...Object.keys(DON_STATUS_LABELS)];
 const NATURES = ["ALL", "MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE", "DON_FINANCIER", "AUTRE"];
 const PERIODES = [
   { value: "all", label: "Toutes" },
@@ -125,22 +126,7 @@ export default function AdminDonsPageClient({ initialData }) {
     }
   }
 
-  const statutLabel = (s) => {
-    switch (s) {
-      case "SOUMIS":
-        return "Soumis";
-      case "EN_VERIFICATION":
-        return "En vérification";
-      case "INSPECTE":
-        return "Inspecté";
-      case "VALIDE":
-        return "Validé";
-      case "FICHE_GENEREE":
-        return "Fiche générée";
-      default:
-        return s;
-    }
-  };
+  const statutLabel = (s) => DON_STATUS_LABELS[s] || "Statut inconnu";
 
   return (
     <div className="max-w-6xl">

@@ -91,6 +91,7 @@ enum StatutDon {
   INSPECTE
   VALIDE
   FICHE_GENEREE
+  REJETE
 }
 
 enum ObjectifDon {

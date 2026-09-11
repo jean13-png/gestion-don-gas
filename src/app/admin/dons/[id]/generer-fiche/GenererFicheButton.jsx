@@ -10,7 +10,7 @@ export default function GenererFicheButton({ don, formAction }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasPhotos = don.photos && don.photos.length > 0;
-  const isGeneratedOrValidated = don.statut === "FICHE_GENEREE" || don.statut === "VALIDE";
+  const isGenerated = don.statut === "FICHE_GENEREE";
 
   useEffect(() => {
     if (searchParams.get("generated") !== "1") return;
@@ -26,7 +26,7 @@ export default function GenererFicheButton({ don, formAction }) {
   }, [pathname, router, searchParams]);
 
   const handleClick = async () => {
-    if (isGeneratedOrValidated || pending) return;
+    if (isGenerated || pending) return;
 
     if (!hasPhotos) {
       const confirmed = await Swal.fire({
@@ -65,10 +65,10 @@ export default function GenererFicheButton({ don, formAction }) {
     <button
       type="button"
       onClick={handleClick}
-      disabled={pending || isGeneratedOrValidated}
+      disabled={pending || isGenerated}
       className="h-11 px-5 disabled:cursor-not-allowed disabled:bg-gray-600 rounded-md uppercase bg-ong-bleu text-white text-[14px] font-medium cursor-pointer hover:bg-ong-bleu-fonce"
     >
-      {pending ? "Génération en cours..." : isGeneratedOrValidated ? "FICHE GÉNÉRÉE" : "Générer la fiche de don"}
+      {pending ? "Génération en cours..." : isGenerated ? "FICHE GÉNÉRÉE" : "Générer la fiche de don"}
     </button>
   );
 }

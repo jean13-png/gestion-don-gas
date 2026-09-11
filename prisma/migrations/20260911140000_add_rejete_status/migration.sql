@@ -1,0 +1,1 @@
+ALTER TYPE "StatutDon" ADD VALUE 'REJETE';

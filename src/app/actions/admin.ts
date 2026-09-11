@@ -37,7 +37,7 @@ export async function validateDon(donId: string, observations?: string) {
   await requireAdmin();
 
   const updated = await prisma.don.update({
-    where: { id: donId },
+    where: { id: donId, statut: "INSPECTE" },
     data: {
       statut: "VALIDE",
       validatedAt: new Date(),
@@ -49,6 +49,55 @@ export async function validateDon(donId: string, observations?: string) {
   revalidatePath("/admin/dashboard");
   revalidatePath(`/admin/dons/${donId}`);
 
+  return updated;
+}
+
+const STATUS_TRANSITIONS = {
+  SOUMIS: ["EN_VERIFICATION", "REJETE"],
+  EN_VERIFICATION: ["INSPECTE", "REJETE"],
+  INSPECTE: ["VALIDE", "REJETE"],
+  REJETE: ["EN_VERIFICATION"],
+};
+
+export async function updateDonStatus(donId: string, nextStatus: string, observations?: string) {
+  await requireAdmin();
+
+  if (!Object.hasOwn(STATUS_TRANSITIONS, nextStatus) && nextStatus !== "VALIDE") {
+    throw new Error("DON_STATUS_INVALID");
+  }
+
+  const don = await prisma.don.findUnique({ where: { id: donId }, select: { statut: true } });
+  if (!don || !STATUS_TRANSITIONS[don.statut]?.includes(nextStatus)) {
+    throw new Error("DON_STATUS_TRANSITION_INVALID");
+  }
+
+  const updated = await prisma.don.update({
+    where: { id: donId, statut: don.statut },
+    data: {
+      statut: nextStatus,
+      observations: observations || undefined,
+      validatedAt: nextStatus === "VALIDE" ? new Date() : undefined,
+    },
+  });
+
+  revalidatePath("/admin/dons");
+  revalidatePath("/admin/dashboard");
+  revalidatePath(`/admin/dons/${donId}`);
+  return updated;
+}
+
+export async function markDonFicheGenerated(donId: string, ficheUrl: string) {
+  await requireAdmin();
+  if (!ficheUrl) throw new Error("DON_FICHE_URL_INVALID");
+
+  const updated = await prisma.don.update({
+    where: { id: donId, statut: "VALIDE" },
+    data: { ficheUrl, statut: "FICHE_GENEREE" },
+  });
+
+  revalidatePath("/admin/dons");
+  revalidatePath("/admin/dashboard");
+  revalidatePath(`/admin/dons/${donId}`);
   return updated;
 }
 
