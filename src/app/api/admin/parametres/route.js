@@ -30,7 +30,7 @@ export async function PATCH(request) {
 export async function POST() {
   if (!(await adminOrUnauthorized())) return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
   const result = await envoyerMail({
-    to: process.env.RESEND_TEST_EMAIL || "tossajean13@gmail.com",
+    to: process.env.RESEND_TEST_EMAIL || process.env.MAIL_ADMIN_EMAIL || "tossajean13@gmail.com",
     sujet: "E-mail de test ONG-GAS",
     html: templateEmail("<p>Ceci est un e-mail de test envoyé depuis les paramètres de la plateforme ONG-GAS.</p>"),
   });
