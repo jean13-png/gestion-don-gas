@@ -258,8 +258,8 @@ export default async function HomePage() {
                 </div>
               </div>
               <img
-                src="/images/enfant_en_pleine_etude.jpg"
-                alt="Jeune apprenant accompagné dans son parcours scolaire"
+                src="/images/remerciementsp.jpg"
+                alt="Partenaire remercié pour son soutien aux actions de l'ONG-GAS"
                 loading="lazy"
                 className="w-full h-72 object-cover rounded-lg border border-ong-bordure"
               />
