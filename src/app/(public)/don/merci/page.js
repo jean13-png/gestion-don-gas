@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
+import jsPDF from "jspdf";
 import Icon from "@/components/ui/Icon";
 
 const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE", "REJETE"];
@@ -112,17 +113,64 @@ function DonMerciContent() {
       return;
     }
     try {
-      const response = await fetch(`/api/dons/${encodeURIComponent(reference)}/pdf`);
-      if (!response.ok) throw new Error(`PDF indisponible (${response.status})`);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `fiche-${reference}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      const headerResponse = await fetch("/images/entete-mail.png");
+      if (!headerResponse.ok) throw new Error(`En-tête indisponible (${headerResponse.status})`);
+      const headerBlob = await headerResponse.blob();
+      const headerData = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Lecture de l'en-tête impossible"));
+        reader.readAsDataURL(headerBlob);
+      });
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const margin = 18;
+      const contentWidth = 210 - margin * 2;
+      let y = 58;
+      pdf.addImage(headerData, "PNG", 0, 0, 210, 52.5);
+      pdf.setTextColor(34, 50, 59);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(15);
+      pdf.text("Récapitulatif de votre proposition de don", margin, y);
+      y += 12;
+
+      const addField = (label, value) => {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
+        pdf.text(`${label} :`, margin, y);
+        pdf.setFont("helvetica", "normal");
+        const lines = pdf.splitTextToSize(String(value || "—"), contentWidth - 34);
+        pdf.text(lines, margin + 34, y);
+        y += Math.max(7, lines.length * 5);
+      };
+
+      addField("Référence", don.reference);
+      addField("Statut", STATUT_LABELS[don.statut] || don.statut);
+      addField("Donateur", `${don.donateur.prenom} ${don.donateur.nom}`);
+      addField("Nature du don", don.nature === "AUTRE" && don.natureAutre ? don.natureAutre : don.nature);
+      addField("Description", don.description);
+      addField("Localisation", don.localisation);
+      addField(
+        "Date de soumission",
+        new Date(don.createdAt).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+      );
+      y += 8;
+      pdf.setDrawColor(0, 160, 184);
+      pdf.line(margin, y, 210 - margin, y);
+      y += 10;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.setTextColor(74, 85, 104);
+      pdf.text(
+        pdf.splitTextToSize("Conservez précieusement cette référence pour suivre l'avancement de votre dossier.", contentWidth),
+        margin,
+        y,
+      );
+      pdf.save(`recu-don-${reference}.pdf`);
       await Swal.fire({
         title: "PDF téléchargé",
         text: "Votre récapitulatif a été enregistré.",
