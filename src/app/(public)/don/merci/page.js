@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
-import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Icon from "@/components/ui/Icon";
 
@@ -20,7 +19,6 @@ function DonMerciContent() {
   const [don, setDon] = useState(null);
   const [loading, setLoading] = useState(() => Boolean(reference));
   const [copied, setCopied] = useState(false);
-  const captureRef = useRef(null);
 
   useEffect(() => {
     if (!reference) {
@@ -105,16 +103,8 @@ function DonMerciContent() {
     }
   }
 
-  function sanitizeClone(clonedDoc) {
-    clonedDoc.querySelectorAll("style").forEach((styleEl) => {
-      if (styleEl.textContent.includes("oklab")) {
-        styleEl.textContent = styleEl.textContent.replace(/::placeholder\s*\{[^}]*\}/g, "");
-      }
-    });
-  }
-
   async function handleDownloadPDF() {
-    if (!captureRef.current || !reference) {
+    if (!don || !reference) {
       Swal.fire({
         title: "Erreur",
         text: "Impossible de générer le PDF pour le moment.",
@@ -123,33 +113,67 @@ function DonMerciContent() {
       return;
     }
     try {
-      const canvas = await html2canvas(captureRef.current, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        allowTaint: true,
-        onclone: sanitizeClone,
-      });
-      const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      const margin = 18;
+      const contentWidth = 210 - margin * 2;
+      let y = 22;
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.setFillColor(15, 58, 95);
+      pdf.rect(0, 0, 210, 12, "F");
+      pdf.setTextColor(15, 58, 95);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(20);
+      pdf.text("ONG GLOBAL ACTIONS SOLIDARITÉ", margin, y);
+      y += 9;
+      pdf.setTextColor(0, 135, 168);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(13);
+      pdf.text("Projet Informatique Pour Tous", margin, y);
+      y += 15;
+      pdf.setTextColor(34, 50, 59);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(15);
+      pdf.text("Récapitulatif de votre proposition de don", margin, y);
+      y += 12;
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+      const addField = (label, value) => {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
+        pdf.text(`${label} :`, margin, y);
+        pdf.setFont("helvetica", "normal");
+        const lines = pdf.splitTextToSize(String(value || "—"), contentWidth - 34);
+        pdf.text(lines, margin + 34, y);
+        y += Math.max(7, lines.length * 5);
+      };
 
+      addField("Référence", don.reference);
+      addField("Statut", STATUT_LABELS[don.statut] || don.statut);
+      addField("Donateur", `${don.donateur.prenom} ${don.donateur.nom}`);
+      addField("Nature du don", don.nature === "AUTRE" && don.natureAutre ? don.natureAutre : don.nature);
+      addField("Description", don.description);
+      addField("Localisation", don.localisation);
+      addField(
+        "Date de soumission",
+        new Date(don.createdAt).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+      );
+      y += 8;
+      pdf.setDrawColor(0, 160, 184);
+      pdf.line(margin, y, 210 - margin, y);
+      y += 10;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.setTextColor(74, 85, 104);
+      pdf.text(
+        pdf.splitTextToSize("Conservez précieusement cette référence pour suivre l'avancement de votre dossier.", contentWidth),
+        margin,
+        y,
+      );
       pdf.save(`recu-don-${reference}.pdf`);
-      Swal.fire({
+      await Swal.fire({
         title: "PDF téléchargé",
         text: "Votre récapitulatif a été enregistré.",
         icon: "success",
@@ -166,50 +190,10 @@ function DonMerciContent() {
     }
   }
 
-  async function handleDownloadImage() {
-    if (!captureRef.current || !reference) {
-      Swal.fire({
-        title: "Erreur",
-        text: "Impossible de générer l'image pour le moment.",
-        icon: "error",
-      });
-      return;
-    }
-    try {
-      const canvas = await html2canvas(captureRef.current, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        allowTaint: true,
-        onclone: sanitizeClone,
-      });
-      const link = document.createElement("a");
-      link.download = `recu-don-${reference}.png`;
-      link.href = canvas.toDataURL("image/png");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      Swal.fire({
-        title: "Image téléchargée",
-        text: "Votre récapitulatif a été enregistré.",
-        icon: "success",
-        timer: 1800,
-        showConfirmButton: false,
-      });
-    } catch (err) {
-      console.error("[merci] Image error:", err);
-      Swal.fire({
-        title: "Erreur",
-        text: "Impossible de générer l'image.",
-        icon: "error",
-      });
-    }
-  }
-
   return (
     <section className="bg-ong-fond py-16">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div ref={captureRef} className="bg-white border border-ong-bordure rounded-lg p-8">
+        <div className="bg-white border border-ong-bordure rounded-lg p-8">
           <div className="flex items-start gap-4 mb-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ong-vert text-white text-[22px]">
               <Icon name="circle-check" />
@@ -373,14 +357,6 @@ function DonMerciContent() {
                  >
                   <Icon name="file-pdf" fixedWidth />
                   Télécharger le PDF
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDownloadImage}
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md border border-ong-bordure text-ong-bleu text-[14px] font-medium hover:bg-ong-bleu-tres-clair transition-colors"
-                >
-                  <Icon name="image" fixedWidth />
-                  Capturer l&apos;image
                 </button>
                 <a
                   href={reference ? `/suivi?reference=${encodeURIComponent(reference)}` : "/suivi"}
