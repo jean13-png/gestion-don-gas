@@ -124,9 +124,8 @@ function DonMerciContent() {
           reader.readAsDataURL(blob);
         });
       };
-      const [logoOng, logoIpt, mailIcon, phoneIcon] = await Promise.all([
-        loadImage("/images/logo-ong-gas.png"),
-        loadImage("/images/logo-projet-ipt.png"),
+      const [logo, mailIcon, phoneIcon] = await Promise.all([
+        loadImage("/fiche-don/logo-ong-gas.jpg"),
         loadImage("/fiche-don/icone-mail.png"),
         loadImage("/fiche-don/icone-telephone.png"),
       ]);
@@ -134,29 +133,33 @@ function DonMerciContent() {
       const pdf = new jsPDF("p", "mm", "a4");
       const margin = 18;
       const contentWidth = 210 - margin * 2;
-      let y = 49;
-      // En-tête institutionnel identique au modèle de fiche validée.
-      pdf.addImage(logoOng, "PNG", 8, 4, 25, 27);
-      pdf.addImage(logoIpt, "PNG", 178, 5, 24, 25);
+      const pt = (value) => value * 25.4 / 72;
+      let y = pt(125.6);
+      // Coordonnées reprises de dessinerEnteteInstitutionnel du PDF admin.
+      pdf.addImage(logo, "JPEG", pt(31.4), pt(11), pt(73), pt(78.3));
+      pdf.addImage(logo, "JPEG", pt(489.8), pt(14.9), pt(73.2), pt(78.2));
       pdf.setTextColor(46, 116, 181);
       pdf.setFont("helvetica", "bolditalic");
       pdf.setFontSize(12);
-      pdf.text("ONG Global Actions Solidarité – Projet Informatique Pour Tous", 105, 9, { align: "center" });
+      pdf.text("ONG Global Actions Solidarité – Projet Informatique Pour Tous", pt(141.9), pt(21.7));
       pdf.setTextColor(0, 0, 0);
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(9);
-      pdf.addImage(mailIcon, "PNG", 75, 11.5, 4.2, 3.8);
-      pdf.text("Mail : infos@ongglobalactionsolidarite.com", 105, 15, { align: "center" });
-      pdf.addImage(phoneIcon, "PNG", 84, 16.5, 4, 3.7);
-      pdf.text("+229-01-46-46-66-56", 105, 20, { align: "center" });
-      pdf.setFontSize(8);
-      pdf.text("N°OAPI : 003/MIC/DDI/C-SPPI/S-DDI", 45, 26, { align: "center" });
-      pdf.text("Siège : Abomey-Calavi République du Bénin", 157, 26, { align: "center" });
+      pdf.setFontSize(10.08);
+      pdf.addImage(mailIcon, "PNG", pt(214.1), pt(45.1), pt(13.7), pt(13.92));
+      pdf.addImage(phoneIcon, "PNG", pt(229.7), pt(45.1), pt(13.2), pt(13.5));
+      pdf.text("Mail : infos@ongglobalactionsolidarite.com", pt(206.5), pt(35.7));
+      pdf.text("+229-01-46-46-66-56", pt(254), pt(47.9));
+      pdf.setFontSize(9.12);
+      pdf.text("N°OAPI : 003/MIC/DDI/C-SPPI/S-DDI", pt(129.2), pt(60.9));
+      pdf.setFontSize(10.08);
+      pdf.text("Siège : ", pt(276.4), pt(60.1));
+      pdf.setFont("times", "bold");
+      pdf.text("Abomey-Calavi République du Bénin", pt(305.6), pt(58.7));
       pdf.setDrawColor(0, 0, 0);
-      pdf.setLineWidth(0.35);
-      pdf.line(14, 33.5, 196, 33.5);
-      pdf.setLineWidth(0.8);
-      pdf.line(14, 34.2, 196, 34.2);
+      pdf.setLineWidth(pt(0.91));
+      pdf.line(pt(40.44), pt(94.08), pt(550.64), pt(94.08));
+      pdf.setLineWidth(pt(2.74));
+      pdf.line(pt(40.44), pt(95.9), pt(550.64), pt(95.9));
       pdf.setTextColor(34, 50, 59);
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(15);
