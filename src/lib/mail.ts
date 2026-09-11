@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import prisma from "@/lib/prisma";
 
 const DEFAULT_FROM = "onboarding@resend.dev";
-const ADMIN_EMAIL = "infos@ongglobalactionsolidarite.com";
+const ADMIN_EMAIL = process.env.MAIL_ADMIN_EMAIL || "infos@ongglobalactionsolidarite.com";
 const EMAIL_HEADER = "https://gestion-don-gas.vercel.app/images/entete-mail.png";
 
 let resend: Resend | null = null;
@@ -47,11 +47,13 @@ export async function envoyerMail(opts: {
     await prisma.historique.create({
       data: { type: "MAIL", donId: opts.donId, destinataire: opts.to, sujet: opts.sujet, contenuHtml: opts.html, statut: "ENVOYE" },
     });
+    return { sent: true };
   } catch (error) {
     console.error("[mail] Envoi échoué:", error);
     await prisma.historique.create({
       data: { type: "MAIL", donId: opts.donId, destinataire: opts.to, sujet: opts.sujet, contenuHtml: opts.html, statut: "ECHEC", erreur: String(error).slice(0, 500) },
     }).catch((historyError) => console.error("[mail] Journalisation échouée:", historyError));
+    return { sent: false, error: String(error) };
   }
 }
 

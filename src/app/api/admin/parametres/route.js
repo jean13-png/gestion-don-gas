@@ -29,10 +29,15 @@ export async function PATCH(request) {
 
 export async function POST() {
   if (!(await adminOrUnauthorized())) return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
-  await envoyerMail({
-    to: "infos@ongglobalactionsolidarite.com",
+  const result = await envoyerMail({
+    to: process.env.RESEND_TEST_EMAIL || "tossajean13@gmail.com",
     sujet: "E-mail de test ONG-GAS",
     html: templateEmail("<p>Ceci est un e-mail de test envoyé depuis les paramètres de la plateforme ONG-GAS.</p>"),
   });
+  if (!result.sent) {
+    return NextResponse.json({
+      error: "Resend a refusé l'envoi. Vérifiez RESEND_API_KEY, RESEND_TEST_EMAIL et la vérification du domaine.",
+    }, { status: 502 });
+  }
   return NextResponse.json({ success: true });
 }
