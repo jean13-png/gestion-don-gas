@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { adminDonDetailsSchema } from "@/lib/validation";
-import { ADMIN_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
+import { OWNER_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
 
 export type AdminDonsFilter = {
   search?: string;
@@ -85,7 +85,7 @@ export async function updateDonStatus(donId: string, nextStatus: string, observa
   if (detail) {
     const label = nextStatus.replaceAll("_", " ");
     await envoyerMail({
-      to: ADMIN_EMAIL,
+      to: OWNER_EMAIL,
       sujet: `[${label}] Don ${detail.reference}`,
       html: templateEmail(`<p>Le don <strong>${detail.reference}</strong> est passé au statut « ${label} » le ${new Date().toLocaleString("fr-FR")} par ${admin.nom}.</p>`),
       donId,
@@ -110,7 +110,7 @@ export async function markDonFicheGenerated(donId: string, ficheUrl: string) {
   });
   if (don) {
     await envoyerMail({
-      to: ADMIN_EMAIL,
+      to: OWNER_EMAIL,
       sujet: `[FICHE_GENEREE] Don ${don.reference}`,
       html: templateEmail(`<p>Le don <strong>${don.reference}</strong> est passé au statut « FICHE GENEREE » le ${new Date().toLocaleString("fr-FR")} par ${admin.nom}.</p>`),
       donId,

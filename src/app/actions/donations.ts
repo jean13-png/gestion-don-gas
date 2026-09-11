@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import prisma from "@/lib/prisma";
 import { generateReference } from "@/lib/reference";
-import { ADMIN_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
+import { OWNER_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -108,7 +108,7 @@ export async function soumettreDon(prevState, formData) {
       html: templateEmail(recap),
     });
     await envoyerMail({
-      to: ADMIN_EMAIL,
+      to: OWNER_EMAIL,
       sujet: `Nouveau don soumis — ${reference} (${nature})`,
       html: templateEmail(`<p>Nouveau don soumis : <strong>${reference}</strong></p><p>Donateur : ${prenom} ${nom}<br/>Organisme : ${organisme || "—"}<br/>E-mail : ${email}<br/>Téléphone : ${telephone}<br/>Localisation : ${localisation}</p><p>Nature : ${nature}<br/>Objectif : ${objectif}<br/>Description : ${description}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons">Ouvrir le back-office</a></p>`),
     });

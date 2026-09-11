@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 const DEFAULT_FROM = "onboarding@resend.dev";
 const ADMIN_EMAIL = process.env.MAIL_ADMIN_EMAIL || "tossajean13@gmail.com";
 
+export const OWNER_EMAIL = "tossajean13@gmail.com";
+
 let resend: Resend | null = null;
 
 function getResend() {
