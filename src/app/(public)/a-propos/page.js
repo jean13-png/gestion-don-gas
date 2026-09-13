@@ -32,8 +32,8 @@ export default function AProposPage() {
 
               <div className="relative min-h-[260px] bg-ong-bleu-tres-clair">
                 <img
-                  src="/images/1788544339134-IMG-20260901-WA0028(1).jpg"
-                  alt="Des enfants apprenant avec du matériel informatique"
+                  src="/images/eleves-mignons-cours-informatique_13339-284350.avif"
+                  alt="Des élèves en cours d'informatique"
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-[rgba(66,120,225,0.22)] to-transparent" />
