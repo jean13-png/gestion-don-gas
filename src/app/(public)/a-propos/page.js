@@ -10,22 +10,35 @@ export default function AProposPage() {
         </h1>
 
         <div className="mt-10 space-y-12">
-          <div className="bg-white border border-ong-bordure rounded-lg p-8">
-            <h2 className="font-display font-semibold text-ong-bleu text-[20px] mb-4">
-              Notre mission
-            </h2>
-            <p className="text-[15px] text-ong-texte leading-relaxed">
-              L&apos;ONG Global Actions Solidarité (ONG-GAS) est une association à but non lucratif
-              créée pour réduire la fracture numérique dans les écoles du Bénin. À travers le
-              Projet Informatique Pour Tous (PIPT), nous collectons, vérifons et acheminons du
-              matériel informatique et pédagogique vers les établissements scolaires de maternelle,
-              primaire et secondaire.
-            </p>
-            <p className="mt-4 text-[15px] text-ong-texte leading-relaxed">
-              Notre approche repose sur trois principes : transparence totale du donateur au
-              bénéficiaire, vérification systématique sur site, et accompagnement technique des
-              équipes éducatives pour garantir une utilisation durable des équipements.
-            </p>
+          <div className="overflow-hidden rounded-lg border border-ong-bordure bg-white shadow-sm">
+            <div className="grid md:grid-cols-[1.15fr_0.85fr]">
+              <div className="p-8">
+                <h2 className="font-display font-semibold text-ong-bleu text-[20px] mb-4">
+                  Notre mission
+                </h2>
+                <p className="text-[15px] text-ong-texte leading-relaxed">
+                  L&apos;ONG Global Actions Solidarité (ONG-GAS) est une association à but non lucratif
+                  créée pour réduire la fracture numérique dans les écoles du Bénin. À travers le
+                  Projet Informatique Pour Tous (PIPT), nous collectons, vérifons et acheminons du
+                  matériel informatique et pédagogique vers les établissements scolaires de maternelle,
+                  primaire et secondaire.
+                </p>
+                <p className="mt-4 text-[15px] text-ong-texte leading-relaxed">
+                  Notre approche repose sur trois principes : transparence totale du donateur au
+                  bénéficiaire, vérification systématique sur site, et accompagnement technique des
+                  équipes éducatives pour garantir une utilisation durable des équipements.
+                </p>
+              </div>
+
+              <div className="relative min-h-[260px] bg-ong-bleu-tres-clair">
+                <img
+                  src="/images/1788544339134-IMG-20260901-WA0028(1).jpg"
+                  alt="Des enfants apprenant avec du matériel informatique"
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[rgba(66,120,225,0.22)] to-transparent" />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
