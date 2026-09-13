@@ -21,6 +21,7 @@ import PhotoUploadForm from "./PhotoUploadForm";
 import PhotoProofs from "./PhotoProofs";
 import { DON_STATUS_LABELS, DON_STATUS_STYLES } from "@/lib/don-status";
 import ProgrammerDonateurPage from "./PorgrammerDonnateur";
+import RefuserDon from "./RefuserDon";
 
 const NATURE_MAP = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -538,16 +539,7 @@ export default async function AdminDonDetailPage({ params }) {
           </div>
         </form>
         {["SOUMIS", "EN_VERIFICATION", "INSPECTE"].includes(don.statut) && (
-          <form action={handleStatusChange} className="mt-3">
-            <input type="hidden" name="nextStatus" value="REJETE" />
-            <input type="hidden" name="observations" value="" />
-            <button
-              type="submit"
-              className="h-10 px-4 rounded-md border border-red-200 text-red-700 text-[13px] font-medium hover:bg-red-50"
-            >
-              Rejeter le don
-            </button>
-          </form>
+          <RefuserDon formAction={handleStatusChange} />
         )}
         <div className="mt-4">
           <Supprimer id={don.id} />

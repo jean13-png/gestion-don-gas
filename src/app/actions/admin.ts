@@ -67,6 +67,11 @@ export async function updateDonStatus(donId: string, nextStatus: string, observa
     throw new Error("DON_STATUS_INVALID");
   }
 
+  const cleanObservations = observations?.trim() || "";
+  if (nextStatus === "REJETE" && (cleanObservations.length < 10 || cleanObservations.length > 1000)) {
+    throw new Error("DON_REJECTION_REASON_INVALID");
+  }
+
   const don = await prisma.don.findUnique({ where: { id: donId }, select: { statut: true } });
   if (!don || !STATUS_TRANSITIONS[don.statut]?.includes(nextStatus)) {
     throw new Error("DON_STATUS_TRANSITION_INVALID");
@@ -76,7 +81,7 @@ export async function updateDonStatus(donId: string, nextStatus: string, observa
     where: { id: donId, statut: don.statut },
     data: {
       statut: nextStatus,
-      observations: observations || undefined,
+      observations: cleanObservations || undefined,
       validatedAt: nextStatus === "VALIDE" ? new Date() : undefined,
     },
   });
