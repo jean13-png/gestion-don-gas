@@ -5,6 +5,123 @@ import { requireAdmin } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { adminDonDetailsSchema } from "@/lib/validation";
 import { OWNER_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
+import { donationSchema } from "@/lib/validation";
+import { generateReference } from "@/lib/reference";
+import { genererFicheReceptionDon } from "@/lib/pdf";
+import type { NatureDon } from "@/lib/pdf";
+
+const NATURE_MAP: Record<string, NatureDon> = {
+  MATERIEL_INFORMATIQUE: "MATERIEL",
+  EQUIPEMENT_PEDAGOGIQUE: "MATERIEL",
+  DON_FINANCIER: "ESPECES",
+  AUTRE: "AUTRES",
+};
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  })[character]);
+}
+
+export async function creerDonAdmin(prevState: unknown, formData: FormData) {
+  const admin = await requireAdmin();
+  const values = {
+    nom: formData.get("nom")?.toString().trim() || "",
+    prenom: formData.get("prenom")?.toString().trim() || "",
+    organisme: formData.get("organisme")?.toString().trim() || "",
+    email: formData.get("email")?.toString().trim().toLowerCase() || "",
+    telephone: formData.get("telephone")?.toString().trim() || "",
+    nature: formData.get("nature")?.toString().trim() || "",
+    natureAutre: formData.get("natureAutre")?.toString().trim() || "",
+    description: formData.get("description")?.toString().trim() || "",
+    localisation: formData.get("localisation")?.toString().trim() || "",
+    objectif: formData.get("objectif")?.toString().trim() || "",
+    objectifAutre: formData.get("objectifAutre")?.toString().trim() || "",
+  };
+  const parsed = donationSchema.safeParse(values);
+
+  if (!parsed.success) return { error: "Veuillez corriger les informations saisies." };
+  if (values.nature === "AUTRE" && !values.natureAutre) {
+    return { error: "Veuillez préciser la nature du don." };
+  }
+  if (values.objectif === "AUTRES" && !values.objectifAutre) {
+    return { error: "Veuillez préciser l'objectif du don." };
+  }
+
+  const reference = generateReference();
+  const don = await prisma.$transaction(async (transaction) => {
+    const donateur = await transaction.donateur.create({
+      data: {
+        nom: values.nom,
+        prenom: values.prenom,
+        organisme: values.organisme || null,
+        email: values.email,
+        telephone: values.telephone,
+      },
+    });
+
+    return transaction.don.create({
+      data: {
+        reference,
+        nature: parsed.data.nature,
+        natureAutre: parsed.data.nature === "AUTRE" ? parsed.data.natureAutre : null,
+        description: values.description,
+        localisation: values.localisation,
+        objectif: parsed.data.objectif,
+        objectifAutre: parsed.data.objectif === "AUTRES" ? parsed.data.objectifAutre : null,
+        donateurId: donateur.id,
+      },
+    });
+  });
+
+  let pieceJointe;
+  try {
+    const contenu = await genererFicheReceptionDon({
+      donateur: {
+        nomRaisonSociale: `${values.prenom} ${values.nom}`,
+        representant: values.organisme || undefined,
+        adresse: values.localisation,
+        telephone: values.telephone,
+        email: values.email,
+      },
+      nature: NATURE_MAP[parsed.data.nature],
+      natureAutresDetail: parsed.data.nature === "AUTRE" ? parsed.data.natureAutre : undefined,
+      description: values.description,
+      objectif: parsed.data.objectif,
+      objectifAutresDetail: parsed.data.objectif === "AUTRES" ? parsed.data.objectifAutre : undefined,
+    });
+    pieceJointe = { nom: `fiche-${reference}.pdf`, contenu };
+  } catch (error) {
+    console.error("[creerDonAdmin] Génération PDF échouée:", error);
+  }
+
+  const donorName = escapeHtml(`${values.prenom} ${values.nom}`);
+  const donorMail = await envoyerMail({
+    to: values.email,
+    sujet: `Accusé de réception de votre don — Réf. ${reference}`,
+    html: templateEmail(`<p>Bonjour ${donorName},</p><p>Votre proposition de don a été enregistrée par notre équipe.</p><p>Référence : <strong>${reference}</strong></p><p>Conservez cette référence pour suivre votre dossier.</p><p><a href="https://gestion-don-gas.vercel.app/suivi?reference=${encodeURIComponent(reference)}">Suivre mon dossier</a></p>`),
+    pieceJointe,
+    donId: don.id,
+  });
+
+  if (values.email !== OWNER_EMAIL) {
+    await envoyerMail({
+      to: OWNER_EMAIL,
+      sujet: `Don créé par l'administration — ${reference}`,
+      html: templateEmail(`<p>Le don <strong>${escapeHtml(reference)}</strong> a été créé par ${escapeHtml(admin.nom)}.</p><p>Donateur : ${donorName}<br>E-mail : ${escapeHtml(values.email)}<br>Nature : ${escapeHtml(values.nature)}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons/${don.id}">Ouvrir le dossier</a></p>`),
+      donId: don.id,
+    });
+  }
+
+  await journaliserAction(don.id, `Don ${reference} créé par ${admin.nom}; accusé donateur ${donorMail.sent ? "envoyé" : "en échec"}`);
+  revalidatePath("/admin/dons");
+  revalidatePath("/admin/dashboard");
+  return { success: true, donId: don.id, reference };
+}
 
 export type AdminDonsFilter = {
   search?: string;

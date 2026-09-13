@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { getAdminDons, exportAdminDonsCsv } from "@/app/actions/admin";
 import { DON_STATUS_LABELS } from "@/lib/don-status";
 
@@ -132,14 +133,19 @@ export default function AdminDonsPageClient({ initialData }) {
     <div className="max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">Dons</h1>
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={exporting}
-          className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bordure text-ong-bleu text-[13px] font-medium hover:bg-ong-fond transition-colors disabled:opacity-60"
-        >
-          {exporting ? "Export..." : "Exporter CSV"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/dons/nouveau" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-ong-bleu text-white text-[13px] font-medium hover:bg-ong-bleu-fonce transition-colors">
+            + Créer un don
+          </Link>
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={exporting}
+            className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bordure text-ong-bleu text-[13px] font-medium hover:bg-ong-fond transition-colors disabled:opacity-60"
+          >
+            {exporting ? "Export..." : "Exporter CSV"}
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 bg-white border border-ong-bordure rounded-lg p-4">
