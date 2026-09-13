@@ -538,11 +538,13 @@ export default async function AdminDonDetailPage({ params }) {
             <GenererFicheButton don={don} formAction={handleGeneratePDF} />
           </div>
         </form>
-        {["SOUMIS", "EN_VERIFICATION", "INSPECTE"].includes(don.statut) && (
-          <RefuserDon formAction={handleStatusChange} />
-        )}
-        <div className="mt-4">
-          <Supprimer id={don.id} />
+        <div className="flex flex-wrap items-end gap-3">
+          {["SOUMIS", "EN_VERIFICATION", "INSPECTE"].includes(don.statut) && (
+            <RefuserDon formAction={handleStatusChange} />
+          )}
+          <div className="mb-4">
+            <Supprimer id={don.id} />
+          </div>
         </div>
       </div>
     </div>
