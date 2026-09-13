@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,7 +27,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="min-h-screen flex flex-col bg-ong-fond text-ong-texte min-w-0">
-        {children}
+        <ScrollReveal>{children}</ScrollReveal>
       </body>
     </html>
   );
