@@ -20,26 +20,38 @@ model Donateur {
 }
 
 model Don {
-  id          String      @id @default(cuid())
-  reference   String      @unique
-  nature      NatureDon
-  natureAutre String?
-  description String
-  localisation String
-  objectif    ObjectifDon @default(AUTRES)
-  objectifAutre String?
-  responsable String @default("HEDJE ZINSOU RAOUL")
-  faitA       String?
-  dateReception DateTime? @default(now())
-  statut      StatutDon   @default(SOUMIS)
-  donateur    Donateur    @relation(fields: [donateurId], references: [id])
-  donateurId  String
-  photos      Photo[]
-  observations String?
-  ficheUrl    String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  validatedAt DateTime?
+  id                String      @id @default(cuid())
+  reference         String      @unique
+  nature            NatureDon
+  natureAutre       String?
+  description       String
+  localisation      String
+  objectif          ObjectifDon @default(AUTRES)
+  objectifAutre     String?
+  responsable       String @default("HEDJE ZINSOU RAOUL")
+  faitA             String?
+  dateReception     DateTime? @default(now())
+  statut            StatutDon   @default(SOUMIS)
+  dateProgrammation DateTime?
+  donateur          Donateur    @relation(fields: [donateurId], references: [id])
+  donateurId        String
+  photos            Photo[]
+  messages          DonMessage[]
+  observations      String?
+  ficheUrl          String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  validatedAt       DateTime?
+}
+
+model DonMessage {
+  id        String   @id @default(cuid())
+  don       Don      @relation(fields: [donId], references: [id], onDelete: Cascade)
+  donId     String
+  expediteur String
+  contenu   String
+  lu        Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model Photo {
@@ -109,6 +121,7 @@ enum StatutDon {
   INSPECTE
   VALIDE
   FICHE_GENEREE
+  PROGRAMMEE
   REJETE
 }
 

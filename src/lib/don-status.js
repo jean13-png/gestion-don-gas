@@ -5,6 +5,7 @@ export const DON_STATUS_LABELS = {
   VALIDE: "Validé",
   FICHE_GENEREE: "Fiche générée",
   REJETE: "Rejeté",
+  PROGRAMMEE: "Programmée"
 };
 
 export const DON_STATUS_ORDER = [
@@ -13,6 +14,8 @@ export const DON_STATUS_ORDER = [
   "INSPECTE",
   "VALIDE",
   "FICHE_GENEREE",
+  "PROGRAMMEE",
+  "REJETE"
 ];
 
 export const DON_STATUS_STYLES = {
@@ -22,6 +25,7 @@ export const DON_STATUS_STYLES = {
   VALIDE: "bg-green-50 text-green-700 border-green-200",
   FICHE_GENEREE: "bg-emerald-50 text-emerald-700 border-emerald-200",
   REJETE: "bg-red-50 text-red-700 border-red-200",
+  PROGRAMMEE:"bg-blue-50 text-blue-700 border-blue-200"
 };
 
 export function getDonStatusLabel(status) {

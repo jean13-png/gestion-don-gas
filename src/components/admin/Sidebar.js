@@ -91,6 +91,19 @@ export default function Sidebar() {
           <Icon name="handshake" />
           Partenaires
         </Link>
+        <Link
+          onClick={() => setOpen(false)}
+          href="/admin/programmes"
+          aria-current={isActive("/admin/partenaires") ? "page" : undefined}
+          className={`flex items-center gap-3 px-3 py-2 rounded-md border-l-4 text-[14px] font-medium transition-colors ${
+            isActive("/admin/programmes")
+              ? "border-ong-bleu bg-ong-bleu-pale text-ong-bleu"
+              : "border-transparent text-ong-texte hover:border-ong-bleu-pale hover:bg-ong-fond"
+          }`}
+        >
+          <Icon name="#" />
+          Programmes
+        </Link>
       </nav>
       <div className="p-4 border-t border-ong-bordure">
         <form action={signOutAction}>

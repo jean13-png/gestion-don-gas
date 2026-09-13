@@ -1,7 +1,12 @@
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { put } from "@vercel/blob";
-import { markDonFicheGenerated, mettreAJourDonDetails, updateDonStatus } from "@/app/actions/admin";
+import {
+  markDonFicheGenerated,
+  mettreAJourDonDetails,
+  repondreMessageAdmin,
+  updateDonStatus,
+} from "@/app/actions/admin";
 import { genererFicheReceptionDon } from "@/lib/pdf";
 import { envoyerMail, templateEmail } from "@/lib/mail";
 import { deletePhoto, uploadPhoto } from "@/app/actions/upload";
@@ -15,6 +20,7 @@ import GenererFicheButton from "./generer-fiche/GenererFicheButton";
 import PhotoUploadForm from "./PhotoUploadForm";
 import PhotoProofs from "./PhotoProofs";
 import { DON_STATUS_LABELS, DON_STATUS_STYLES } from "@/lib/don-status";
+import ProgrammerDonateurPage from "./PorgrammerDonnateur";
 
 const NATURE_MAP = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -29,7 +35,11 @@ export default async function AdminDonDetailPage({ params }) {
   const { id } = await params;
   const don = await prisma.don.findUnique({
     where: { id },
-    include: { donateur: true, photos: true },
+    include: {
+      donateur: true,
+      photos: true,
+      messages: { orderBy: { createdAt: "asc" } },
+    },
   });
 
   if (!don) {
@@ -42,7 +52,9 @@ export default async function AdminDonDetailPage({ params }) {
     await updateDonStatus(don.id, "VALIDE", observations);
     const validationPdf = await genererFicheReceptionDon({
       donateur: {
-        nomRaisonSociale: [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || undefined,
+        nomRaisonSociale:
+          [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
+          undefined,
         representant: don.donateur.organisme || undefined,
         adresse: don.localisation || undefined,
         telephone: don.donateur.telephone,
@@ -52,14 +64,20 @@ export default async function AdminDonDetailPage({ params }) {
       natureAutresDetail: don.nature === "AUTRE" ? don.natureAutre : undefined,
       description: don.description,
       objectif: don.objectif,
-      objectifAutresDetail: don.objectif === "AUTRES" ? don.objectifAutre : undefined,
+      objectifAutresDetail:
+        don.objectif === "AUTRES" ? don.objectifAutre : undefined,
       responsable: don.responsable || undefined,
     });
     await envoyerMail({
       to: don.donateur.email,
       sujet: `Votre don ${don.reference} a été validé`,
-      html: templateEmail(`<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Bonne nouvelle : votre don (réf. ${don.reference}) vient d'être validé par notre équipe.</p><p>Vous trouverez en pièce jointe la fiche officielle de réception de votre don.</p><p>Au nom des enfants, des écoles et des familles que nous accompagnons : merci.</p><p>L'équipe ONG-GAS</p>`),
-      pieceJointe: { nom: `fiche-${don.reference}.pdf`, contenu: validationPdf },
+      html: templateEmail(
+        `<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Bonne nouvelle : votre don (réf. ${don.reference}) vient d'être validé par notre équipe.</p><p>Vous trouverez en pièce jointe la fiche officielle de réception de votre don.</p><p>Au nom des enfants, des écoles et des familles que nous accompagnons : merci.</p><p>L'équipe ONG-GAS</p>`,
+      ),
+      pieceJointe: {
+        nom: `fiche-${don.reference}.pdf`,
+        contenu: validationPdf,
+      },
       donId: don.id,
     });
   }
@@ -70,7 +88,11 @@ export default async function AdminDonDetailPage({ params }) {
       await handleValidate(formData);
       return;
     }
-    await updateDonStatus(don.id, formData.get("nextStatus"), formData.get("observations"));
+    await updateDonStatus(
+      don.id,
+      formData.get("nextStatus"),
+      formData.get("observations"),
+    );
   }
 
   async function handleUploadPhoto(formData) {
@@ -106,7 +128,10 @@ export default async function AdminDonDetailPage({ params }) {
             const source = Buffer.from(await response.arrayBuffer());
             const preview = source.subarray(0, 100).toString("utf8");
             if (preview.startsWith("{") || preview.startsWith("<")) {
-              console.error(`[admin] Réponse Blob non-image (${photo.url}):`, preview);
+              console.error(
+                `[admin] Réponse Blob non-image (${photo.url}):`,
+                preview,
+              );
               throw new Error("Réponse Blob invalide");
             }
             const temporaryPath = path.join(
@@ -121,7 +146,10 @@ export default async function AdminDonDetailPage({ params }) {
             await fs.writeFile(temporaryPath, normalized);
             return temporaryPath;
           } catch (error) {
-            console.error(`[admin] Photo de preuve ignorée (${photo.url}):`, error);
+            console.error(
+              `[admin] Photo de preuve ignorée (${photo.url}):`,
+              error,
+            );
             return null;
           }
         }),
@@ -129,7 +157,9 @@ export default async function AdminDonDetailPage({ params }) {
     ).filter(Boolean);
     const buffer = await genererFicheReceptionDon({
       donateur: {
-        nomRaisonSociale: [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || undefined,
+        nomRaisonSociale:
+          [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
+          undefined,
         representant: don.donateur.organisme || undefined,
         adresse: don.localisation || undefined,
         telephone: don.donateur.telephone,
@@ -139,9 +169,14 @@ export default async function AdminDonDetailPage({ params }) {
       natureAutresDetail: don.nature === "AUTRE" ? don.natureAutre : undefined,
       description: don.description,
       objectif: don.objectif,
-      objectifAutresDetail: don.objectif === "AUTRES" && don.objectifAutre ? don.objectifAutre : undefined,
+      objectifAutresDetail:
+        don.objectif === "AUTRES" && don.objectifAutre
+          ? don.objectifAutre
+          : undefined,
       faitA: don.faitA || undefined,
-      dateReception: don.dateReception ? don.dateReception.toLocaleDateString("fr-FR") : undefined,
+      dateReception: don.dateReception
+        ? don.dateReception.toLocaleDateString("fr-FR")
+        : undefined,
       responsable: don.responsable || undefined,
       photosPreuves: temporaryPhotos,
     });
@@ -162,7 +197,9 @@ export default async function AdminDonDetailPage({ params }) {
       await envoyerMail({
         to: don.donateur.email,
         sujet: `Attestation PDF — Don ${don.reference}`,
-        html: templateEmail(`<p>Bonjour ${don.donateur.prenom},</p><p>Votre attestation officielle est disponible.</p><p>Référence : ${don.reference}</p><p>Cordialement,<br/>ONG Global Actions Solidarité</p>`),
+        html: templateEmail(
+          `<p>Bonjour ${don.donateur.prenom},</p><p>Votre attestation officielle est disponible.</p><p>Référence : ${don.reference}</p><p>Cordialement,<br/>ONG Global Actions Solidarité</p>`,
+        ),
         pieceJointe: { nom: `fiche-${don.reference}.pdf`, contenu: buffer },
         donId: don.id,
       });
@@ -189,8 +226,10 @@ export default async function AdminDonDetailPage({ params }) {
             {don.donateur.prenom} {don.donateur.nom} — {don.nature}
           </p>
         </div>
-        <span className={`inline-flex items-center border px-2.5 py-1 rounded-full text-[12px] font-medium ${DON_STATUS_STYLES[don.statut] || "bg-gray-50 text-gray-700 border-gray-200"}`}>
-        {DON_STATUS_LABELS[don.statut] || "Statut inconnu"}
+        <span
+          className={`inline-flex items-center border px-2.5 py-1 rounded-full text-[12px] font-medium ${DON_STATUS_STYLES[don.statut] || "bg-gray-50 text-gray-700 border-gray-200"}`}
+        >
+          {DON_STATUS_LABELS[don.statut] || "Statut inconnu"}
         </span>
       </div>
 
@@ -209,16 +248,22 @@ export default async function AdminDonDetailPage({ params }) {
             {don.donateur.organisme && (
               <div>
                 <dt className="text-ong-muted">Organisme</dt>
-                <dd className="text-ong-texte font-medium">{don.donateur.organisme}</dd>
+                <dd className="text-ong-texte font-medium">
+                  {don.donateur.organisme}
+                </dd>
               </div>
             )}
             <div>
               <dt className="text-ong-muted">Email</dt>
-              <dd className="text-ong-texte font-medium">{don.donateur.email}</dd>
+              <dd className="text-ong-texte font-medium">
+                {don.donateur.email}
+              </dd>
             </div>
             <div>
               <dt className="text-ong-muted">Téléphone</dt>
-              <dd className="text-ong-texte font-medium">{don.donateur.telephone}</dd>
+              <dd className="text-ong-texte font-medium">
+                {don.donateur.telephone}
+              </dd>
             </div>
           </dl>
         </div>
@@ -253,6 +298,7 @@ export default async function AdminDonDetailPage({ params }) {
                   <a
                     href={don.ficheUrl}
                     target="_blank"
+                    style={{ color: "white" }}
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-ong-bleu text-white text-[13px] font-medium hover:bg-ong-bleu-fonce transition-colors"
                   >
@@ -265,6 +311,68 @@ export default async function AdminDonDetailPage({ params }) {
           </dl>
         </div>
       </div>
+      {don.statut === "PROGRAMMEE" ?(
+        <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
+        <h2 className="font-display font-semibold text-blue-700 text-[16px] mb-4">
+          Date Programmée :
+        </h2>
+
+        <div className="flex gap-x-6 items-center justify-between">
+          <p>
+            <strong>{don.dateProgrammation ? new Date(don.dateProgrammation).toLocaleDateString("fr-FR") : "—"}</strong>
+          </p>
+          <button
+            type="button"
+            style={{ color: "white" }}
+            className="inline-flex cursor-pointer items-center gap-2 px-4 py-2.5 rounded-md bg-green-500 hover:bg-green-600 text-white text-[13px] font-medium transition-colors"
+          >
+            Modifier
+          </button>
+        </div>
+      </div>
+      ) : (
+        <ProgrammerDonateurPage donId={don.id}/>
+      )}
+
+      <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
+        <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
+          Messagerie sécurisée
+        </h2>
+
+        {don.messages.length > 0 ? (
+          <div className="space-y-3">
+            {don.messages.map((message) => (
+              <div key={message.id} className={`rounded-lg border p-3 ${message.expediteur === "ADMIN" ? "border-ong-bleu bg-ong-bleu-tres-clair" : "border-ong-bordure bg-slate-50"}`}>
+                <div className="mb-1 flex items-center justify-between gap-2 text-[12px] text-ong-muted">
+                  <span>{message.expediteur === "ADMIN" ? "Équipe ONG-GAS" : "Donateur"}</span>
+                  <span>{new Date(message.createdAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+                <p className="whitespace-pre-wrap text-[14px] text-ong-texte">{message.contenu}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[14px] text-ong-texte-secondaire">Aucune conversation pour ce dossier.</p>
+        )}
+
+        <form action={repondreMessageAdmin} className="mt-5 space-y-3">
+          <input type="hidden" name="donId" value={don.id} />
+          <label htmlFor="message-admin" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+            Répondre au donateur
+          </label>
+          <textarea
+            id="message-admin"
+            name="contenu"
+            required
+            rows={4}
+            placeholder="Écrivez la réponse à envoyer au donateur..."
+            className="w-full rounded-md border border-ong-bordure bg-white px-3 py-2.5 text-[14px] text-ong-texte focus:outline-none focus:ring-2 focus:ring-ong-bleu focus:border-ong-bleu"
+          />
+          <button type="submit" className="inline-flex h-11 items-center justify-center rounded-md bg-ong-bleu px-5 text-[14px] font-medium text-white hover:bg-ong-bleu-fonce transition-colors">
+            Envoyer la réponse
+          </button>
+        </form>
+      </div>
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
         <h2 className="font-display font-semibold text-blue-700 text-[16px] mb-4">
@@ -272,9 +380,14 @@ export default async function AdminDonDetailPage({ params }) {
         </h2>
 
         {don.photos.length >= 10 ? (
-          <p className="text-[13px] text-ong-muted">Limite de 10 photos atteinte.</p>
+          <p className="text-[13px] text-ong-muted">
+            Limite de 10 photos atteinte.
+          </p>
         ) : (
-          <PhotoUploadForm action={handleUploadPhoto} existingCount={don.photos.length} />
+          <PhotoUploadForm
+            action={handleUploadPhoto}
+            existingCount={don.photos.length}
+          />
         )}
 
         {don.photos.length > 0 && (
@@ -289,10 +402,18 @@ export default async function AdminDonDetailPage({ params }) {
         <form action={handleUpdateDetails} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="objectif" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+              <label
+                htmlFor="objectif"
+                className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+              >
                 Objectif du don
               </label>
-              <select id="objectif" name="objectif" defaultValue={don.objectif} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert">
+              <select
+                id="objectif"
+                name="objectif"
+                defaultValue={don.objectif}
+                className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+              >
                 <option value="EDUCATION">Soutien à l&apos;éducation</option>
                 <option value="AIDE_SOCIALE">Aide sociale / Humanitaire</option>
                 <option value="FORMATION">Formation</option>
@@ -301,33 +422,77 @@ export default async function AdminDonDetailPage({ params }) {
             </div>
             {don.objectif === "AUTRES" && (
               <div>
-                <label htmlFor="objectifAutre" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                <label
+                  htmlFor="objectifAutre"
+                  className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+                >
                   Préciser l&apos;objectif
                 </label>
-                <input id="objectifAutre" name="objectifAutre" type="text" defaultValue={don.objectifAutre || ""} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+                <input
+                  id="objectifAutre"
+                  name="objectifAutre"
+                  type="text"
+                  defaultValue={don.objectifAutre || ""}
+                  className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+                />
               </div>
             )}
             <div>
-              <label htmlFor="responsable" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+              <label
+                htmlFor="responsable"
+                className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+              >
                 Responsable
               </label>
-              <input id="responsable" name="responsable" type="text" defaultValue={don.responsable || "HEDJE ZINSOU RAOUL"} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+              <input
+                id="responsable"
+                name="responsable"
+                type="text"
+                defaultValue={don.responsable || "HEDJE ZINSOU RAOUL"}
+                className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+              />
             </div>
             <div>
-              <label htmlFor="faitA" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+              <label
+                htmlFor="faitA"
+                className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+              >
                 Fait à (lieu)
               </label>
-              <input id="faitA" name="faitA" type="text" defaultValue={don.faitA || "Abomey-Calavi"} placeholder="Ex : Abomey-Calavi" className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+              <input
+                id="faitA"
+                name="faitA"
+                type="text"
+                defaultValue={don.faitA || "Abomey-Calavi"}
+                placeholder="Ex : Abomey-Calavi"
+                className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+              />
             </div>
             <div>
-              <label htmlFor="dateReception" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+              <label
+                htmlFor="dateReception"
+                className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+              >
                 Date de réception
               </label>
-              <input id="dateReception" name="dateReception" type="date" defaultValue={don.dateReception ? don.dateReception.toISOString().split("T")[0] : new Date().toISOString().split("T")[0]} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+              <input
+                id="dateReception"
+                name="dateReception"
+                type="date"
+                defaultValue={
+                  don.dateReception
+                    ? don.dateReception.toISOString().split("T")[0]
+                    : new Date().toISOString().split("T")[0]
+                }
+                className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+              />
             </div>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="h-10 px-5 rounded-md border border-ong-bleu text-ong-bleu text-[14px] font-medium cursor-pointer hover:bg-ong-fond">
+            <button
+              type="submit"
+              className="h-10 px-5 rounded-md border border-ong-bleu text-ong-bleu text-[14px] font-medium cursor-pointer hover:bg-ong-fond"
+            >
               Enregistrer les détails
             </button>
           </div>
@@ -340,16 +505,47 @@ export default async function AdminDonDetailPage({ params }) {
         </h2>
         <form action={handleStatusChange} className="space-y-4">
           <div>
-            <label htmlFor="observations" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="observations"
+              className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+            >
               Observations
             </label>
-            <textarea id="observations" name="observations" rows={3} className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px]" />
+            <textarea
+              id="observations"
+              name="observations"
+              rows={3}
+              className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px]"
+            />
           </div>
           <div className="flex flex-wrap gap-3">
-            <input type="hidden" name="nextStatus" value={don.statut === "REJETE" ? "EN_VERIFICATION" : don.statut === "SOUMIS" ? "EN_VERIFICATION" : don.statut === "EN_VERIFICATION" ? "INSPECTE" : "VALIDE"} />
-            <button disabled={["VALIDE", "FICHE_GENEREE"].includes(don.statut)} type="submit"
-              className="disabled:cursor-not-allowed h-11 uppercase px-5 rounded-md bg-ong-vert text-white cursor-pointer text-[14px] font-medium hover:brightness-95">
-              {don.statut === "VALIDE" || don.statut === "FICHE_GENEREE" ? "Don validé" : don.statut === "REJETE" ? "Reprendre le traitement" : don.statut === "SOUMIS" ? "Passer en vérification" : don.statut === "EN_VERIFICATION" ? "Marquer inspecté" : "Valider le don"}
+            <input
+              type="hidden"
+              name="nextStatus"
+              value={
+                don.statut === "REJETE"
+                  ? "EN_VERIFICATION"
+                  : don.statut === "SOUMIS"
+                    ? "EN_VERIFICATION"
+                    : don.statut === "EN_VERIFICATION"
+                      ? "INSPECTE"
+                      : "VALIDE"
+              }
+            />
+            <button
+              disabled={["VALIDE", "FICHE_GENEREE"].includes(don.statut)}
+              type="submit"
+              className="disabled:cursor-not-allowed h-11 uppercase px-5 rounded-md bg-ong-vert text-white cursor-pointer text-[14px] font-medium hover:brightness-95"
+            >
+              {don.statut === "VALIDE" || don.statut === "FICHE_GENEREE"
+                ? "Don validé"
+                : don.statut === "REJETE"
+                  ? "Reprendre le traitement"
+                  : don.statut === "SOUMIS"
+                    ? "Passer en vérification"
+                    : don.statut === "EN_VERIFICATION"
+                      ? "Marquer inspecté"
+                      : "Valider le don"}
             </button>
             <GenererFicheButton don={don} formAction={handleGeneratePDF} />
           </div>
@@ -358,7 +554,10 @@ export default async function AdminDonDetailPage({ params }) {
           <form action={handleStatusChange} className="mt-3">
             <input type="hidden" name="nextStatus" value="REJETE" />
             <input type="hidden" name="observations" value="" />
-            <button type="submit" className="h-10 px-4 rounded-md border border-red-200 text-red-700 text-[13px] font-medium hover:bg-red-50">
+            <button
+              type="submit"
+              className="h-10 px-4 rounded-md border border-red-200 text-red-700 text-[13px] font-medium hover:bg-red-50"
+            >
               Rejeter le don
             </button>
           </form>
@@ -366,7 +565,6 @@ export default async function AdminDonDetailPage({ params }) {
         <div className="mt-4">
           <Supprimer id={don.id} />
         </div>
-        
       </div>
     </div>
   );

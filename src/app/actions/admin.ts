@@ -124,6 +124,50 @@ export async function markDonFicheGenerated(donId: string, ficheUrl: string) {
   return updated;
 }
 
+export async function repondreMessageAdmin(formData: FormData) {
+  const admin = await requireAdmin();
+
+  const donId = formData.get("donId")?.toString().trim();
+  const contenu = formData.get("contenu")?.toString().trim();
+
+  if (!donId || !contenu) {
+    throw new Error("MESSAGE_INVALID");
+  }
+
+  const don = await prisma.don.findUnique({
+    where: { id: donId },
+    include: { donateur: true },
+  });
+
+  if (!don) {
+    throw new Error("DON_NOT_FOUND");
+  }
+
+  await prisma.donMessage.create({
+    data: {
+      donId,
+      expediteur: "ADMIN",
+      contenu,
+    },
+  });
+
+  await envoyerMail({
+    to: don.donateur.email,
+    sujet: `Réponse de l'équipe — Don ${don.reference}`,
+    html: templateEmail(`<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Une réponse a été ajoutée à votre dossier de don.</p><p><strong>Message :</strong></p><p>${contenu.replace(/\n/g, "<br/>")}</p><p>Référence de suivi : <strong>${don.reference}</strong></p><p><a href="https://gestion-don-gas.vercel.app/suivi?reference=${encodeURIComponent(don.reference)}">Suivre mon dossier</a></p>`),
+    donId,
+  });
+
+  await journaliserAction(donId, `Réponse admin envoyée à ${don.donateur.email}`);
+
+  revalidatePath("/admin/dons");
+  revalidatePath("/admin/dashboard");
+  revalidatePath(`/admin/dons/${donId}`);
+  revalidatePath("/suivi");
+
+  return { success: "Réponse envoyée au donateur." };
+}
+
 export async function mettreAJourDonDetails(donId: string, formData: FormData) {
   await requireAdmin();
 

@@ -1,11 +1,17 @@
 import prisma from "@/lib/prisma";
+import { posterMessageDonateur } from "@/app/actions/donations";
 
 export const dynamic = "force-dynamic";
 
-const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE", "REJETE"];
+const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE", "PROGRAMMEE", "REJETE"];
 const STATUT_LABELS = {
-  SOUMIS: "Soumis", EN_VERIFICATION: "En vérification", INSPECTE: "Inspecté",
-  VALIDE: "Validé", FICHE_GENEREE: "Fiche générée", REJETE: "Rejeté",
+  SOUMIS: "Soumis",
+  EN_VERIFICATION: "En vérification",
+  INSPECTE: "Inspecté",
+  VALIDE: "Validé",
+  FICHE_GENEREE: "Fiche générée",
+  PROGRAMMEE: "Programmée",
+  REJETE: "Rejeté",
 };
 
 export default async function SuiviPage({ searchParams }) {
@@ -14,7 +20,7 @@ export default async function SuiviPage({ searchParams }) {
   const don = reference
     ? await prisma.don.findUnique({
         where: { reference },
-        include: { donateur: true, photos: true },
+        include: { donateur: true, photos: true, messages: { orderBy: { createdAt: "asc" } } },
       })
     : null;
 
@@ -151,6 +157,57 @@ export default async function SuiviPage({ searchParams }) {
                   );
                 })}
               </ol>
+            </div>
+
+            {don.dateProgrammation && (
+              <div className="bg-white border border-ong-bordure rounded-lg p-5">
+                <h2 className="font-display font-semibold text-ong-bleu text-[15px] mb-3">
+                  Rendez-vous programmé
+                </h2>
+                <p className="text-[14px] text-ong-texte">
+                  La vérification de votre dossier est programmée pour le <strong>{new Date(don.dateProgrammation).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</strong>.
+                </p>
+              </div>
+            )}
+
+            <div className="bg-white border border-ong-bordure rounded-lg p-5">
+              <h2 className="font-display font-semibold text-ong-bleu text-[15px] mb-4">
+                Messages / réponse de l&apos;équipe
+              </h2>
+
+              {don.messages.length > 0 ? (
+                <div className="space-y-3">
+                  {don.messages.map((message) => (
+                    <div key={message.id} className={`rounded-lg border p-3 ${message.expediteur === "ADMIN" ? "border-ong-bleu bg-ong-bleu-tres-clair" : "border-ong-bordure bg-slate-50"}`}>
+                      <div className="mb-1 flex items-center justify-between gap-2 text-[12px] text-ong-muted">
+                        <span className="font-medium uppercase tracking-wide">{message.expediteur === "ADMIN" ? "Équipe ONG-GAS" : "Vous"}</span>
+                        <span>{new Date(message.createdAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      </div>
+                      <p className="whitespace-pre-wrap text-[14px] text-ong-texte">{message.contenu}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[14px] text-ong-texte-secondaire">Aucun message pour le moment.</p>
+              )}
+
+              <form action={posterMessageDonateur} className="mt-5 space-y-3">
+                <input type="hidden" name="reference" value={don.reference} />
+                <label htmlFor="message" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                  Envoyer un message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  required
+                  rows={4}
+                  placeholder="Renseignez une information complémentaire ou une question..."
+                  className="w-full rounded-md border border-ong-bordure bg-white px-3 py-2.5 text-[14px] text-ong-texte focus:outline-none focus:ring-2 focus:ring-ong-bleu focus:border-ong-bleu"
+                />
+                <button type="submit" className="inline-flex h-11 items-center justify-center rounded-md bg-ong-bleu px-5 text-[14px] font-medium text-white hover:bg-ong-bleu-fonce transition-colors">
+                  Envoyer
+                </button>
+              </form>
             </div>
 
             {don.ficheUrl && (
