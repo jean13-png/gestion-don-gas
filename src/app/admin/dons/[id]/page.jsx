@@ -311,27 +311,14 @@ export default async function AdminDonDetailPage({ params }) {
           </dl>
         </div>
       </div>
-      {don.statut === "PROGRAMMEE" ?(
-        <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
-        <h2 className="font-display font-semibold text-blue-700 text-[16px] mb-4">
-          Date Programmée :
-        </h2>
-
-        <div className="flex gap-x-6 items-center justify-between">
-          <p>
-            <strong>{don.dateProgrammation ? new Date(don.dateProgrammation).toLocaleDateString("fr-FR") : "—"}</strong>
-          </p>
-          <button
-            type="button"
-            style={{ color: "white" }}
-            className="inline-flex cursor-pointer items-center gap-2 px-4 py-2.5 rounded-md bg-green-500 hover:bg-green-600 text-white text-[13px] font-medium transition-colors"
-          >
-            Modifier
-          </button>
-        </div>
-      </div>
+      {don.statut === "PROGRAMMEE" ? (
+        <ProgrammerDonateurPage
+          donId={don.id}
+          initialDate={don.dateProgrammation ? new Date(don.dateProgrammation).toISOString().split("T")[0] : ""}
+          mode="edit"
+        />
       ) : (
-        <ProgrammerDonateurPage donId={don.id}/>
+        <ProgrammerDonateurPage donId={don.id} />
       )}
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">

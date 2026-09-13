@@ -257,9 +257,15 @@ export async function ProgrammerDonnateur(prevState, formData) {
     return { error: "Veuillez sélectionner une date" };
   }
 
-  const parsedDate = new Date(date);
+  const parsedDate = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsedDate.getTime())) {
     return { error: "Date invalide" };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (parsedDate <= today) {
+    return { error: "La date programmée doit être strictement ultérieure à aujourd'hui." };
   }
 
   try {
