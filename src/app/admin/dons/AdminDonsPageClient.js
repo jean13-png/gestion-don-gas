@@ -134,7 +134,7 @@ export default function AdminDonsPageClient({ initialData }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">Dons</h1>
         <div className="flex flex-wrap gap-2">
-          <Link href="/admin/dons/nouveau" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-ong-bleu text-white text-[13px] font-medium hover:bg-ong-bleu-fonce transition-colors">
+          <Link href="/admin/dons/nouveau" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bleu bg-white text-ong-bleu text-[13px] font-medium hover:bg-ong-bleu-tres-clair transition-colors">
             + Créer un don
           </Link>
           <button
