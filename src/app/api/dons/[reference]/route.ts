@@ -26,6 +26,10 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Don non trouvé" }, { status: 404 });
     }
 
+    const donorName = don.donateur
+      ? [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || "Donateur"
+      : "Donateur";
+
     return NextResponse.json({
       reference: don.reference,
       nature: don.nature,
@@ -33,10 +37,12 @@ export async function GET(request, { params }) {
       description: don.description,
       localisation: don.localisation,
       statut: don.statut,
-      donateur: {
-        nom: don.donateur.nom,
-        prenom: don.donateur.prenom,
-      },
+      donateur: don.donateur
+        ? {
+            nom: don.donateur.nom,
+            prenom: don.donateur.prenom,
+          }
+        : { nom: "", prenom: donorName },
       createdAt: don.createdAt,
     });
   } catch (error) {

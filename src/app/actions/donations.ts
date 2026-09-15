@@ -160,40 +160,47 @@ export async function soumettreDon(prevState, formData) {
 }
 
 export async function posterMessageDonateur(prevState, formData) {
-  const reference = formData.get("reference")?.toString().trim();
-  const message = formData.get("message")?.toString().trim();
+  try {
+    const reference = formData.get("reference")?.toString().trim();
+    const message = formData.get("message")?.toString().trim();
 
-  if (!reference || !message) {
-    return { error: "La référence et le message sont obligatoires." };
-  }
+    if (!reference || !message) {
+      return { error: "La référence et le message sont obligatoires." };
+    }
 
-  const don = await prisma.don.findUnique({
-    where: { reference },
-    include: { donateur: true },
-  });
+    const don = await prisma.don.findUnique({
+      where: { reference },
+      include: { donateur: true },
+    });
 
-  if (!don) {
-    return { error: "Aucun dossier correspondant n'a été trouvé." };
-  }
+    if (!don || !don.donateur) {
+      return { error: "Aucun dossier correspondant n'a été trouvé." };
+    }
 
-  await prisma.donMessage.create({
-    data: {
+    const donorName = [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || "Donateur";
+
+    await prisma.donMessage.create({
+      data: {
+        donId: don.id,
+        expediteur: "DONATEUR",
+        contenu: message,
+      },
+    });
+
+    await envoyerMail({
+      to: OWNER_EMAIL,
+      sujet: `Nouveau message du donateur — ${don.reference}`,
+      html: templateEmail(`<p>Le donateur <strong>${donorName}</strong> a envoyé un message sur le dossier <strong>${don.reference}</strong>.</p><p><strong>Message :</strong></p><p>${message.replace(/\n/g, "<br/>")}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons/${don.id}">Ouvrir la fiche du don</a></p>`),
       donId: don.id,
-      expediteur: "DONATEUR",
-      contenu: message,
-    },
-  });
+    });
 
-  await envoyerMail({
-    to: OWNER_EMAIL,
-    sujet: `Nouveau message du donateur — ${don.reference}`,
-    html: templateEmail(`<p>Le donateur <strong>${don.donateur.prenom} ${don.donateur.nom}</strong> a envoyé un message sur le dossier <strong>${don.reference}</strong>.</p><p><strong>Message :</strong></p><p>${message.replace(/\n/g, "<br/>")}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons/${don.id}">Ouvrir la fiche du don</a></p>`),
-    donId: don.id,
-  });
-
-  revalidatePath("/suivi");
-  revalidatePath(`/admin/dons/${don.id}`);
-  return { success: "Votre message a bien été envoyé à l'équipe." };
+    revalidatePath("/suivi");
+    revalidatePath(`/admin/dons/${don.id}`);
+    return { success: "Votre message a bien été envoyé à l'équipe." };
+  } catch (error) {
+    console.error("[posterMessageDonateur] Erreur:", error);
+    return { error: "Nous n'avons pas pu envoyer votre message. Veuillez réessayer." };
+  }
 }
 // Fonction pour supprimer un don
 export async function supprimerDon(prevState, formData) {

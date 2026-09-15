@@ -174,32 +174,44 @@ const STATUS_TRANSITIONS = {
   SOUMIS: ["EN_VERIFICATION", "REJETE"],
   EN_VERIFICATION: ["INSPECTE", "REJETE"],
   INSPECTE: ["VALIDE", "REJETE"],
+  PROGRAMMEE: ["VALIDE", "REJETE", "EN_VERIFICATION"],
+  VALIDE: [],
+  FICHE_GENEREE: [],
   REJETE: ["EN_VERIFICATION"],
 };
 
 export async function updateDonStatus(donId: string, nextStatus: string, observations?: string) {
   const admin = await requireAdmin();
 
-  if (!Object.hasOwn(STATUS_TRANSITIONS, nextStatus) && nextStatus !== "VALIDE") {
+  const normalizedNextStatus = nextStatus?.trim();
+  if (!normalizedNextStatus || !Object.hasOwn(STATUS_TRANSITIONS, normalizedNextStatus)) {
     throw new Error("DON_STATUS_INVALID");
   }
 
   const cleanObservations = observations?.trim() || "";
-  if (nextStatus === "REJETE" && (cleanObservations.length < 10 || cleanObservations.length > 1000)) {
+  if (normalizedNextStatus === "REJETE" && (cleanObservations.length < 10 || cleanObservations.length > 1000)) {
     throw new Error("DON_REJECTION_REASON_INVALID");
   }
 
   const don = await prisma.don.findUnique({ where: { id: donId }, select: { statut: true } });
-  if (!don || !STATUS_TRANSITIONS[don.statut]?.includes(nextStatus)) {
+  if (!don) {
+    throw new Error("DON_NOT_FOUND");
+  }
+
+  if (don.statut === normalizedNextStatus) {
+    return don;
+  }
+
+  if (!STATUS_TRANSITIONS[don.statut]?.includes(normalizedNextStatus)) {
     throw new Error("DON_STATUS_TRANSITION_INVALID");
   }
 
   const updated = await prisma.don.update({
     where: { id: donId, statut: don.statut },
     data: {
-      statut: nextStatus,
+      statut: normalizedNextStatus,
       observations: cleanObservations || undefined,
-      validatedAt: nextStatus === "VALIDE" ? new Date() : undefined,
+      validatedAt: normalizedNextStatus === "VALIDE" ? new Date() : undefined,
     },
   });
 

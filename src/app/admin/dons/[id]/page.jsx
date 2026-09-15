@@ -517,23 +517,27 @@ export default async function AdminDonDetailPage({ params }) {
                     ? "EN_VERIFICATION"
                     : don.statut === "EN_VERIFICATION"
                       ? "INSPECTE"
-                      : "VALIDE"
+                      : don.statut === "PROGRAMMEE"
+                        ? "VALIDE"
+                        : "VALIDE"
               }
             />
             <button
-              disabled={["VALIDE", "FICHE_GENEREE"].includes(don.statut)}
+              disabled={["VALIDE", "FICHE_GENEREE", "PROGRAMMEE"].includes(don.statut)}
               type="submit"
               className="disabled:cursor-not-allowed h-11 uppercase px-5 rounded-md bg-ong-vert text-white cursor-pointer text-[14px] font-medium hover:brightness-95"
             >
               {don.statut === "VALIDE" || don.statut === "FICHE_GENEREE"
                 ? "Don validé"
-                : don.statut === "REJETE"
-                  ? "Reprendre le traitement"
-                  : don.statut === "SOUMIS"
-                    ? "Passer en vérification"
-                    : don.statut === "EN_VERIFICATION"
-                      ? "Marquer inspecté"
-                      : "Valider le don"}
+                : don.statut === "PROGRAMMEE"
+                  ? "Don programmé"
+                  : don.statut === "REJETE"
+                    ? "Reprendre le traitement"
+                    : don.statut === "SOUMIS"
+                      ? "Passer en vérification"
+                      : don.statut === "EN_VERIFICATION"
+                        ? "Marquer inspecté"
+                        : "Valider le don"}
             </button>
             <GenererFicheButton don={don} formAction={handleGeneratePDF} />
           </div>

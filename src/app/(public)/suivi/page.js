@@ -23,6 +23,9 @@ export default async function SuiviPage({ searchParams }) {
         include: { donateur: true, photos: true, messages: { orderBy: { createdAt: "asc" } } },
       })
     : null;
+  const donorName = don?.donateur
+    ? [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || "Donateur"
+    : "Donateur";
 
   return (
     <section className="bg-ong-fond py-8">
@@ -84,7 +87,7 @@ export default async function SuiviPage({ searchParams }) {
                   Donateur
                 </p>
                 <p className="text-[15px] text-ong-texte font-medium">
-                  {don.donateur.prenom} {don.donateur.nom}
+                  {donorName}
                 </p>
                 <p className="mt-2 text-[13px] text-ong-muted">
                   Les coordonnées complètes restent accessibles uniquement à l’équipe de gestion du projet.
