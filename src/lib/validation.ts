@@ -24,6 +24,9 @@ export const donationSchema = z.object({
   natureAutre: z.string().trim().max(180),
   description: z.string().trim().min(10).max(5000),
   localisation: z.string().trim().min(1).max(240),
+  pays: z.string().trim().max(120).optional().or(z.literal("")),
+  ville: z.string().trim().max(120).optional().or(z.literal("")),
+  quartierVillage: z.string().trim().max(180).optional().or(z.literal("")),
   objectif: objectifDonSchema,
   objectifAutre: z.string().trim().max(180),
 });

@@ -36,6 +36,9 @@ export async function GET(request, { params }) {
       natureAutre: don.natureAutre,
       description: don.description,
       localisation: don.localisation,
+      pays: don.pays,
+      ville: don.ville,
+      quartierVillage: don.quartierVillage,
       statut: don.statut,
       donateur: don.donateur
         ? {

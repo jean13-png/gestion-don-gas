@@ -21,6 +21,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ refe
       nature: don.nature === "AUTRE" && don.natureAutre ? don.natureAutre : don.nature,
       description: don.description,
       localisation: don.localisation,
+      pays: don.pays ?? undefined,
+      ville: don.ville ?? undefined,
+      quartierVillage: don.quartierVillage ?? undefined,
       createdAt: don.createdAt,
     });
 

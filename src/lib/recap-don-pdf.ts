@@ -9,6 +9,9 @@ export type DonRecapPdfData = {
   nature?: string;
   description?: string;
   localisation?: string;
+  pays?: string;
+  ville?: string;
+  quartierVillage?: string;
   createdAt?: Date | string;
 };
 
@@ -47,12 +50,17 @@ export function genererRecuDonPdf(data: DonRecapPdfData): Promise<Buffer> {
 
       doc.moveTo(40, 145).lineTo(555, 145).strokeColor("#0A7FA5").lineWidth(1).stroke();
 
+      const locationText = [data.pays, data.ville, data.quartierVillage, data.localisation]
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value && value.length > 0))
+        .join(", ");
+
       const rows = [
         ["Référence", data.reference || "—"],
         ["Statut", data.statut || "—"],
         ["Donateur", [data.donateur?.prenom, data.donateur?.nom].filter(Boolean).join(" ") || "—"],
         ["Nature du don", data.nature || "—"],
-        ["Localisation", data.localisation || "—"],
+        ["Localisation", locationText || "—"],
         ["Date de soumission", data.createdAt ? new Date(data.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"],
       ];
 

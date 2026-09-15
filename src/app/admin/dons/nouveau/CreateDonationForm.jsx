@@ -51,7 +51,10 @@ export default function CreateDonationForm() {
           </label>
           <label className="text-[13px]">Précision nature (si autre)<input name="natureAutre" maxLength={180} className={inputClass} /></label>
           <label className="text-[13px]">Précision objectif (si autres)<input name="objectifAutre" maxLength={180} className={inputClass} /></label>
-          <label className="text-[13px] sm:col-span-2">Localisation<input name="localisation" required maxLength={240} className={inputClass} /></label>
+          <label className="text-[13px]">Pays<input name="pays" required maxLength={120} className={inputClass} /></label>
+          <label className="text-[13px]">Ville<input name="ville" required maxLength={120} className={inputClass} /></label>
+          <label className="text-[13px] sm:col-span-2">Quartier / village<input name="quartierVillage" required maxLength={180} className={inputClass} /></label>
+          <label className="text-[13px] sm:col-span-2">Détail / lieu de dépôt ou d'enlèvement<input name="localisation" maxLength={240} className={inputClass} /></label>
           <label className="text-[13px] sm:col-span-2">Description<textarea name="description" required minLength={10} maxLength={5000} rows={5} className="mt-1 w-full rounded-md border border-ong-bordure px-3 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-ong-bleu" /></label>
         </div>
       </div>

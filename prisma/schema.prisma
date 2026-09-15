@@ -26,6 +26,9 @@ model Don {
   natureAutre       String?
   description       String
   localisation      String
+  pays              String?
+  ville             String?
+  quartierVillage   String?
   objectif          ObjectifDon @default(AUTRES)
   objectifAutre     String?
   responsable       String @default("HEDJE ZINSOU RAOUL")

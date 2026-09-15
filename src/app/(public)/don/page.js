@@ -14,6 +14,9 @@ export default function DonPage() {
   const [telephone, setTelephone] = useState("");
   const [natureAutre, setNatureAutre] = useState("");
   const [description, setDescription] = useState("");
+  const [pays, setPays] = useState("");
+  const [ville, setVille] = useState("");
+  const [quartierVillage, setQuartierVillage] = useState("");
   const [localisation, setLocalisation] = useState("");
   const [objectif, setObjectif] = useState("");
   const [objectifAutre, setObjectifAutre] = useState("");
@@ -156,11 +159,31 @@ export default function DonPage() {
                 </label>
                 <textarea id="description" name="description" rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-3 py-2.5 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
               </div>
-              <div>
-                <label htmlFor="localisation" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
-                  Localisation d&apos;enlèvement / dépôt
-                </label>
-                <input id="localisation" name="localisation" type="text" required value={localisation} onChange={(e) => setLocalisation(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="pays" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                    Pays
+                  </label>
+                  <input id="pays" name="pays" type="text" required value={pays} onChange={(e) => setPays(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" placeholder="Ex : Bénin" />
+                </div>
+                <div>
+                  <label htmlFor="ville" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                    Ville
+                  </label>
+                  <input id="ville" name="ville" type="text" required value={ville} onChange={(e) => setVille(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" placeholder="Ex : Cotonou" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="quartierVillage" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                    Quartier / village
+                  </label>
+                  <input id="quartierVillage" name="quartierVillage" type="text" required value={quartierVillage} onChange={(e) => setQuartierVillage(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" placeholder="Ex : Akpakpa, Ouando" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="localisation" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
+                    Détail / lieu de dépôt ou d&apos;enlèvement
+                  </label>
+                  <input id="localisation" name="localisation" type="text" value={localisation} onChange={(e) => setLocalisation(e.target.value)} className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert" placeholder="Ex : près de l'école, rue principale..." />
+                </div>
               </div>
             </div>
           </fieldset>

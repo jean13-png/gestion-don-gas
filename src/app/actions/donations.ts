@@ -11,9 +11,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { donationSchema } from "@/lib/validation";
 import { type NatureDon, type ObjectifDon } from "@/lib/pdf";
 import { genererRecuDonPdf } from "@/lib/recap-don-pdf";
-import { id } from "zod/locales";
-import { success } from "zod";
-import { error } from "node:console";
+import { buildDonLocalisation } from "@/lib/location";
 
 const NATURE_MAP: Record<string, NatureDon> = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -62,7 +60,11 @@ export async function soumettreDon(prevState, formData) {
   const nature = formData.get("nature")?.toString().trim() || "";
   const natureAutre = formData.get("natureAutre")?.toString().trim() || "";
   const description = formData.get("description")?.toString().trim() || "";
-  const localisation = formData.get("localisation")?.toString().trim() || "";
+  const pays = formData.get("pays")?.toString().trim() || "";
+  const ville = formData.get("ville")?.toString().trim() || "";
+  const quartierVillage = formData.get("quartierVillage")?.toString().trim() || "";
+  const localisationInput = formData.get("localisation")?.toString().trim() || "";
+  const localisation = buildDonLocalisation({ localisation: localisationInput, pays, ville, quartierVillage });
   const objectif = formData.get("objectif")?.toString().trim() || "";
   const objectifAutre = formData.get("objectifAutre")?.toString().trim() || "";
 
@@ -76,6 +78,9 @@ export async function soumettreDon(prevState, formData) {
     natureAutre,
     description,
     localisation,
+    pays,
+    ville,
+    quartierVillage,
     objectif,
     objectifAutre,
   });
@@ -106,6 +111,9 @@ export async function soumettreDon(prevState, formData) {
           natureAutre: nature === "AUTRE" ? natureAutre : null,
           description,
           localisation,
+          pays: pays || null,
+          ville: ville || null,
+          quartierVillage: quartierVillage || null,
           objectif: objectif as ObjectifDon,
           objectifAutre: objectif === "AUTRES" ? objectifAutre : null,
           donateurId: donateur.id,
@@ -120,6 +128,9 @@ export async function soumettreDon(prevState, formData) {
       nature: nature === "AUTRE" && natureAutre ? natureAutre : nature,
       description,
       localisation,
+      pays,
+      ville,
+      quartierVillage,
       createdAt: new Date(),
     });
 

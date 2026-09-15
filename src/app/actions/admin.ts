@@ -10,6 +10,7 @@ import { generateReference } from "@/lib/reference";
 import { genererFicheReceptionDon } from "@/lib/pdf";
 import type { NatureDon } from "@/lib/pdf";
 import { genererRecuDonPdf } from "@/lib/recap-don-pdf";
+import { buildDonLocalisation } from "@/lib/location";
 
 const NATURE_MAP: Record<string, NatureDon> = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -39,11 +40,23 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
     nature: formData.get("nature")?.toString().trim() || "",
     natureAutre: formData.get("natureAutre")?.toString().trim() || "",
     description: formData.get("description")?.toString().trim() || "",
-    localisation: formData.get("localisation")?.toString().trim() || "",
+    pays: formData.get("pays")?.toString().trim() || "",
+    ville: formData.get("ville")?.toString().trim() || "",
+    quartierVillage: formData.get("quartierVillage")?.toString().trim() || "",
+    localisationInput: formData.get("localisation")?.toString().trim() || "",
     objectif: formData.get("objectif")?.toString().trim() || "",
     objectifAutre: formData.get("objectifAutre")?.toString().trim() || "",
   };
-  const parsed = donationSchema.safeParse(values);
+  const localisation = buildDonLocalisation({
+    localisation: values.localisationInput,
+    pays: values.pays,
+    ville: values.ville,
+    quartierVillage: values.quartierVillage,
+  });
+  const parsed = donationSchema.safeParse({
+    ...values,
+    localisation,
+  });
 
   if (!parsed.success) return { error: "Veuillez corriger les informations saisies." };
   if (values.nature === "AUTRE" && !values.natureAutre) {
@@ -71,7 +84,10 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
         nature: parsed.data.nature,
         natureAutre: parsed.data.nature === "AUTRE" ? parsed.data.natureAutre : null,
         description: values.description,
-        localisation: values.localisation,
+        localisation,
+        pays: values.pays || null,
+        ville: values.ville || null,
+        quartierVillage: values.quartierVillage || null,
         objectif: parsed.data.objectif,
         objectifAutre: parsed.data.objectif === "AUTRES" ? parsed.data.objectifAutre : null,
         donateurId: donateur.id,
@@ -85,7 +101,10 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
     donateur: { prenom: values.prenom, nom: values.nom },
     nature: parsed.data.nature === "AUTRE" ? values.natureAutre : values.nature,
     description: values.description,
-    localisation: values.localisation,
+    localisation,
+    pays: values.pays,
+    ville: values.ville,
+    quartierVillage: values.quartierVillage,
     createdAt: new Date(),
   });
 
