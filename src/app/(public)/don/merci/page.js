@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
-import jsPDF from "jspdf";
 import Icon from "@/components/ui/Icon";
 
 const STATUTS = ["SOUMIS", "EN_VERIFICATION", "INSPECTE", "VALIDE", "FICHE_GENEREE", "REJETE"];
@@ -112,97 +111,23 @@ function DonMerciContent() {
       });
       return;
     }
+
     try {
-      const loadImage = async (source) => {
-        const response = await fetch(source);
-        if (!response.ok) throw new Error(`Image indisponible (${response.status})`);
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error("Lecture de l'en-tête impossible"));
-          reader.readAsDataURL(blob);
-        });
-      };
-      const [logo, mailIcon, phoneIcon] = await Promise.all([
-        loadImage("/fiche-don/logo-ong-gas.jpg"),
-        loadImage("/fiche-don/icone-mail.png"),
-        loadImage("/fiche-don/icone-telephone.png"),
-      ]);
+      const response = await fetch(`/api/dons/${encodeURIComponent(reference)}/recu`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
-      const pdf = new jsPDF("p", "mm", "a4");
-      const margin = 18;
-      const contentWidth = 210 - margin * 2;
-      const pt = (value) => value * 25.4 / 72;
-      let y = pt(125.6);
-      // Coordonnées reprises de dessinerEnteteInstitutionnel du PDF admin.
-      pdf.addImage(logo, "JPEG", pt(31.4), pt(11), pt(73), pt(78.3));
-      pdf.addImage(logo, "JPEG", pt(489.8), pt(14.9), pt(73.2), pt(78.2));
-      pdf.setTextColor(46, 116, 181);
-      pdf.setFont("helvetica", "bolditalic");
-      pdf.setFontSize(12);
-      pdf.text("ONG Global Actions Solidarité – Projet Informatique Pour Tous", pt(141.9), pt(21.7));
-      pdf.setTextColor(0, 0, 0);
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(10.08);
-      pdf.addImage(mailIcon, "PNG", pt(214.1), pt(45.1), pt(13.7), pt(13.92));
-      pdf.addImage(phoneIcon, "PNG", pt(229.7), pt(45.1), pt(13.2), pt(13.5));
-      pdf.text("Mail : infos@ongglobalactionsolidarite.com", pt(206.5), pt(35.7));
-      pdf.text("+229-01-46-46-66-56", pt(254), pt(47.9));
-      pdf.setFontSize(9.12);
-      pdf.text("N°OAPI : 003/MIC/DDI/C-SPPI/S-DDI", pt(129.2), pt(60.9));
-      pdf.setFontSize(10.08);
-      pdf.text("Siège : ", pt(276.4), pt(60.1));
-      pdf.setFont("times", "bold");
-      pdf.text("Abomey-Calavi République du Bénin", pt(305.6), pt(58.7));
-      pdf.setDrawColor(0, 0, 0);
-      pdf.setLineWidth(pt(0.91));
-      pdf.line(pt(40.44), pt(94.08), pt(550.64), pt(94.08));
-      pdf.setLineWidth(pt(2.74));
-      pdf.line(pt(40.44), pt(95.9), pt(550.64), pt(95.9));
-      pdf.setTextColor(34, 50, 59);
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(15);
-      pdf.text("Récapitulatif de votre proposition de don", margin, y);
-      y += 12;
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `recu-don-${reference}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
 
-      const addField = (label, value) => {
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(10);
-        pdf.text(`${label} :`, margin, y);
-        pdf.setFont("helvetica", "normal");
-        const lines = pdf.splitTextToSize(String(value || "—"), contentWidth - 34);
-        pdf.text(lines, margin + 34, y);
-        y += Math.max(7, lines.length * 5);
-      };
-
-      addField("Référence", don.reference);
-      addField("Statut", STATUT_LABELS[don.statut] || don.statut);
-      addField("Donateur", `${don.donateur.prenom} ${don.donateur.nom}`);
-      addField("Nature du don", don.nature === "AUTRE" && don.natureAutre ? don.natureAutre : don.nature);
-      addField("Description", don.description);
-      addField("Localisation", don.localisation);
-      addField(
-        "Date de soumission",
-        new Date(don.createdAt).toLocaleDateString("fr-FR", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }),
-      );
-      y += 8;
-      pdf.setDrawColor(0, 160, 184);
-      pdf.line(margin, y, 210 - margin, y);
-      y += 10;
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      pdf.setTextColor(74, 85, 104);
-      pdf.text(
-        pdf.splitTextToSize("Conservez précieusement cette référence pour suivre l'avancement de votre dossier.", contentWidth),
-        margin,
-        y,
-      );
-      pdf.save(`recu-don-${reference}.pdf`);
       await Swal.fire({
         title: "PDF téléchargé",
         text: "Votre récapitulatif a été enregistré.",

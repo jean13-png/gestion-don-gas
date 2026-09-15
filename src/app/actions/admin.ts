@@ -9,6 +9,7 @@ import { donationSchema } from "@/lib/validation";
 import { generateReference } from "@/lib/reference";
 import { genererFicheReceptionDon } from "@/lib/pdf";
 import type { NatureDon } from "@/lib/pdf";
+import { genererRecuDonPdf } from "@/lib/recap-don-pdf";
 
 const NATURE_MAP: Record<string, NatureDon> = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -78,33 +79,22 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
     });
   });
 
-  let pieceJointe;
-  try {
-    const contenu = await genererFicheReceptionDon({
-      donateur: {
-        nomRaisonSociale: `${values.prenom} ${values.nom}`,
-        representant: values.organisme || undefined,
-        adresse: values.localisation,
-        telephone: values.telephone,
-        email: values.email,
-      },
-      nature: NATURE_MAP[parsed.data.nature],
-      natureAutresDetail: parsed.data.nature === "AUTRE" ? parsed.data.natureAutre : undefined,
-      description: values.description,
-      objectif: parsed.data.objectif,
-      objectifAutresDetail: parsed.data.objectif === "AUTRES" ? parsed.data.objectifAutre : undefined,
-    });
-    pieceJointe = { nom: `fiche-${reference}.pdf`, contenu };
-  } catch (error) {
-    console.error("[creerDonAdmin] Génération PDF échouée:", error);
-  }
+  const recapPdf = await genererRecuDonPdf({
+    reference,
+    statut: "SOUMIS",
+    donateur: { prenom: values.prenom, nom: values.nom },
+    nature: parsed.data.nature === "AUTRE" ? values.natureAutre : values.nature,
+    description: values.description,
+    localisation: values.localisation,
+    createdAt: new Date(),
+  });
 
   const donorName = escapeHtml(`${values.prenom} ${values.nom}`);
   const donorMail = await envoyerMail({
     to: values.email,
     sujet: `Accusé de réception de votre don — Réf. ${reference}`,
     html: templateEmail(`<p>Bonjour ${donorName},</p><p>Votre proposition de don a été enregistrée par notre équipe.</p><p>Référence : <strong>${reference}</strong></p><p>Conservez cette référence pour suivre votre dossier.</p><p><a href="https://gestion-don-gas.vercel.app/suivi?reference=${encodeURIComponent(reference)}">Suivre mon dossier</a></p>`),
-    pieceJointe,
+    pieceJointe: { nom: `recu-don-${reference}.pdf`, contenu: recapPdf },
     donId: don.id,
   });
 

@@ -9,7 +9,8 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { donationSchema } from "@/lib/validation";
-import { genererFicheReceptionDon, type NatureDon, type ObjectifDon } from "@/lib/pdf";
+import { type NatureDon, type ObjectifDon } from "@/lib/pdf";
+import { genererRecuDonPdf } from "@/lib/recap-don-pdf";
 import { id } from "zod/locales";
 import { success } from "zod";
 import { error } from "node:console";
@@ -112,33 +113,22 @@ export async function soumettreDon(prevState, formData) {
       });
     });
 
-    let pieceJointe;
-    try {
-      const contenu = await genererFicheReceptionDon({
-        donateur: {
-          nomRaisonSociale: [prenom, nom].filter(Boolean).join(" ") || undefined,
-          representant: organisme || undefined,
-          adresse: localisation || undefined,
-          telephone,
-          email,
-        },
-        nature: NATURE_MAP[nature] || "AUTRES",
-        natureAutresDetail: nature === "AUTRE" ? natureAutre : undefined,
-        description,
-        objectif,
-        objectifAutresDetail: objectif === "AUTRES" ? objectifAutre : undefined,
-      });
-      pieceJointe = { nom: `fiche-${reference}.pdf`, contenu };
-    } catch (error) {
-      console.error("[soumettreDon] Génération du PDF jointe échouée:", error);
-    }
+    const recapPdf = await genererRecuDonPdf({
+      reference,
+      statut: "SOUMIS",
+      donateur: { prenom, nom },
+      nature: nature === "AUTRE" && natureAutre ? natureAutre : nature,
+      description,
+      localisation,
+      createdAt: new Date(),
+    });
 
     const recap = `<p>Bonjour ${prenom} ${nom},</p><p>Nous avons bien reçu votre proposition de don. Voici le récapitulatif :</p><ul><li>Référence : ${reference}</li><li>Nature : ${nature}</li><li>Objectif : ${objectif}</li><li>Description : ${description}</li></ul><p>Conservez précieusement votre référence : elle vous permet de suivre l'avancement de votre dossier à tout moment.</p><p><a href="https://gestion-don-gas.vercel.app/suivi">➜ Suivre mon dossier</a></p><p>Notre équipe examine chaque proposition et revient vers vous rapidement.<br/>Merci pour votre solidarité.</p><p>L'équipe ONG-GAS</p>`;
     await envoyerMail({
       to: email,
       sujet: `Accusé de réception de votre don — Réf. ${reference}`,
       html: templateEmail(recap),
-      pieceJointe,
+      pieceJointe: { nom: `recu-don-${reference}.pdf`, contenu: recapPdf },
       donId: don.id,
     });
     await envoyerMail({
