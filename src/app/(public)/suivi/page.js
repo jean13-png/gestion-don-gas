@@ -26,13 +26,21 @@ export default async function SuiviPage({ searchParams }) {
   const donorName = don?.donateur
     ? [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") || "Donateur"
     : "Donateur";
+  const hasMessages = (don?.messages?.length || 0) > 0;
 
   return (
     <section className="bg-ong-fond py-8">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-        <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
-          Suivre ma demande
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
+            Suivre ma demande
+          </h1>
+          {hasMessages && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-800" title="Messages de l'équipe">
+              💬 {don.messages.length}
+            </span>
+          )}
+        </div>
         <p className="mt-2 text-[15px] text-ong-texte">
           Entrez votre référence de don pour consulter le statut et les détails de votre dossier.
         </p>
@@ -174,8 +182,12 @@ export default async function SuiviPage({ searchParams }) {
             )}
 
             <div className="bg-white border border-ong-bordure rounded-lg p-5">
-              <h2 className="font-display font-semibold text-ong-bleu text-[15px] mb-4">
-                Messages / réponse de l&apos;équipe
+              <h2 className="font-display font-semibold text-ong-bleu text-[15px] mb-4 flex items-center gap-2">
+                <span>💬</span>
+                <span>Messages / réponse de l&apos;équipe</span>
+                {don.messages.length > 0 && (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">{don.messages.length}</span>
+                )}
               </h2>
 
               {don.messages.length > 0 ? (

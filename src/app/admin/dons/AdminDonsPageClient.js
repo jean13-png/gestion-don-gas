@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getAdminDons, exportAdminDonsCsv } from "@/app/actions/admin";
@@ -51,10 +51,6 @@ export default function AdminDonsPageClient({ initialData }) {
   const current = state.data || initialData;
   const totalPages = current?.totalPages || 1;
   const currentPage = current?.page || 1;
-
-  useEffect(() => {
-    setPage(currentPage);
-  }, [currentPage]);
 
   const pageNumbers = useMemo(() => {
     const pages = [];
@@ -242,7 +238,14 @@ export default function AdminDonsPageClient({ initialData }) {
               <tbody>
                 {current.dons.map((don) => (
                   <tr key={don.id} className="border-b border-ong-bordure hover:bg-ong-fond">
-                    <td className="px-6 py-4 font-medium">{don.reference}</td>
+                    <td className="px-6 py-4 font-medium">
+                      <div className="flex items-center gap-2">
+                        <span>{don.reference}</span>
+                        {don.hasMessages && (
+                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-[11px] text-amber-800" title="Messages de suivi">💬</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-6 py-4">{don.donateur.prenom} {don.donateur.nom}</td>
                     <td className="px-6 py-4">{don.nature}</td>
                     <td className="px-6 py-4 text-ong-muted">{new Date(don.createdAt).toLocaleDateString("fr-FR")}</td>

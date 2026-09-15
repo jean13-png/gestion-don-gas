@@ -65,7 +65,7 @@ export default async function AdminDonsPage({ searchParams }) {
         orderBy: { createdAt: "desc" },
         skip,
         take: initialFilter.limit,
-        include: { donateur: true },
+        include: { donateur: true, messages: { select: { id: true } } },
       }),
       tx.don.count({ where }),
     ]);
@@ -77,6 +77,7 @@ export default async function AdminDonsPage({ searchParams }) {
         nature: don.nature,
         statut: don.statut,
         createdAt: don.createdAt.toISOString(),
+        hasMessages: (don.messages?.length || 0) > 0,
         donateur: {
           prenom: don.donateur.prenom,
           nom: don.donateur.nom,

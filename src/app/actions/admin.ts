@@ -227,9 +227,14 @@ export async function markDonFicheGenerated(donId: string, ficheUrl: string) {
   const admin = await requireAdmin();
   if (!ficheUrl) throw new Error("DON_FICHE_URL_INVALID");
 
+  const currentDon = await prisma.don.findUnique({ where: { id: donId }, select: { statut: true } });
+  if (!currentDon || !["VALIDE", "PROGRAMMEE"].includes(currentDon.statut)) {
+    throw new Error("DON_MUST_BE_VALIDATED");
+  }
+
   const don = await prisma.don.findUnique({ where: { id: donId } });
   const updated = await prisma.don.update({
-    where: { id: donId, statut: "VALIDE" },
+    where: { id: donId, statut: currentDon.statut },
     data: { ficheUrl, statut: "FICHE_GENEREE" },
   });
   if (don) {

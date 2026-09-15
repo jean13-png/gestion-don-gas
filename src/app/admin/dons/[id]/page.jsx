@@ -114,7 +114,7 @@ export default async function AdminDonDetailPage({ params }) {
       where: { id: don.id },
       select: { statut: true },
     });
-    if (currentDon?.statut !== "VALIDE") {
+    if (!currentDon || !["VALIDE", "PROGRAMMEE"].includes(currentDon.statut)) {
       throw new Error("DON_MUST_BE_VALIDATED");
     }
     const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
@@ -220,9 +220,16 @@ export default async function AdminDonDetailPage({ params }) {
     <div className="max-w-4xl">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
-            Don {don.reference}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display font-semibold text-ong-bleu text-[28px]">
+              Don {don.reference}
+            </h1>
+            {don.messages.length > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-800" title="Messages en attente">
+                💬 {don.messages.length}
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-[13px] text-ong-muted">
             {don.donateur.prenom} {don.donateur.nom} — {don.nature}
           </p>
@@ -323,8 +330,12 @@ export default async function AdminDonDetailPage({ params }) {
       )}
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
-        <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
-          Messagerie sécurisée
+        <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4 flex items-center gap-2">
+          <span>💬</span>
+          <span>Messagerie sécurisée</span>
+          {don.messages.length > 0 && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800">{don.messages.length}</span>
+          )}
         </h2>
 
         {don.messages.length > 0 ? (
