@@ -1,9 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export default function ScrollReveal({ children }) {
+  const pathname = usePathname();
+
   useEffect(() => {
+    if (pathname?.startsWith("/admin")) {
+      return;
+    }
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReducedMotion) {
@@ -43,7 +49,11 @@ export default function ScrollReveal({ children }) {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
+
+  if (pathname?.startsWith("/admin")) {
+    return <>{children}</>;
+  }
 
   return <>{children}</>;
 }
