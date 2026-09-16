@@ -47,8 +47,11 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         />
-        <link rel="icon" href="/favicon.svg" />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <link rel="icon" href="/favicon-32.png" sizes="32x32" />
+        <link rel="icon" href="/favicon-16.png" sizes="16x16" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="shortcut icon" href="/favicon-96.png" />
+        <link rel="mask-icon" href="/favicon.svg" color="#1F4E79" />
         <link rel="canonical" href="https://gestion-don-gas.vercel.app" />
         <meta name="robots" content="index, follow" />
         <meta name="keywords" content="ONG, GAS, dons, donation, écoles, PIPT, Bénin, aide" />
