@@ -88,15 +88,19 @@ export default async function AdminDonDetailPage({ params }) {
       AUTRE: "Autre",
     };
 
-    const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
-    // If the original enum represents a specific material subtype (e.g. JOUETS),
+    // Prefer the donor-submitted nature when present; fall back to the current
+    // recorded nature (may have been edited by admin).
+    const donorNature = don.originalNature ?? don.nature;
+    const naturePdf = NATURE_MAP[donorNature] || "AUTRES";
+
+    // If the stored enum represents a specific material subtype (e.g. JOUETS),
     // pass it to the fiche as natureAutresDetail so the document records the
     // exact donated item while keeping the checked general case (Matériel).
     let natureDetail;
-    if (don.nature === "AUTRE") {
+    if (donorNature === "AUTRE") {
       natureDetail = don.natureAutre;
-    } else if (naturePdf === "MATERIEL" && !["MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE"].includes(don.nature)) {
-      natureDetail = NATURE_LABELS[don.nature] || undefined;
+    } else if (naturePdf === "MATERIEL" && !["MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE"].includes(donorNature)) {
+      natureDetail = NATURE_LABELS[donorNature] || undefined;
     }
 
     const validationPdf = await genererFicheReceptionDon({

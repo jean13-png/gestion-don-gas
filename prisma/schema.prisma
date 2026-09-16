@@ -23,6 +23,7 @@ model Don {
   id                String      @id @default(cuid())
   reference         String      @unique
   nature            NatureDon
+  originalNature    NatureDon?
   natureAutre       String?
   description       String
   localisation      String

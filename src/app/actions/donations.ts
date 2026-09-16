@@ -123,6 +123,7 @@ export async function soumettreDon(prevState, formData) {
         data: {
           reference,
           nature,
+          originalNature: nature,
           natureAutre: nature === "AUTRE" ? natureAutre : null,
           description,
           localisation,
