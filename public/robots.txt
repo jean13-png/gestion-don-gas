@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /_next/
+Allow: /
+
+Sitemap: https://gestion-don-gas.vercel.app/sitemap.xml
+Host: https://gestion-don-gas.vercel.app
