@@ -66,6 +66,39 @@ export default async function AdminDonDetailPage({ params }) {
     "use server";
     const observations = formData.get("observations");
     await updateDonStatus(don.id, "VALIDE", observations);
+    const NATURE_LABELS = {
+      MATERIEL_INFORMATIQUE: "Matériel informatique",
+      EQUIPEMENT_PEDAGOGIQUE: "Équipement pédagogique",
+      DON_FINANCIER: "Don financier",
+      DES_HABITS: "Des habits",
+      DES_VIVRES: "Des vivres",
+      MACHINES_A_COUDRE: "Des machines à coudre",
+      VEHICULES: "Des véhicules",
+      BUS_TRANSPORT: "Un bus de transport en commun",
+      ORDINATEURS: "Des ordinateurs",
+      MOBILIER: "Du mobilier (tables, chaises, tableaux, bancs…)",
+      JOUETS: "Des jouets",
+      LIVRES: "Des livres",
+      FAUTEUILS_MEDICAUX: "Des fauteuils médicaux",
+      BEQUILLES: "Des béquilles",
+      APPARTEMENT: "Un appartement",
+      MAISON: "Une maison",
+      MATELAS: "Des matelas",
+      IMPRIMANTES: "Des imprimantes",
+      AUTRE: "Autre",
+    };
+
+    const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
+    // If the original enum represents a specific material subtype (e.g. JOUETS),
+    // pass it to the fiche as natureAutresDetail so the document records the
+    // exact donated item while keeping the checked general case (Matériel).
+    let natureDetail;
+    if (don.nature === "AUTRE") {
+      natureDetail = don.natureAutre;
+    } else if (naturePdf === "MATERIEL" && !["MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE"].includes(don.nature)) {
+      natureDetail = NATURE_LABELS[don.nature] || undefined;
+    }
+
     const validationPdf = await genererFicheReceptionDon({
       donateur: {
         nomRaisonSociale:
@@ -76,13 +109,14 @@ export default async function AdminDonDetailPage({ params }) {
         telephone: don.donateur.telephone,
         email: don.donateur.email,
       },
-      nature: NATURE_MAP[don.nature] || "AUTRES",
-      natureAutresDetail: don.nature === "AUTRE" ? don.natureAutre : undefined,
+      nature: naturePdf,
+      natureAutresDetail: natureDetail,
       description: don.description,
       objectif: don.objectif,
       objectifAutresDetail:
         don.objectif === "AUTRES" ? don.objectifAutre : undefined,
       responsable: don.responsable || undefined,
+      dateReception: new Date().toLocaleDateString("fr-FR"),
     });
     await envoyerMail({
       to: don.donateur.email,
@@ -133,6 +167,8 @@ export default async function AdminDonDetailPage({ params }) {
       throw new Error("DON_MUST_BE_VALIDATED");
     }
     const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
+    // For generation after validation, prefer to use the validation date if present
+    const generationDate = don.validatedAt ? new Date(don.validatedAt) : new Date();
     const temporaryPhotos = (
       await Promise.all(
         don.photos.slice(0, 10).map(async (photo, index) => {
@@ -171,30 +207,59 @@ export default async function AdminDonDetailPage({ params }) {
         }),
       )
     ).filter(Boolean);
+    const NATURE_LABELS = {
+     MATERIEL_INFORMATIQUE: "Matériel informatique",
+     EQUIPEMENT_PEDAGOGIQUE: "Équipement pédagogique",
+     DON_FINANCIER: "Don financier",
+     DES_HABITS: "Des habits",
+     DES_VIVRES: "Des vivres",
+     MACHINES_A_COUDRE: "Des machines à coudre",
+     VEHICULES: "Des véhicules",
+     BUS_TRANSPORT: "Un bus de transport en commun",
+     ORDINATEURS: "Des ordinateurs",
+     MOBILIER: "Du mobilier (tables, chaises, tableaux, bancs…)",
+     JOUETS: "Des jouets",
+     LIVRES: "Des livres",
+     FAUTEUILS_MEDICAUX: "Des fauteuils médicaux",
+     BEQUILLES: "Des béquilles",
+     APPARTEMENT: "Un appartement",
+     MAISON: "Une maison",
+     MATELAS: "Des matelas",
+     IMPRIMANTES: "Des imprimantes",
+     AUTRE: "Autre",
+    };
+
+    let natureDetail;
+    if (don.nature === "AUTRE") {
+     natureDetail = don.natureAutre;
+    } else if (naturePdf === "MATERIEL" && !["MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE"].includes(don.nature)) {
+     natureDetail = NATURE_LABELS[don.nature] || undefined;
+    }
+
     const buffer = await genererFicheReceptionDon({
-      donateur: {
-        nomRaisonSociale:
-          [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
-          undefined,
-        representant: don.donateur.organisme || undefined,
-        adresse: don.localisation || undefined,
-        telephone: don.donateur.telephone,
-        email: don.donateur.email,
-      },
-      nature: naturePdf,
-      natureAutresDetail: don.nature === "AUTRE" ? don.natureAutre : undefined,
-      description: don.description,
-      objectif: don.objectif,
-      objectifAutresDetail:
-        don.objectif === "AUTRES" && don.objectifAutre
-          ? don.objectifAutre
-          : undefined,
-      faitA: don.faitA || undefined,
-      dateReception: don.dateReception
-        ? don.dateReception.toLocaleDateString("fr-FR")
-        : undefined,
-      responsable: don.responsable || undefined,
-      photosPreuves: temporaryPhotos,
+     donateur: {
+       nomRaisonSociale:
+         [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
+         undefined,
+       representant: don.donateur.organisme || undefined,
+       adresse: don.localisation || undefined,
+       telephone: don.donateur.telephone,
+       email: don.donateur.email,
+     },
+     nature: naturePdf,
+     natureAutresDetail: natureDetail,
+     description: don.description,
+     objectif: don.objectif,
+     objectifAutresDetail:
+       don.objectif === "AUTRES" && don.objectifAutre
+         ? don.objectifAutre
+         : undefined,
+     faitA: don.faitA || undefined,
+     dateReception: generationDate
+       ? generationDate.toLocaleDateString("fr-FR")
+       : undefined,
+     responsable: don.responsable || undefined,
+     photosPreuves: temporaryPhotos,
     });
 
     const fiche = await put(
