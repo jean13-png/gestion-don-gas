@@ -93,6 +93,21 @@ export default function DonPage() {
                   <option value="MATERIEL_INFORMATIQUE">Matériel informatique</option>
                   <option value="EQUIPEMENT_PEDAGOGIQUE">Équipement pédagogique</option>
                   <option value="DON_FINANCIER">Don financier</option>
+                  <option value="DES_HABITS">Des habits</option>
+                  <option value="DES_VIVRES">Des vivres</option>
+                  <option value="MACHINES_A_COUDRE">Des machines à coudre</option>
+                  <option value="VEHICULES">Des véhicules</option>
+                  <option value="BUS_TRANSPORT">Un bus de transport en commun</option>
+                  <option value="ORDINATEURS">Des ordinateurs</option>
+                  <option value="MOBILIER">Du mobilier (tables, chaises, tableaux, bancs…)</option>
+                  <option value="JOUETS">Des jouets</option>
+                  <option value="LIVRES">Des livres</option>
+                  <option value="FAUTEUILS_MEDICAUX">Des fauteuils médicaux</option>
+                  <option value="BEQUILLES">Des béquilles</option>
+                  <option value="APPARTEMENT">Un appartement</option>
+                  <option value="MAISON">Une maison</option>
+                  <option value="MATELAS">Des matelas</option>
+                  <option value="IMPRIMANTES">Des imprimantes</option>
                   <option value="AUTRE">Autre</option>
                 </select>
               </div>
