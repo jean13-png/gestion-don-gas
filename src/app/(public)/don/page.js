@@ -90,25 +90,42 @@ export default function DonPage() {
                   className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
                 >
                   <option value="">Sélectionner...</option>
-                  <option value="MATERIEL_INFORMATIQUE">Matériel informatique</option>
-                  <option value="EQUIPEMENT_PEDAGOGIQUE">Équipement pédagogique</option>
-                  <option value="DON_FINANCIER">Don financier</option>
-                  <option value="DES_HABITS">Des habits</option>
-                  <option value="DES_VIVRES">Des vivres</option>
-                  <option value="MACHINES_A_COUDRE">Des machines à coudre</option>
-                  <option value="VEHICULES">Des véhicules</option>
-                  <option value="BUS_TRANSPORT">Un bus de transport en commun</option>
-                  <option value="ORDINATEURS">Des ordinateurs</option>
-                  <option value="MOBILIER">Du mobilier (tables, chaises, tableaux, bancs…)</option>
-                  <option value="JOUETS">Des jouets</option>
-                  <option value="LIVRES">Des livres</option>
-                  <option value="FAUTEUILS_MEDICAUX">Des fauteuils médicaux</option>
-                  <option value="BEQUILLES">Des béquilles</option>
-                  <option value="APPARTEMENT">Un appartement</option>
-                  <option value="MAISON">Une maison</option>
-                  <option value="MATELAS">Des matelas</option>
-                  <option value="IMPRIMANTES">Des imprimantes</option>
-                  <option value="AUTRE">Autre</option>
+                 <optgroup label="Matériel informatique & pédagogique">
+                   <option value="MATERIEL_INFORMATIQUE">Matériel informatique</option>
+                   <option value="EQUIPEMENT_PEDAGOGIQUE">Équipement pédagogique</option>
+                   <option value="ORDINATEURS">Des ordinateurs</option>
+                   <option value="IMPRIMANTES">Des imprimantes</option>
+                 </optgroup>
+
+                 <optgroup label="Vêtements & vivres">
+                   <option value="DES_HABITS">Des habits</option>
+                   <option value="DES_VIVRES">Des vivres</option>
+                 </optgroup>
+
+                 <optgroup label="Mobilier & équipements">
+                   <option value="MOBILIER">Du mobilier (tables, chaises, tableaux, bancs…)</option>
+                   <option value="MATELAS">Des matelas</option>
+                   <option value="FAUTEUILS_MEDICAUX">Des fauteuils médicaux</option>
+                   <option value="BEQUILLES">Des béquilles</option>
+                   <option value="JOUETS">Des jouets</option>
+                   <option value="LIVRES">Des livres</option>
+                   <option value="MACHINES_A_COUDRE">Des machines à coudre</option>
+                 </optgroup>
+
+                 <optgroup label="Véhicules & transport">
+                   <option value="VEHICULES">Des véhicules</option>
+                   <option value="BUS_TRANSPORT">Un bus de transport en commun</option>
+                 </optgroup>
+
+                 <optgroup label="Biens immobiliers">
+                   <option value="APPARTEMENT">Un appartement</option>
+                   <option value="MAISON">Une maison</option>
+                 </optgroup>
+
+                 <optgroup label="Autres">
+                   <option value="DON_FINANCIER">Don financier</option>
+                   <option value="AUTRE">Autre</option>
+                 </optgroup>
                 </select>
               </div>
 
