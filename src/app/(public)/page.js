@@ -81,7 +81,7 @@ export default async function HomePage() {
       </section>
 
       {/* Actions de terrain */}
-      <section className="section">
+      <section id="actions" className="section">
         <div className="container">
           <div className="section-head">
             <h2>Nos actions de terrain</h2>
@@ -169,6 +169,17 @@ export default async function HomePage() {
               </div>
             </article>
 
+
+            <article className="action-item">
+              <div className="action-number">03</div>
+              <div>
+                <h3>Nos actions de terrain</h3>
+                <p>
+                  Découvrez nos interventions récentes et l'impact concret des dons.
+                </p>
+                <Link href="/#actions">Voir nos actions</Link>
+              </div>
+            </article>
 
             <article className="action-item">
               <div className="action-number">04</div>
