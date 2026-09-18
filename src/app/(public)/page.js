@@ -47,17 +47,15 @@ export default async function HomePage() {
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-[1.08fr_0.78fr] gap-10 lg:gap-[65px] items-center py-14 lg:py-[55px]">
             <div>
-              <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
-                ONG Global Actions Solidarité — Abomey-Calavi, Bénin
-              </p>
+            <p className="m-0 mb-3 text-[15px] font-semibold text-[var(--color-ong-bleu)]">
+              ONG Global Actions Solidarité — Organisation créée en 2019
+            </p>
             <h1 className="max-w-[640px] text-[clamp(34px,4vw,52px)] font-extrabold leading-[1.12] tracking-tight text-[var(--color-ong-texte)] uppercase">
               Pour la santé, l&apos;éducation et l&apos;amélioration des conditions de vie pour tous.
             </h1>
-              <p className="mt-4 text-[16px] text-[var(--color-ong-texte)] max-w-[620px]">
-                À travers ses projets, dont le Projet Informatique Pour Tous, l&apos;ONG-GAS agit
-                auprès des enfants, des écoles et des familles du Bénin : dons de matériel
-                scolaire et informatique, équipements, et appui aux communautés.
-              </p>
+            <p className="mt-4 text-[16px] text-[var(--color-ong-texte)] max-w-[620px]">
+              Donner à chaque enfant les compétences numériques de base dès la maternelle. Susciter l’éveil scientifique et technologique chez les apprenants des écoles maternelles, primaires et secondaires tout en les amenant à se familiariser et à maîtriser l’outil informatique durant leur cursus scolaire.
+            </p>
               <div className="mt-7 flex flex-wrap gap-3.5">
                 <Link href="/don" className="button button-outline">
                   Faire un don
@@ -121,11 +119,10 @@ export default async function HomePage() {
               Un projet pour les écoles maternelles, primaires et secondaires
             </h2>
             <p className="text-[15px] text-[var(--color-ong-texte-secondaire)]">
-              Le Projet Informatique Pour Tous vise à susciter l&apos;éveil scientifique
-              et technologique des apprenants tout au long de leur parcours scolaire.
+              « L’ambition du projet est de contribuer, aux côtés des écoles et autres acteurs éducatifs, à donner progressivement aux enfants les connaissances et réflexes numériques nécessaires à leur éducation et à leur avenir ».
             </p>
             <p className="text-[15px] text-[var(--color-ong-texte-secondaire)]">
-              Les équipements reçus sont contrôlés par l&apos;ONG-GAS avant leur intégration
+              Les équipements reçus sont contrôlés par ONG-GAS avant leur intégration
               dans le programme. Les écoles bénéficient également d&apos;un accompagnement
               technique et de la maintenance du matériel mis à disposition.
             </p>
