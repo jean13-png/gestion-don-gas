@@ -17,8 +17,7 @@ export default function AProposPage() {
                   Notre mission
                 </h2>
                 <p className="text-[15px] text-ong-texte leading-relaxed">
-                  L&apos;ONG Global Actions Solidarité (ONG-GAS) est une association à but non lucratif
-                  créée pour réduire la fracture numérique dans les écoles du Bénin. À travers le
+                  L'ONG Global Actions Solidarité (ONG-GAS) est une organisation à but non lucratif, créée en 2019. Notre mission est de donner à chaque enfant les compétences numériques de base dès la maternelle. Susciter l’éveil scientifique et technologique chez les apprenants des écoles maternelles, primaires et secondaires tout en les amenant à se familiariser et à maîtriser l’outil informatique durant leur cursus scolaire. À travers le
                   Projet Informatique Pour Tous (PIPT), nous collectons, vérifons et acheminons du
                   matériel informatique et pédagogique vers les établissements scolaires de maternelle,
                   primaire et secondaire.
@@ -51,14 +50,14 @@ export default function AProposPage() {
                   <Icon name="building" className="text-ong-bleu mt-0.5" />
                   <div>
                     <dt className="text-ong-muted">Statut</dt>
-                    <dd className="text-ong-texte font-medium">Association à but non lucratif</dd>
+                    <dd className="text-ong-texte font-medium">Organisation à but non lucratif</dd>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Icon name="map-pin" className="text-ong-bleu mt-0.5" />
                   <div>
                     <dt className="text-ong-muted">Siège</dt>
-                    <dd className="text-ong-texte font-medium">Abomey-Calavi, Bénin</dd>
+                    <dd className="text-ong-texte font-medium">Abomey-Calavi</dd>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -79,7 +78,7 @@ export default function AProposPage() {
                   <Icon name="calendar" className="text-ong-bleu mt-0.5" />
                   <div>
                     <dt className="text-ong-muted">Année de création</dt>
-                    <dd className="text-ong-texte font-medium">2025</dd>
+                    <dd className="text-ong-texte font-medium">2019</dd>
                   </div>
                 </div>
               </dl>
@@ -116,7 +115,7 @@ export default function AProposPage() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
               <div>
-                <p className="font-display font-semibold text-ong-bleu text-[32px]">2025</p>
+                <p className="font-display font-semibold text-ong-bleu text-[32px]">2019</p>
                 <p className="mt-1 text-[14px] text-ong-muted">Année de lancement</p>
               </div>
               <div>
@@ -135,10 +134,7 @@ export default function AProposPage() {
               Partenaires et reconnaissance
             </h2>
             <p className="text-[15px] text-ong-texte leading-relaxed">
-              L&apos;ONG-GAS collabore avec les autorités éducatives béninoises, des établissements
-              scolaires publics et privés, ainsi que des entreprises et particuliers donateurs.
-              La plateforme PIPT est le point de convergence de ces acteurs, garantissant un suivi
-              fiable et officiel de chaque don.
+              L'ONG-GAS collabore avec des écoles, établissements scolaires, entreprises et particuliers donateurs. La plateforme PIPT est le point de convergence de ces acteurs, garantissant un suivi fiable et officiel de chaque don.
             </p>
             <p className="mt-4 text-[15px] text-ong-texte leading-relaxed">
               Pour toute demande de partenariat ou d&apos;information institutionnelle, contactez-nous

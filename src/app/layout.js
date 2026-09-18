@@ -11,13 +11,13 @@ const inter = Inter({
 export const metadata = {
   title: "ONG-GAS — PIPT | Plateforme de gestion des dons",
   description:
-    "Plateforme officielle du Projet Informatique Pour Tous (PIPT) de l'ONG Global Actions Solidarité. Soumettez et suivez vos dons destinés aux écoles du Bénin.",
-  keywords: ["ONG", "GAS", "dons", "donation", "écoles", "PIPT", "Bénin", "aide"],
+    "Plateforme officielle de l'ONG Global Actions Solidarité. Soumettez et suivez vos dons destinés à améliorer la santé, l'éducation et les conditions de vie des communautés.",
+  keywords: ["ONG", "GAS", "dons", "donation", "éducation", "aide", "solidarité"],
   authors: [{ name: "ONG Global Actions Solidarité", url: "https://gestion-don-gas.vercel.app" }],
   openGraph: {
     title: "ONG-GAS — PIPT | Plateforme de gestion des dons",
     description:
-      "Soumettez et suivez vos dons destinés aux écoles du Bénin. Plateforme officielle du Projet Informatique Pour Tous (PIPT).",
+      "Soumettez et suivez vos dons destinés à améliorer la santé, l'éducation et les conditions de vie des communautés. Plateforme officielle de l'ONG Global Actions Solidarité.",
     url: "https://gestion-don-gas.vercel.app",
     siteName: "ONG-GAS",
     images: ["/favicon.svg"],
@@ -54,7 +54,7 @@ export default function RootLayout({ children }) {
         <link rel="mask-icon" href="/favicon.svg" color="#1F4E79" />
         <link rel="canonical" href="https://gestion-don-gas.vercel.app" />
         <meta name="robots" content="index, follow" />
-        <meta name="keywords" content="ONG, GAS, dons, donation, écoles, PIPT, Bénin, aide" />
+        <meta name="keywords" content="ONG, GAS, dons, donation, éducation, aide, solidarité" />
         <meta property="og:locale" content="fr_FR" />
         <meta property="og:site_name" content="ONG-GAS" />
         <meta name="twitter:card" content="summary_large_image" />
