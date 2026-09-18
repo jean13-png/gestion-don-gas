@@ -131,6 +131,18 @@ export default function AProposPage() {
 
           <div className="bg-white border border-ong-bordure rounded-lg p-8">
             <h2 className="font-display font-semibold text-ong-bleu text-[20px] mb-4">
+              Notre ambition
+            </h2>
+            <p className="text-[15px] text-ong-texte leading-relaxed">
+              « L’ambition du projet est de contribuer, aux côtés des écoles et autres acteurs éducatifs, à donner progressivement aux enfants les connaissances et réflexes numériques nécessaires à leur éducation et à leur avenir ».
+            </p>
+            <p className="mt-4 text-[15px] text-ong-texte leading-relaxed">
+              Nous mettons en œuvre des actions concrètes pour atteindre cette ambition : équipement pédagogique, formation des enseignants, maintenance des installations et suivi d'impact pour garantir que chaque don ait une utilité mesurable.
+            </p>
+          </div>
+
+          <div className="bg-white border border-ong-bordure rounded-lg p-8">
+            <h2 className="font-display font-semibold text-ong-bleu text-[20px] mb-4">
               Partenaires et reconnaissance
             </h2>
             <p className="text-[15px] text-ong-texte leading-relaxed">
