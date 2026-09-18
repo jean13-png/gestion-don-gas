@@ -8,14 +8,37 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   let partenaires = [];
+  let actions = [];
   try {
-    partenaires = await prisma.partenaire.findMany({
-      where: { visible: true, consentementLogo: true },
-      orderBy: [{ ordre: "asc" }, { createdAt: "asc" }],
-    });
+    [partenaires, actions] = await Promise.all([
+      prisma.partenaire.findMany({
+        where: { visible: true, consentementLogo: true },
+        orderBy: [{ ordre: "asc" }, { createdAt: "asc" }],
+      }),
+      prisma.actionAccueil.findMany({
+        where: { visible: true },
+        orderBy: [{ ordre: "asc" }, { createdAt: "asc" }],
+        take: 6,
+      }),
+    ]);
   } catch (error) {
-    console.error("[accueil] Partenaires indisponibles:", error);
+    console.error("[accueil] Contenu dynamique indisponible:", error);
   }
+
+  const actionsFallback = [
+    ["don-enfant.jpg", "La joie des enfants bénéficiaires"],
+    ["don-sacs-scolaires.jpg", "Des sacs scolaires pour bien démarrer l'année"],
+    ["don-tables-bancs.jpg", "Des salles de classe équipées"],
+    ["don-habits.jpg", "Des vêtements pour les enfants"],
+    ["don-informatique.jpg", "Du matériel informatique pour les écoles"],
+  ];
+
+  const actionsAffichees = actions.length > 0 ? actions : actionsFallback.map(([image, title]) => ({
+    id: image,
+    titre: title,
+    description: null,
+    imageUrl: `/images/images-dons/${image}`,
+  }));
 
   return (
     <>
@@ -67,16 +90,13 @@ export default async function HomePage() {
             <p>Chaque don change concrètement le quotidien des enfants, des écoles et des familles que nous accompagnons.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              ["don-enfant.jpg", "La joie des enfants bénéficiaires"],
-              ["don-sacs-scolaires.jpg", "Des sacs scolaires pour bien démarrer l'année"],
-              ["don-tables-bancs.jpg", "Des salles de classe équipées"],
-              ["don-habits.jpg", "Des vêtements pour les enfants"],
-              ["don-informatique.jpg", "Du matériel informatique pour les écoles"],
-            ].map(([image, title]) => (
-              <figure key={image} className="overflow-hidden rounded-lg border border-ong-bordure bg-white">
-                <img src={`/images/images-dons/${image}`} alt={title} loading="lazy" className="w-full h-56 object-cover" />
-                <figcaption className="px-4 py-3 text-[15px] font-semibold text-ong-texte">{title}</figcaption>
+            {actionsAffichees.map((action) => (
+              <figure key={action.id} className="overflow-hidden rounded-lg border border-ong-bordure bg-white">
+                <img src={action.imageUrl} alt={action.titre} loading="lazy" className="w-full h-56 object-cover" />
+                <figcaption className="px-4 py-3 text-[15px] font-semibold text-ong-texte">{action.titre}</figcaption>
+                {action.description && (
+                  <p className="px-4 pb-4 text-[14px] text-ong-texte-secondaire">{action.description}</p>
+                )}
               </figure>
             ))}
           </div>
