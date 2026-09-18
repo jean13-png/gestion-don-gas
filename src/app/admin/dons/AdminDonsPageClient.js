@@ -133,13 +133,16 @@ export default function AdminDonsPageClient({ initialData }) {
           <Link href="/admin/dons/nouveau" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bleu bg-white text-ong-bleu text-[13px] font-medium hover:bg-ong-bleu-tres-clair transition-colors">
             + Créer un don
           </Link>
+          <Link href="/admin/dons?statut=VALIDE" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bordure text-ong-bleu text-[13px] font-medium hover:bg-ong-fond transition-colors">
+            Gérer les dons validés
+          </Link>
           <button
             type="button"
             onClick={handleExport}
             disabled={exporting}
             className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bordure text-ong-bleu text-[13px] font-medium hover:bg-ong-fond transition-colors disabled:opacity-60"
           >
-            {exporting ? "Export..." : "Exporter CSV"}
+            {exporting ? "Export..." : "Exporter Excel"}
           </button>
         </div>
       </div>

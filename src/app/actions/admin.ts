@@ -11,6 +11,7 @@ import { genererFicheReceptionDon } from "@/lib/pdf";
 import type { NatureDon } from "@/lib/pdf";
 import { genererRecuDonPdf } from "@/lib/recap-don-pdf";
 import { buildDonLocalisation } from "@/lib/location";
+import * as XLSX from "xlsx";
 
 const NATURE_MAP: Record<string, NatureDon> = {
   MATERIEL_INFORMATIQUE: "MATERIEL",
@@ -340,13 +341,14 @@ export async function mettreAJourDonDetails(donId: string, formData: FormData) {
     responsable: formData.get("responsable")?.toString().trim() || "HEDJE ZINSOU RAOUL",
     faitA: formData.get("faitA")?.toString().trim() || "",
     dateReception: formData.get("dateReception")?.toString().trim() || new Date().toISOString(),
+    aQuoiServi: formData.get("aQuoiServi")?.toString().trim() || "",
   });
 
   if (!parsed.success) {
     throw new Error("DON_DETAILS_INVALID");
   }
 
-  const { objectif, objectifAutre, responsable, faitA, dateReception } = parsed.data;
+  const { objectif, objectifAutre, responsable, faitA, dateReception, aQuoiServi } = parsed.data;
 
   const data: Record<string, unknown> = {
     objectif,
@@ -361,6 +363,7 @@ export async function mettreAJourDonDetails(donId: string, formData: FormData) {
 
   data.faitA = faitA || null;
   data.dateReception = dateReception;
+  data.aQuoiServi = aQuoiServi || null;
 
   const updated = await prisma.don.update({
     where: { id: donId },
@@ -446,6 +449,7 @@ export async function getAdminDons(filter: AdminDonsFilter = {}): Promise<AdminD
         nom: don.donateur.nom,
         email: don.donateur.email,
       },
+      aQuoiServi: don.aQuoiServi ?? "",
     })),
     total,
     page,
@@ -459,27 +463,66 @@ export async function exportAdminDonsCsv(filter: Omit<AdminDonsFilter, "page" | 
 
   const result = await getAdminDons({ ...filter, page: 1, limit: 1000 });
 
-  const rows = [["Reference", "Nature", "Statut", "Date", "Donateur", "Email"]];
-  for (const don of result.dons) {
+  const rows = [[
+    "N°",
+    "Référence",
+    "Nom",
+    "Prénom",
+    "Date de soumission",
+    "Date de validation",
+    "Nature",
+    "Statut",
+    "Localisation",
+    "Objectif",
+    "Ce à quoi le don a servi",
+    "Email",
+  ]];
+
+  for (const [index, don] of result.dons.entries()) {
+    const donData = await prisma.don.findUnique({
+      where: { id: don.id },
+      select: {
+        ville: true,
+        pays: true,
+        localisation: true,
+        objectif: true,
+        objectifAutre: true,
+        aQuoiServi: true,
+        validatedAt: true,
+      },
+    });
+
     rows.push([
+      index + 1,
       don.reference,
+      don.donateur.nom,
+      don.donateur.prenom,
+      new Date(don.createdAt).toLocaleDateString("fr-FR"),
+      donData?.validatedAt ? new Date(donData.validatedAt).toLocaleDateString("fr-FR") : "",
       don.nature,
       don.statut,
-      new Date(don.createdAt).toLocaleDateString("fr-FR"),
-      `${don.donateur.prenom} ${don.donateur.nom}`,
+      donData?.localisation || [donData?.ville, donData?.pays].filter(Boolean).join(" - ") || "",
+      donData?.objectif === "AUTRES" && donData.objectifAutre ? donData.objectifAutre : donData?.objectif || "",
+      donData?.aQuoiServi || "",
       don.donateur.email,
     ]);
   }
 
-  const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n");
-  const buffer = Buffer.from(`\uFEFF${csv}`, "utf-8");
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Dons");
+
+  const buffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "buffer",
+  });
 
   revalidatePath("/admin/dons");
   revalidatePath("/admin/dashboard");
 
   return {
     content: buffer,
-    filename: `dons-ong-gas-${new Date().toISOString().slice(0, 10)}.csv`,
-    contentType: "text/csv; charset=utf-8",
+    filename: `dons-ong-gas-${new Date().toISOString().slice(0, 10)}.xlsx`,
+    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   };
 }

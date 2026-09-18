@@ -52,4 +52,5 @@ export const adminDonDetailsSchema = z.object({
   responsable: z.string().trim().min(1).max(180),
   faitA: z.string().trim().max(180),
   dateReception: z.coerce.date().refine((date) => !Number.isNaN(date.getTime())),
+  aQuoiServi: z.string().trim().max(2000).optional().or(z.literal("")),
 });

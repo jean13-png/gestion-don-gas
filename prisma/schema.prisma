@@ -35,6 +35,7 @@ model Don {
   responsable       String @default("HEDJE ZINSOU RAOUL")
   faitA             String?
   dateReception     DateTime? @default(now())
+  aQuoiServi        String?
   statut            StatutDon   @default(SOUMIS)
   dateProgrammation DateTime?
   donateur          Donateur    @relation(fields: [donateurId], references: [id])

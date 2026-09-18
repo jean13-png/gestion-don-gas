@@ -168,14 +168,33 @@ export default async function AdminDonDetailPage({ params }) {
     "use server";
     const currentDon = await prisma.don.findUnique({
       where: { id: don.id },
-      select: { statut: true },
+      select: {
+        statut: true,
+        nature: true,
+        originalNature: true,
+        natureAutre: true,
+        faitA: true,
+        dateReception: true,
+        validatedAt: true,
+        responsable: true,
+        objectif: true,
+        objectifAutre: true,
+        description: true,
+        localisation: true,
+        donateur: true,
+      },
     });
     if (!currentDon || !["VALIDE", "PROGRAMMEE"].includes(currentDon.statut)) {
       throw new Error("DON_MUST_BE_VALIDATED");
     }
-    const naturePdf = NATURE_MAP[don.nature] || "AUTRES";
-    // For generation after validation, prefer to use the validation date if present
-    const generationDate = don.validatedAt ? new Date(don.validatedAt) : new Date();
+
+    const donorNature = currentDon.originalNature ?? currentDon.nature;
+    const naturePdf = NATURE_MAP[donorNature] || "AUTRES";
+    const generationDate = currentDon.dateReception
+      ? new Date(currentDon.dateReception)
+      : currentDon.validatedAt
+        ? new Date(currentDon.validatedAt)
+        : new Date();
     const temporaryPhotos = (
       await Promise.all(
         don.photos.slice(0, 10).map(async (photo, index) => {
@@ -237,35 +256,35 @@ export default async function AdminDonDetailPage({ params }) {
     };
 
     let natureDetail;
-    if (don.nature === "AUTRE") {
-     natureDetail = don.natureAutre;
-    } else if (naturePdf === "MATERIEL" && !["MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE"].includes(don.nature)) {
-     natureDetail = NATURE_LABELS[don.nature] || undefined;
+    if (donorNature === "AUTRE") {
+     natureDetail = currentDon.natureAutre || don.natureAutre;
+    } else if (naturePdf === "MATERIEL" && !["MATERIEL_INFORMATIQUE", "EQUIPEMENT_PEDAGOGIQUE"].includes(donorNature)) {
+     natureDetail = NATURE_LABELS[donorNature] || undefined;
     }
 
     const buffer = await genererFicheReceptionDon({
      donateur: {
        nomRaisonSociale:
-         [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
+         [currentDon.donateur.prenom, currentDon.donateur.nom].filter(Boolean).join(" ") ||
          undefined,
-       representant: don.donateur.organisme || undefined,
-       adresse: don.localisation || undefined,
-       telephone: don.donateur.telephone,
-       email: don.donateur.email,
+       representant: currentDon.donateur.organisme || undefined,
+       adresse: currentDon.localisation || undefined,
+       telephone: currentDon.donateur.telephone,
+       email: currentDon.donateur.email,
      },
      nature: naturePdf,
      natureAutresDetail: natureDetail,
-     description: don.description,
-     objectif: don.objectif,
+     description: currentDon.description || don.description,
+     objectif: currentDon.objectif || don.objectif,
      objectifAutresDetail:
-       don.objectif === "AUTRES" && don.objectifAutre
-         ? don.objectifAutre
+       (currentDon.objectif || don.objectif) === "AUTRES"
+         ? (currentDon.objectifAutre || don.objectifAutre)
          : undefined,
-     faitA: don.faitA || "Abomey-Calavi",
-     dateReception: don.dateReception
-       ? new Date(don.dateReception).toLocaleDateString("fr-FR")
+     faitA: currentDon.faitA || don.faitA || "Abomey-Calavi",
+     dateReception: currentDon.dateReception
+       ? new Date(currentDon.dateReception).toLocaleDateString("fr-FR")
        : generationDate.toLocaleDateString("fr-FR"),
-     responsable: don.responsable || "HEDJE ZINSOU RAOUL",
+     responsable: currentDon.responsable || don.responsable || "HEDJE ZINSOU RAOUL",
      photosPreuves: temporaryPhotos,
     });
 
@@ -573,6 +592,22 @@ export default async function AdminDonDetailPage({ params }) {
                 className="w-full h-11 px-3 rounded-md border border-ong-bordure bg-white text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
               />
             </div>
+          </div>
+          <div>
+            <label
+              htmlFor="aQuoiServi"
+              className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5"
+            >
+              Ce à quoi le don a servi
+            </label>
+            <textarea
+              id="aQuoiServi"
+              name="aQuoiServi"
+              rows={3}
+              defaultValue={don.aQuoiServi || ""}
+              placeholder="Ex : les biens ont servi à soutenir l'éducation des enfants..."
+              className="w-full rounded-md border border-ong-bordure bg-white px-3 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-ong-vert focus:border-ong-vert"
+            />
           </div>
           <div className="flex justify-end">
             <button

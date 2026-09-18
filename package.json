@@ -25,6 +25,7 @@
     "resend": "^6.26.0",
     "sharp": "^0.35.4",
     "sweetalert2": "^11.26.25",
+    "xlsx": "^0.18.5",
     "zod": "^4.5.4"
   },
   "devDependencies": {
