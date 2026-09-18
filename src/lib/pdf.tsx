@@ -76,7 +76,13 @@ function resolveBase(sousDossier: string, sonde: string): string {
   return path.join(DIR, sousDossier || "assets");
 }
 const FONTS = resolveBase("fonts", "TimesNewRoman-subset.ttf");
-const ASSETS = resolveBase("", "logo-ong-gas.jpg");
+const ASSET_LOGO_PNG = path.join(process.cwd(), "public", "images", "logo-ong-gas.png");
+const ASSET_LOGO_JPG = path.join(process.cwd(), "public", "fiche-don", "logo-ong-gas.jpg");
+const ASSETS = fs.existsSync(ASSET_LOGO_PNG)
+  ? path.join(process.cwd(), "public", "images")
+  : fs.existsSync(ASSET_LOGO_JPG)
+    ? path.join(process.cwd(), "public", "fiche-don")
+    : resolveBase("", "logo-ong-gas.jpg");
 
 /**
  * Polices du texte STATIQUE : sous-ensembles extraits du PDF modèle.
@@ -109,7 +115,7 @@ const F = {
 };
 
 const IMG = {
-  logo: path.join(ASSETS, "logo-ong-gas.jpg"),
+  logo: fs.existsSync(ASSET_LOGO_PNG) ? ASSET_LOGO_PNG : path.join(ASSETS, "logo-ong-gas.jpg"),
   iconeMail: path.join(ASSETS, "icone-mail.png"),
   iconeTel: path.join(ASSETS, "icone-telephone.png"),
   fondCentral: path.join(ASSETS, "fond-central.jpg"),

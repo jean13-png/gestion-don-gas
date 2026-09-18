@@ -25,9 +25,11 @@ export function genererRecuDonPdf(data: DonRecapPdfData): Promise<Buffer> {
     doc.on("error", reject);
 
     try {
-      const logoPath = path.join(process.cwd(), "public", "fiche-don", "logo-ong-gas.jpg");
-      if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 48, 32, { width: 70 });
+      const logoPath = path.join(process.cwd(), "public", "images", "logo-ong-gas.png");
+      const legacyLogoPath = path.join(process.cwd(), "public", "fiche-don", "logo-ong-gas.jpg");
+      const resolvedLogoPath = fs.existsSync(logoPath) ? logoPath : legacyLogoPath;
+      if (fs.existsSync(resolvedLogoPath)) {
+        doc.image(resolvedLogoPath, 48, 32, { width: 70 });
       }
 
       doc

@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const path = require('path');
 (async () => {
   try {
-    const src = path.join(process.cwd(), 'public', 'fiche-don', 'logo-ong-gas.jpg');
+    const src = path.join(process.cwd(), 'public', 'images', 'logo-ong-gas.png');
     const out = path.join(process.cwd(), 'public');
     await sharp(src).resize(180, 180, { fit: 'cover' }).png().toFile(path.join(out, 'apple-touch-icon.png'));
     await sharp(src).resize(32, 32, { fit: 'cover' }).png().toFile(path.join(out, 'favicon-32.png'));
