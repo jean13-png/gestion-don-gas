@@ -137,11 +137,6 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
-                <Link href="/ecoles" onClick={closeMenu} className="block px-4 py-[13px] !text-white text-[13px] font-medium transition-all duration-200 hover:bg-[var(--color-ong-bleu-fonce)] hover:translate-x-0.5">
-                  Écoles partenaires
-                </Link>
-              </li>
-              <li>
                 <Link href="/contact" onClick={closeMenu} className="block px-4 py-[13px] !text-white text-[13px] font-medium transition-all duration-200 hover:bg-[var(--color-ong-bleu-fonce)] hover:translate-x-0.5">
                   Contact
                 </Link>

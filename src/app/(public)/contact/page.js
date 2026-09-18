@@ -142,7 +142,6 @@ export default function ContactPage() {
                     <option value="">Sélectionner...</option>
                     <option value="DON">Question sur un don</option>
                     <option value="PARTENARIAT">Demande de partenariat</option>
-                    <option value="ECOLE">École partenaire</option>
                     <option value="PRESSE">Presse / média</option>
                     <option value="AUTRE">Autre</option>
                   </select>

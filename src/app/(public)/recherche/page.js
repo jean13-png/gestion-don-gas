@@ -6,7 +6,6 @@ const PAGES = [
   { title: "Le projet PIPT", href: "/a-propos", keywords: ["projet", "pipt", "mission", "association", "ong"] },
   { title: "Faire un don", href: "/don", keywords: ["don", "contribution", "aider", "soutenir", "participer"] },
   { title: "Suivre ma demande", href: "/suivi", keywords: ["suivi", "statut", "référence", "demande", "don"] },
-  { title: "Écoles partenaires", href: "/ecoles", keywords: ["ecoles", "partenaires", "institutions", "éducation", "projet"] },
   { title: "Contact", href: "/contact", keywords: ["contact", "email", "message", "prise de contact", "intervention"] },
   { title: "Conditions d’utilisation", href: "/conditions-utilisation", keywords: ["conditions", "utilisation", "mentions", "règlement", "données"] },
   { title: "Politique de confidentialité", href: "/confidentialite", keywords: ["confidentialite", "vie privée", "données", "protection"] },

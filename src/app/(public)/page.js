@@ -169,17 +169,6 @@ export default async function HomePage() {
               </div>
             </article>
 
-            <article className="action-item">
-              <div className="action-number">03</div>
-              <div>
-                <h3>Devenir école partenaire</h3>
-                <p>
-                  Découvrez les conditions requises pour intégrer le programme
-                  Informatique Pour Tous.
-                </p>
-                <Link href="/ecoles">Voir les conditions</Link>
-              </div>
-            </article>
 
             <article className="action-item">
               <div className="action-number">04</div>

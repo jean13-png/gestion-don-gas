@@ -50,7 +50,7 @@ function LoginForm() {
               <span className="block max-w-[170px] text-[8px] font-semibold text-[var(--color-ong-texte-secondaire)] leading-tight uppercase">
                 Global Actions Solidarité
                 <br />
-                Projet Informatique Pour Tous
+                Espace administratif
               </span>
             </div>
           </a>
@@ -64,7 +64,7 @@ function LoginForm() {
               Espace gestionnaire
             </h1>
             <p className="mt-3 text-[15px] text-[var(--color-ong-texte-secondaire)]">
-              Connectez-vous pour accéder au back-office de la plateforme PIPT.
+              Connectez-vous pour accéder à l'espace administratif d'ONG-GAS.
             </p>
           </div>
 
