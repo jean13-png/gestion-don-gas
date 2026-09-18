@@ -119,8 +119,11 @@ export default async function AdminDonDetailPage({ params }) {
       objectif: don.objectif,
       objectifAutresDetail:
         don.objectif === "AUTRES" ? don.objectifAutre : undefined,
-      responsable: don.responsable || undefined,
-      dateReception: new Date().toLocaleDateString("fr-FR"),
+      faitA: don.faitA || "Abomey-Calavi",
+      dateReception: don.dateReception
+        ? new Date(don.dateReception).toLocaleDateString("fr-FR")
+        : new Date().toLocaleDateString("fr-FR"),
+      responsable: don.responsable || "HEDJE ZINSOU RAOUL",
     });
     await envoyerMail({
       to: don.donateur.email,
@@ -258,11 +261,11 @@ export default async function AdminDonDetailPage({ params }) {
        don.objectif === "AUTRES" && don.objectifAutre
          ? don.objectifAutre
          : undefined,
-     faitA: don.faitA || undefined,
-     dateReception: generationDate
-       ? generationDate.toLocaleDateString("fr-FR")
-       : undefined,
-     responsable: don.responsable || undefined,
+     faitA: don.faitA || "Abomey-Calavi",
+     dateReception: don.dateReception
+       ? new Date(don.dateReception).toLocaleDateString("fr-FR")
+       : generationDate.toLocaleDateString("fr-FR"),
+     responsable: don.responsable || "HEDJE ZINSOU RAOUL",
      photosPreuves: temporaryPhotos,
     });
 
