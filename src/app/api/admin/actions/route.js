@@ -1,4 +1,4 @@
-import { del, put } from "@vercel/blob";
+import { removeFile, saveFile } from "@/lib/storage";
 import sharp from "sharp";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -46,18 +46,14 @@ export async function POST(request) {
       .webp({ quality: 82 })
       .toBuffer();
 
-    const blob = await put(`actions-accueil/${Date.now()}.webp`, image, {
-      access: "public",
-      addRandomSuffix: true,
-      contentType: "image/webp",
-    });
+    const imageUrl = await saveFile("actions-accueil", `action-${Date.now()}.webp`, image);
 
     const last = await prisma.actionAccueil.findFirst({ orderBy: { ordre: "desc" }, select: { ordre: true } });
     const action = await prisma.actionAccueil.create({
       data: {
         titre,
         description: description || null,
-        imageUrl: blob.url,
+        imageUrl,
         visible,
         ordre: (last?.ordre ?? -1) + 1,
       },
@@ -107,9 +103,9 @@ export async function DELETE(request) {
   if (!action) return NextResponse.json({ error: "Action introuvable." }, { status: 404 });
 
   try {
-    await del(action.imageUrl);
+    await removeFile(action.imageUrl);
   } catch (error) {
-    console.error("[actions] Suppression Blob échouée:", error);
+    console.error("[actions] Suppression du fichier échouée:", error);
   }
 
   await prisma.actionAccueil.delete({ where: { id } });

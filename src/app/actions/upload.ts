@@ -1,9 +1,9 @@
 "use server";
 
-import { del, put } from "@vercel/blob";
 import sharp from "sharp";
 import prisma from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { removeFile, saveFile } from "@/lib/storage";
 
 export async function uploadPhoto(formData: FormData) {
   await requireAdmin();
@@ -45,19 +45,15 @@ export async function uploadPhoto(formData: FormData) {
       .jpeg({ quality: 85 })
       .toBuffer();
 
-    const blob = await put(
-      `dons/${don.reference}/photo-${Date.now()}.jpg`,
+    const url = await saveFile(
+      "dons",
+      `photo-${don.reference}-${Date.now()}.jpg`,
       normalized,
-      {
-        access: "public",
-        addRandomSuffix: true,
-        contentType: "image/jpeg",
-      },
     );
 
     const photo = await prisma.photo.create({
       data: {
-        url: blob.url,
+        url,
         donId: don.id,
       },
     });
@@ -90,7 +86,7 @@ export async function deletePhoto(formData: FormData) {
     return { success: false, error: "Photo introuvable." };
   }
 
-  await del(photo.url);
+  await removeFile(photo.url);
   await prisma.photo.delete({ where: { id: photo.id } });
 
   return { success: true };

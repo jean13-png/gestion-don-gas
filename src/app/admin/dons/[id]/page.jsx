@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { put } from "@vercel/blob";
+import { saveFile } from "@/lib/storage";
 import {
   markDonFicheGenerated,
   mettreAJourDonDetails,
@@ -288,17 +288,13 @@ export default async function AdminDonDetailPage({ params }) {
      photosPreuves: temporaryPhotos,
     });
 
-    const fiche = await put(
-      `dons/${don.reference}/fiche-${don.reference}.pdf`,
+    const ficheUrl = await saveFile(
+      "fiches",
+      `fiche-${don.reference}.pdf`,
       buffer,
-      {
-        access: "public",
-        addRandomSuffix: true,
-        contentType: "application/pdf",
-      },
     );
 
-    await markDonFicheGenerated(don.id, fiche.url);
+    await markDonFicheGenerated(don.id, ficheUrl);
 
     try {
       await envoyerMail({

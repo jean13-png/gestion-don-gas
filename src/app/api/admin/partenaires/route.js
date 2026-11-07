@@ -1,4 +1,4 @@
-import { del, put } from "@vercel/blob";
+import { removeFile, saveFile } from "@/lib/storage";
 import sharp from "sharp";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -45,16 +45,12 @@ export async function POST(request) {
       .resize({ width: 400, withoutEnlargement: true })
       .webp({ quality: 85 })
       .toBuffer();
-    const blob = await put(`partenaires/${Date.now()}.webp`, image, {
-      access: "public",
-      addRandomSuffix: true,
-      contentType: "image/webp",
-    });
+    const logoUrl = await saveFile("partenaires", `logo-${Date.now()}.webp`, image);
     const last = await prisma.partenaire.findFirst({ orderBy: { ordre: "desc" }, select: { ordre: true } });
     const partenaire = await prisma.partenaire.create({
       data: {
         nom,
-        logoUrl: blob.url,
+        logoUrl,
         siteWeb,
         consentementLogo: true,
         ordre: (last?.ordre ?? -1) + 1,
@@ -87,9 +83,9 @@ export async function DELETE(request) {
   const partenaire = await prisma.partenaire.findUnique({ where: { id } });
   if (!partenaire) return NextResponse.json({ error: "Partenaire introuvable." }, { status: 404 });
   try {
-    await del(partenaire.logoUrl);
+    await removeFile(partenaire.logoUrl);
   } catch (error) {
-    console.error("[partenaires] Suppression Blob échouée:", error);
+    console.error("[partenaires] Suppression du fichier échouée:", error);
   }
   await prisma.partenaire.delete({ where: { id } });
   return NextResponse.json({ success: true });
