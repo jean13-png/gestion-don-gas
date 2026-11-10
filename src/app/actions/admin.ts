@@ -128,7 +128,7 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
   const donorMail = await envoyerMail({
     to: values.email,
     sujet: `Accusé de réception de votre don — Réf. ${reference}`,
-    html: templateEmail(`<p>Bonjour ${donorName},</p><p>Votre proposition de don a été enregistrée par notre équipe.</p><p>Référence : <strong>${reference}</strong></p><p>Conservez cette référence pour suivre votre dossier.</p><p><a href="https://gestion-don-gas.vercel.app/suivi?reference=${encodeURIComponent(reference)}">Suivre mon dossier</a></p>`),
+    html: templateEmail(`<p>Bonjour ${donorName},</p><p>Votre proposition de don a été enregistrée par notre équipe.</p><p>Référence : <strong>${reference}</strong></p><p>Conservez cette référence pour suivre votre dossier.</p><p><a href="https://donongas.com/suivi?reference=${encodeURIComponent(reference)}">Suivre mon dossier</a></p>`),
     pieceJointe: { nom: `recu-don-${reference}.pdf`, contenu: recapPdf },
     donId: don.id,
   });
@@ -137,7 +137,7 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
     await envoyerMail({
       to: OWNER_EMAIL,
       sujet: `Don créé par l'administration — ${reference}`,
-      html: templateEmail(`<p>Le don <strong>${escapeHtml(reference)}</strong> a été créé par ${escapeHtml(admin.nom)}.</p><p>Donateur : ${donorName}<br>E-mail : ${escapeHtml(values.email)}<br>Nature : ${escapeHtml(values.nature)}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons/${don.id}">Ouvrir le dossier</a></p>`),
+      html: templateEmail(`<p>Le don <strong>${escapeHtml(reference)}</strong> a été créé par ${escapeHtml(admin.nom)}.</p><p>Donateur : ${donorName}<br>E-mail : ${escapeHtml(values.email)}<br>Nature : ${escapeHtml(values.nature)}</p><p><a href="https://donongas.com/admin/dons/${don.id}">Ouvrir le dossier</a></p>`),
       donId: don.id,
     });
   }
@@ -318,7 +318,7 @@ export async function repondreMessageAdmin(formData: FormData) {
   await envoyerMail({
     to: don.donateur.email,
     sujet: `Réponse de l'équipe — Don ${don.reference}`,
-    html: templateEmail(`<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Une réponse a été ajoutée à votre dossier de don.</p><p><strong>Message :</strong></p><p>${contenu.replace(/\n/g, "<br/>")}</p><p>Référence de suivi : <strong>${don.reference}</strong></p><p><a href="https://gestion-don-gas.vercel.app/suivi?reference=${encodeURIComponent(don.reference)}">Suivre mon dossier</a></p>`),
+    html: templateEmail(`<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Une réponse a été ajoutée à votre dossier de don.</p><p><strong>Message :</strong></p><p>${contenu.replace(/\n/g, "<br/>")}</p><p>Référence de suivi : <strong>${don.reference}</strong></p><p><a href="https://donongas.com/suivi?reference=${encodeURIComponent(don.reference)}">Suivre mon dossier</a></p>`),
     donId,
   });
 

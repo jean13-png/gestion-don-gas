@@ -150,7 +150,7 @@ export async function soumettreDon(prevState, formData) {
       createdAt: new Date(),
     });
 
-    const recap = `<p>Bonjour ${prenom} ${nom},</p><p>Nous avons bien reçu votre proposition de don. Voici le récapitulatif :</p><ul><li>Référence : ${reference}</li><li>Nature : ${nature}</li><li>Objectif : ${objectif}</li><li>Description : ${description}</li></ul><p>Conservez précieusement votre référence : elle vous permet de suivre l'avancement de votre dossier à tout moment.</p><p><a href="https://gestion-don-gas.vercel.app/suivi">➜ Suivre mon dossier</a></p><p>Notre équipe examine chaque proposition et revient vers vous rapidement.<br/>Merci pour votre solidarité.</p><p>L'équipe ONG-GAS</p>`;
+    const recap = `<p>Bonjour ${prenom} ${nom},</p><p>Nous avons bien reçu votre proposition de don. Voici le récapitulatif :</p><ul><li>Référence : ${reference}</li><li>Nature : ${nature}</li><li>Objectif : ${objectif}</li><li>Description : ${description}</li></ul><p>Conservez précieusement votre référence : elle vous permet de suivre l'avancement de votre dossier à tout moment.</p><p><a href="https://donongas.com/suivi">➜ Suivre mon dossier</a></p><p>Notre équipe examine chaque proposition et revient vers vous rapidement.<br/>Merci pour votre solidarité.</p><p>L'équipe ONG-GAS</p>`;
     await envoyerMail({
       to: email,
       sujet: `Accusé de réception de votre don — Réf. ${reference}`,
@@ -161,7 +161,7 @@ export async function soumettreDon(prevState, formData) {
     await envoyerMail({
       to: OWNER_EMAIL,
       sujet: `Nouveau don soumis — ${reference} (${nature})`,
-      html: templateEmail(`<p>Nouveau don soumis : <strong>${reference}</strong></p><p>Donateur : ${prenom} ${nom}<br/>Organisme : ${organisme || "—"}<br/>E-mail : ${email}<br/>Téléphone : ${telephone}<br/>Localisation : ${localisation}</p><p>Nature : ${nature}<br/>Objectif : ${objectif}<br/>Description : ${description}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons">Ouvrir le back-office</a></p>`),
+      html: templateEmail(`<p>Nouveau don soumis : <strong>${reference}</strong></p><p>Donateur : ${prenom} ${nom}<br/>Organisme : ${organisme || "—"}<br/>E-mail : ${email}<br/>Téléphone : ${telephone}<br/>Localisation : ${localisation}</p><p>Nature : ${nature}<br/>Objectif : ${objectif}<br/>Description : ${description}</p><p><a href="https://donongas.com/admin/dons">Ouvrir le back-office</a></p>`),
       donId: don.id,
     });
     await journaliserAction(don.id, `Don ${reference} soumis`);
@@ -207,7 +207,7 @@ export async function posterMessageDonateur(prevState, formData) {
     await envoyerMail({
       to: OWNER_EMAIL,
       sujet: `Nouveau message du donateur — ${don.reference}`,
-      html: templateEmail(`<p>Le donateur <strong>${donorName}</strong> a envoyé un message sur le dossier <strong>${don.reference}</strong>.</p><p><strong>Message :</strong></p><p>${message.replace(/\n/g, "<br/>")}</p><p><a href="https://gestion-don-gas.vercel.app/admin/dons/${don.id}">Ouvrir la fiche du don</a></p>`),
+      html: templateEmail(`<p>Le donateur <strong>${donorName}</strong> a envoyé un message sur le dossier <strong>${don.reference}</strong>.</p><p><strong>Message :</strong></p><p>${message.replace(/\n/g, "<br/>")}</p><p><a href="https://donongas.com/admin/dons/${don.id}">Ouvrir la fiche du don</a></p>`),
       donId: don.id,
     });
 
