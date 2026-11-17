@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Swal from "sweetalert2";
 
-export default function PhotoProofs({ photos, deleteAction }) {
+export default function PhotoProofs({ photos, deleteAction, peutSupprimer = true }) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState(null);
 
@@ -54,15 +54,17 @@ export default function PhotoProofs({ photos, deleteAction }) {
       {photos.map((photo) => (
         <div key={photo.id} className="relative aspect-video bg-ong-fond rounded-md border border-ong-bordure overflow-hidden">
           <img src={photo.url} alt={`Photo ${photo.id}`} className="w-full h-full object-cover" />
-          <button
-            type="button"
-            onClick={() => handleDelete(photo.id)}
-            disabled={deletingId === photo.id}
-            aria-label="Supprimer cette photo"
-            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/95 text-red-700 border border-red-200 shadow-sm text-xl leading-none disabled:opacity-50"
-          >
-            ×
-          </button>
+          {peutSupprimer && (
+            <button
+              type="button"
+              onClick={() => handleDelete(photo.id)}
+              disabled={deletingId === photo.id}
+              aria-label="Supprimer cette photo"
+              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/95 text-red-700 border border-red-200 shadow-sm text-xl leading-none disabled:opacity-50"
+            >
+              ×
+            </button>
+          )}
         </div>
       ))}
     </div>

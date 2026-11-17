@@ -2,11 +2,11 @@
 
 import sharp from "sharp";
 import prisma from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 import { removeFile, saveFile } from "@/lib/storage";
 
 export async function uploadPhoto(formData: FormData) {
-  await requireAdmin();
+  await requirePermission("dons.modifier");
 
   const file = formData.get("photo") as File | null;
   const donId = formData.get("donId") as string | null;
@@ -69,7 +69,7 @@ export async function uploadPhoto(formData: FormData) {
 }
 
 export async function deletePhoto(formData: FormData) {
-  await requireAdmin();
+  await requirePermission("dons.modifier");
 
   const photoId = formData.get("photoId") as string | null;
   const donId = formData.get("donId") as string | null;

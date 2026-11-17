@@ -11,6 +11,7 @@ import {
 import { genererFicheReceptionDon } from "@/lib/pdf";
 import { envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
 import { deletePhoto, uploadPhoto } from "@/app/actions/upload";
+import { requireAdmin, requirePermission, aPermission } from "@/lib/auth";
 import Icon from "@/components/ui/Icon";
 import fs from "fs/promises";
 import os from "os";
@@ -51,6 +52,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDonDetailPage({ params }) {
   const { id } = await params;
+  const admin = await requireAdmin();
+  const peutModifier = aPermission(admin, "dons.modifier");
+  const peutChangerStatut = aPermission(admin, "dons.statuts");
+  const peutSupprimer = aPermission(admin, "dons.supprimer");
+  const peutGererAttestations = aPermission(admin, "dons.attestations");
   const don = await prisma.don.findUnique({
     where: { id },
     include: {
@@ -66,6 +72,7 @@ export default async function AdminDonDetailPage({ params }) {
 
   async function handleValidate(formData) {
     "use server";
+    await requirePermission("dons.statuts");
     const observations = formData.get("observations");
     await updateDonStatus(don.id, "VALIDE", observations);
     const NATURE_LABELS = {
@@ -111,6 +118,7 @@ export default async function AdminDonDetailPage({ params }) {
     let validationPdf = null;
     try {
       validationPdf = await genererFicheReceptionDon({
+        reference: don.reference,
         donateur: {
           nomRaisonSociale:
             [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
@@ -187,6 +195,7 @@ export default async function AdminDonDetailPage({ params }) {
 
   async function handleGeneratePDF(formData) {
     "use server";
+    await requirePermission("dons.attestations");
     const currentDon = await prisma.don.findUnique({
       where: { id: don.id },
       select: {
@@ -289,6 +298,7 @@ export default async function AdminDonDetailPage({ params }) {
     }
 
     const buffer = await genererFicheReceptionDon({
+     reference: don.reference,
      donateur: {
        nomRaisonSociale:
          [currentDon.donateur.prenom, currentDon.donateur.nom].filter(Boolean).join(" ") ||
@@ -392,10 +402,12 @@ export default async function AdminDonDetailPage({ params }) {
               <Icon className="text-white" name="file-pdf" fixedWidth />
               Télécharger l&apos;attestation (PDF)
             </a>
-            <EnvoyerAttestationButton
-              formAction={handleEnvoyerAttestation}
-              email={don.donateur.email}
-            />
+            {peutGererAttestations && (
+              <EnvoyerAttestationButton
+                formAction={handleEnvoyerAttestation}
+                email={don.donateur.email}
+              />
+            )}
           </div>
           <div className="mt-5 rounded-md border border-ong-bordure overflow-hidden bg-ong-fond">
             <iframe
@@ -525,6 +537,7 @@ export default async function AdminDonDetailPage({ params }) {
           <p className="text-[14px] text-ong-texte-secondaire">Aucune conversation pour ce dossier.</p>
         )}
 
+        {peutModifier ? (
         <form action={repondreMessageAdmin} className="mt-5 space-y-3">
           <input type="hidden" name="donId" value={don.id} />
           <label htmlFor="message-admin" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
@@ -542,6 +555,11 @@ export default async function AdminDonDetailPage({ params }) {
             Envoyer la réponse
           </button>
         </form>
+        ) : (
+          <p className="mt-5 rounded-md border border-ong-bordure bg-ong-fond px-4 py-3 text-[13px] text-ong-muted">
+            Votre compte ne permet pas de répondre aux messages des donateurs.
+          </p>
+        )}
       </div>
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
@@ -553,15 +571,23 @@ export default async function AdminDonDetailPage({ params }) {
           <p className="text-[13px] text-ong-muted">
             Limite de 10 photos atteinte.
           </p>
-        ) : (
+        ) : peutModifier ? (
           <PhotoUploadForm
             action={handleUploadPhoto}
             existingCount={don.photos.length}
           />
+        ) : (
+          <p className="text-[13px] text-ong-muted">
+            Votre compte ne permet pas d&apos;ajouter des photos.
+          </p>
         )}
 
         {don.photos.length > 0 && (
-          <PhotoProofs photos={don.photos} deleteAction={handleDeletePhoto} />
+          <PhotoProofs
+            photos={don.photos}
+            deleteAction={handleDeletePhoto}
+            peutSupprimer={peutModifier}
+          />
         )}
       </div>
 
@@ -569,6 +595,7 @@ export default async function AdminDonDetailPage({ params }) {
         <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
           Détails de la fiche PDF
         </h2>
+        {peutModifier ? (
         <form action={handleUpdateDetails} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -683,12 +710,18 @@ export default async function AdminDonDetailPage({ params }) {
             </button>
           </div>
         </form>
+        ) : (
+          <p className="rounded-md border border-ong-bordure bg-ong-fond px-4 py-3 text-[13px] text-ong-muted">
+            Votre compte ne permet pas de modifier les détails du don.
+          </p>
+        )}
       </div>
 
       <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
         <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4">
           Validation & Actions
         </h2>
+        {peutChangerStatut ? (
         <form action={handleStatusChange} className="space-y-4">
           <div>
             <label
@@ -737,16 +770,26 @@ export default async function AdminDonDetailPage({ params }) {
                         ? "Marquer inspecté"
                         : "Valider le don"}
             </button>
-            <GenererFicheButton don={don} formAction={handleGeneratePDF} />
+            {peutGererAttestations && (
+              <GenererFicheButton don={don} formAction={handleGeneratePDF} />
+            )}
           </div>
         </form>
+        ) : (
+          <p className="rounded-md border border-ong-bordure bg-ong-fond px-4 py-3 text-[13px] text-ong-muted">
+            Votre compte ne permet pas de changer le statut des dons.
+          </p>
+        )}
         <div className="flex flex-wrap items-end gap-3">
-          {["SOUMIS", "EN_VERIFICATION", "INSPECTE"].includes(don.statut) && (
-            <RefuserDon formAction={handleStatusChange} />
+          {peutChangerStatut &&
+            ["SOUMIS", "EN_VERIFICATION", "INSPECTE"].includes(don.statut) && (
+              <RefuserDon formAction={handleStatusChange} />
+            )}
+          {peutSupprimer && (
+            <div className="mb-4">
+              <Supprimer id={don.id} />
+            </div>
           )}
-          <div className="mb-4">
-            <Supprimer id={don.id} />
-          </div>
         </div>
       </div>
     </div>

@@ -1,11 +1,23 @@
 'use client';
 import { supprimerDon } from "@/app/actions/donations";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { startTransition } from "react";
 
 export default function Supprimer({ id }) {
   const [state, formAction, isPending] = useActionState(supprimerDon, null);
+
+  // Aucun échec silencieux : toute erreur remonte à l'écran.
+  useEffect(() => {
+    if (state?.error) {
+      Swal.fire({
+        title: "Suppression impossible",
+        text: state.error,
+        icon: "error",
+        confirmButtonColor: "#4278E1",
+      });
+    }
+  }, [state]);
 
   const handleClick = async (e) => {
     const confirmed = await Swal.fire({

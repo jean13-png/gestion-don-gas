@@ -1,11 +1,16 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
+import { getAdminActuel, aPermission } from "@/lib/auth";
+import AccesRefuse from "@/components/admin/AccesRefuse";
 import CreateDonationForm from "./CreateDonationForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewAdminDonationPage() {
-  await requireAdmin();
+  const admin = await getAdminActuel();
+
+  if (!admin || !aPermission(admin, "dons.creer")) {
+    return <AccesRefuse quoi="l'enregistrement de nouveaux dons" />;
+  }
 
   return (
     <div className="max-w-4xl">

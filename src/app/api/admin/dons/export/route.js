@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 import ExcelJS from "exceljs";
 import fs from "fs";
 import path from "path";
@@ -80,7 +80,7 @@ function construireWhere(search, statut, nature, periode) {
 
 export async function GET(request) {
   try {
-    await requireAdmin();
+    await requirePermission("dons.export");
   } catch {
     return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
   }

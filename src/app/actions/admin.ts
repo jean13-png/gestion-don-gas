@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, requirePermission } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { adminDonDetailsSchema } from "@/lib/validation";
 import { OWNER_EMAIL, envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
@@ -93,7 +93,7 @@ function escapeHtml(value: string) {
 }
 
 export async function creerDonAdmin(prevState: unknown, formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requirePermission("dons.creer");
   const values = {
     nom: formData.get("nom")?.toString().trim() || "",
     prenom: formData.get("prenom")?.toString().trim() || "",
@@ -235,6 +235,7 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
       values.natureAutre,
     );
     const buffer = await genererFicheReceptionDon({
+      reference,
       donateur: {
         nomRaisonSociale: [values.prenom, values.nom].filter(Boolean).join(" ") || undefined,
         representant: values.organisme || undefined,
@@ -289,7 +290,7 @@ export async function creerDonAdmin(prevState: unknown, formData: FormData) {
  * Le PDF est lu depuis le stockage local (/uploads/fiches/...).
  */
 export async function envoyerAttestationDonateur(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requirePermission("dons.attestations");
 
   const donId = formData.get("donId")?.toString().trim();
   if (!donId) {
@@ -388,7 +389,7 @@ export type AdminDonsResult = {
 };
 
 export async function validateDon(donId: string, observations?: string) {
-  await requireAdmin();
+  await requirePermission("dons.statuts");
 
   const updated = await prisma.don.update({
     where: { id: donId, statut: "INSPECTE" },
@@ -417,7 +418,7 @@ const STATUS_TRANSITIONS = {
 };
 
 export async function updateDonStatus(donId: string, nextStatus: string, observations?: string) {
-  const admin = await requireAdmin();
+  const admin = await requirePermission("dons.statuts");
 
   const normalizedNextStatus = nextStatus?.trim();
   if (!normalizedNextStatus || !Object.hasOwn(STATUS_TRANSITIONS, normalizedNextStatus)) {
@@ -470,7 +471,7 @@ export async function updateDonStatus(donId: string, nextStatus: string, observa
 }
 
 export async function markDonFicheGenerated(donId: string, ficheUrl: string) {
-  const admin = await requireAdmin();
+  const admin = await requirePermission("dons.attestations");
   if (!ficheUrl) throw new Error("DON_FICHE_URL_INVALID");
 
   const currentDon = await prisma.don.findUnique({ where: { id: donId }, select: { statut: true } });
@@ -500,7 +501,7 @@ export async function markDonFicheGenerated(donId: string, ficheUrl: string) {
 }
 
 export async function repondreMessageAdmin(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requirePermission("dons.modifier");
 
   const donId = formData.get("donId")?.toString().trim();
   const contenu = formData.get("contenu")?.toString().trim();
@@ -544,7 +545,7 @@ export async function repondreMessageAdmin(formData: FormData) {
 }
 
 export async function mettreAJourDonDetails(donId: string, formData: FormData) {
-  await requireAdmin();
+  await requirePermission("dons.modifier");
 
   const parsed = adminDonDetailsSchema.safeParse({
     objectif: formData.get("objectif")?.toString().trim() || "AUTRES",

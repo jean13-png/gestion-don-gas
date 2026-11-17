@@ -2,14 +2,14 @@ import { removeFile, saveFile } from "@/lib/storage";
 import sharp from "sharp";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 
 const MAX_BYTES = 1024 * 1024;
 const VALID_TYPES = ["image/jpeg", "image/png"];
 
 async function ensureAdmin() {
   try {
-    await requireAdmin();
+    await requirePermission("contenu.gerer");
     return true;
   } catch {
     return false;

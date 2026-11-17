@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import AdminDonsPageClient from "./AdminDonsPageClient";
 
 export const dynamic = "force-dynamic";
@@ -91,5 +92,12 @@ export default async function AdminDonsPage({ searchParams }) {
     };
   });
 
-  return <AdminDonsPageClient initialData={initialData} />;
+  const admin = await requireAdmin();
+
+  return (
+    <AdminDonsPageClient
+      initialData={initialData}
+      permissions={admin.permissions ?? []}
+    />
+  );
 }

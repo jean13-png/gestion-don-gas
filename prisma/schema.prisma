@@ -72,6 +72,8 @@ model Admin {
   email        String   @unique
   passwordHash String
   nom          String
+  actif        Boolean  @default(true)
+  permissions  String[] @default([])
   createdAt    DateTime @default(now())
 }
 

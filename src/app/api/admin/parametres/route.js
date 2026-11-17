@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { envoyerMail, getExpediteur, templateEmail } from "@/lib/mail";
-import { requireAdmin } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 
 async function adminOrUnauthorized() {
-  try { await requireAdmin(); return true; } catch { return false; }
+  try { await requirePermission("contenu.gerer"); return true; } catch { return false; }
 }
 
 export async function GET() {

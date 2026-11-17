@@ -19,7 +19,7 @@ const PERIODES = [
   { value: "12m", label: "12 mois" },
 ];
 
-export default function AdminDonsPageClient({ initialData }) {
+export default function AdminDonsPageClient({ initialData, permissions = [] }) {
   const searchParams = useSearchParams();
   const [state, formAction] = useActionState(async (_prev, formData) => {
     try {
@@ -130,12 +130,15 @@ export default function AdminDonsPageClient({ initialData }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display font-semibold text-ong-bleu text-[28px]">Dons</h1>
         <div className="flex flex-wrap gap-2">
-          <Link href="/admin/dons/nouveau" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bleu bg-white text-ong-bleu text-[13px] font-medium hover:bg-ong-bleu-tres-clair transition-colors">
-            + Créer un don
-          </Link>
+          {permissions.includes("dons.creer") && (
+            <Link href="/admin/dons/nouveau" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bleu bg-white text-ong-bleu text-[13px] font-medium hover:bg-ong-bleu-tres-clair transition-colors">
+              + Créer un don
+            </Link>
+          )}
           <Link href="/admin/dons?statut=VALIDE" className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md border border-ong-bordure text-ong-bleu text-[13px] font-medium hover:bg-ong-fond transition-colors">
             Gérer les dons validés
           </Link>
+          {permissions.includes("dons.export") && (
           <button
             type="button"
             onClick={handleExport}
@@ -144,6 +147,7 @@ export default function AdminDonsPageClient({ initialData }) {
           >
             {exporting ? "Export..." : "Exporter Excel"}
           </button>
+          )}
         </div>
       </div>
 

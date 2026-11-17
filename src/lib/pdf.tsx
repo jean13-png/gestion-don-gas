@@ -28,6 +28,11 @@ export type NatureDon = "ESPECES" | "MATERIEL" | "VIVRES" | "AUTRES";
 export type ObjectifDon = "EDUCATION" | "AIDE_SOCIALE" | "FORMATION" | "AUTRES";
 
 export interface DonFicheData {
+  /**
+   * Référence unique du don (ex : GAS-2026-DD193). Affichée en tête du
+   * document et comme première ligne du tableau récapitulatif.
+   */
+  reference?: string;
   donateur: {
     nomRaisonSociale?: string;
     representant?: string;
@@ -332,6 +337,39 @@ function cocher(doc: Doc, box: [number, number, number, number]) {
      .text("X", x - 4, y + (h - 11) / 2 - 1, { width: w + 8, align: "center", lineBreak: false });
 }
 
+/** Largeur d'un texte dans une police donnée (pt). */
+function largeur(doc: Doc, t: string, f: keyof typeof F, size: number): number {
+  return doc.font(F[f]).fontSize(size).widthOfString(t);
+}
+
+/**
+ * Libellé du tableau récapitulatif : Georgia Bold, sauf les caractères
+ * accentués (absents du sous-ensemble de police) rendus en Times Bold —
+ * même substitution que dans le modèle Word/PDF d'origine.
+ */
+function texteLabelAccents(doc: Doc, t: string, x: number, y: number) {
+  const ACCENTUES = /[àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ]/;
+  let cx = x;
+  let segment = "";
+  const viderSegment = () => {
+    if (segment) {
+      texte(doc, segment, cx, y, "GeorgiaBold", 11.04);
+      cx += largeur(doc, segment, "GeorgiaBold", 11.04);
+      segment = "";
+    }
+  };
+  for (const ch of t) {
+    if (ACCENTUES.test(ch)) {
+      viderSegment();
+      texte(doc, ch, cx, y + 0.2, "TimesBold", 11.04);
+      cx += largeur(doc, ch, "TimesBold", 11.04);
+    } else {
+      segment += ch;
+    }
+  }
+  viderSegment();
+}
+
 /* --- Le document ----------------------------------------------------------- */
 
 function dessiner(doc: Doc, d: DonFicheData): void {
@@ -364,37 +402,38 @@ function dessiner(doc: Doc, d: DonFicheData): void {
   texte(doc, "ACTIVITÉS SOCILES", 314.4, 173.9, "TimesBold", 7.9, C.blanc);
   texte(doc, "AUTRES", 451.4, 173.9, "TimesBold", 7.9, C.blanc);
 
-  /* 5. Tableau « LE DONATEUR / PARTENAIRE » */
+  /* 5. Tableau « LE DONATEUR / PARTENAIRE » — récapitulatif du don :
+   *    première ligne = référence du don, puis les 5 informations donateur. */
   rectPlein(doc, 60, 393, 476, 12, C.bleuDonateur); // bandeau
-  // grille
+  // grille : bandeau 12 pt puis 6 lignes de 18 pt (392 -> 512)
   rectContour(doc, 59, 392, 477, 120, C.noir, 1);
   trait(doc, 297.5, 392, 297.5, 512, C.noir, 1);
-  for (const y of [406, 426.5, 448, 469, 490]) {
+  for (const y of [422, 440, 458, 476, 494]) {
     trait(doc, 59, y, 536, y, C.noir, 1);
   }
   texte(doc, "LE DONATEUR / PARTENAIRE", 217.1, 393.0, "TimesBold", 11.04);
 
   // libellés (Georgia Bold 11) — les accents sont rendus en Times Bold dans le
-  // modèle (substitution Word) : reproduit à l'identique pour ces 2 libellés.
-  texte(doc, "Nom/Raison sociale", 64.8, 413.8, "GeorgiaBold", 11.04);
-  texte(doc, "Repr", 64.8, 435.0, "GeorgiaBold", 11.04);
-  texte(doc, "é", 92.9, 435.2, "TimesBold", 11.04);
-  texte(doc, "sentant (si organisation)", 97.7, 435.0, "GeorgiaBold", 11.04);
-  texte(doc, "Adresse", 64.8, 456.1, "GeorgiaBold", 11.04);
-  texte(doc, "T", 64.8, 477.2, "GeorgiaBold", 11.04);
-  texte(doc, "é", 72.3, 477.5, "TimesBold", 11.04);
-  texte(doc, "l", 77.1, 477.2, "GeorgiaBold", 11.04);
-  texte(doc, "é", 80.9, 477.5, "TimesBold", 11.04);
-  texte(doc, "phone", 85.7, 477.2, "GeorgiaBold", 11.04);
-  texte(doc, "Email", 64.8, 498.3, "GeorgiaBold", 11.04);
+  // modèle (substitution Word) : reproduit à l'identique pour ces libellés.
+  // « Référence du don » utilise la police complète (DynBold) : le
+  // sous-ensemble Georgia du modèle ne contient pas les glyphes « f » et « u ».
+  texte(doc, "Référence du don", 64.8, 410.3, "DynBold", 11.04);
+  texteLabelAccents(doc, "Nom/Raison sociale", 64.8, 428.3);
+  texteLabelAccents(doc, "Représentant (si organisation)", 64.8, 446.3);
+  texteLabelAccents(doc, "Adresse", 64.8, 464.3);
+  texteLabelAccents(doc, "Téléphone", 64.8, 482.3);
+  texte(doc, "Email", 64.8, 500.3, "GeorgiaBold", 11.04);
 
   // valeurs dynamiques (colonne de droite) — police complète
+  if (d.reference?.trim()) {
+    texte(doc, d.reference.trim(), 305, 407.5, "DynBold", 11.04);
+  }
   const valeurs: Array<[string | undefined, number]> = [
-    [d.donateur?.nomRaisonSociale, 411],
-    [d.donateur?.representant, 431],
-    [d.donateur?.adresse, 453],
-    [d.donateur?.telephone, 474],
-    [d.donateur?.email, 495],
+    [d.donateur?.nomRaisonSociale, 425.5],
+    [d.donateur?.representant, 443.5],
+    [d.donateur?.adresse, 461.5],
+    [d.donateur?.telephone, 479.5],
+    [d.donateur?.email, 497.5],
   ];
   for (const [v, y] of valeurs) {
     if (v?.trim()) {
@@ -565,6 +604,13 @@ function dessiner(doc: Doc, d: DonFicheData): void {
   /* 10. En-tête institutionnel (textes) */
   dessinerEnteteInstitutionnel(doc);
   texte(doc, "FICHE DE RECEPTION DE DON", 163.5, 125.6, "Georgia", 18);
+  if (d.reference?.trim()) {
+    // Référence du don affichée sous le bandeau du titre, centrée.
+    const libelleReference = `Référence : ${d.reference.trim()}`;
+    doc.font(F.DynBold).fontSize(11.04);
+    const xReference = (PAGE.W - doc.widthOfString(libelleReference)) / 2;
+    texte(doc, libelleReference, xReference, 151.5, "DynBold", 11.04, C.marine);
+  }
 
   /* 11. Listes des colonnes */
   for (const [x, y, t, f] of [...COL_ACC, ...COL_FORM, ...COL_ACT, ...COL_AUT]) {

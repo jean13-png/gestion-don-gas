@@ -26,6 +26,17 @@ async function main() {
       email,
       passwordHash: hashedPassword,
       nom,
+      actif: true,
+      permissions: [
+        'dons.creer',
+        'dons.modifier',
+        'dons.statuts',
+        'dons.supprimer',
+        'dons.attestations',
+        'dons.export',
+        'contenu.gerer',
+        'comptes.gerer',
+      ],
     },
   });
   console.log(`Administrateur créé ou déjà présent : ${email}`);

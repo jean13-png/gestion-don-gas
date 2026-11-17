@@ -235,6 +235,13 @@ export async function supprimerDon(prevState, formData) {
     return { error: "Accès interdit" };
   }
 
+  if (admin.actif === false || !(admin.permissions ?? []).includes("dons.supprimer")) {
+    return {
+      error:
+        "Votre compte ne permet pas de supprimer des dons. Demandez l'autorisation à un administrateur.",
+    };
+  }
+
   const donId = formData.get("donId")?.toString().trim();
 
   if (!donId) {
