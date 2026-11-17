@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import OeilMotDePasse from "@/components/oeil-mot-de-passe";
 import "./globals.css";
 
 const inter = Inter({
@@ -82,6 +83,7 @@ export default function RootLayout({ children }) {
         <link rel="mask-icon" href="/favicon.svg" color="#1F4E79" />
       </head>
       <body className="min-h-screen flex flex-col bg-ong-fond text-ong-texte min-w-0">
+        <OeilMotDePasse />
         <ScrollReveal>{children}</ScrollReveal>
         <script type="application/ld+json">{`{
           "@context": "https://schema.org",
