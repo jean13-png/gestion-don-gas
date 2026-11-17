@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getAdminDons, exportAdminDonsCsv } from "@/app/actions/admin";
+import { getAdminDons } from "@/app/actions/admin";
 import { DON_STATUS_LABELS } from "@/lib/don-status";
 
 const State = {
@@ -105,21 +105,21 @@ export default function AdminDonsPageClient({ initialData }) {
     setExporting(true);
     setError("");
     try {
-      const result = await exportAdminDonsCsv({ search, statut, nature, periode });
-      const blob = new Blob([result.content], { type: result.contentType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = result.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const parametres = new URLSearchParams({
+        search: search || "",
+        statut: statut || "ALL",
+        nature: nature || "ALL",
+        periode: periode || "all",
+      });
+      // La route API renvoie directement le fichier Excel : le telechargement
+      // est gere par le navigateur (Content-Disposition), sans passage du
+      // contenu par une server action.
+      window.location.href = `/api/admin/dons/export?${parametres.toString()}`;
     } catch (exportError) {
       console.error("[admin/dons] Export échoué:", exportError);
       setError("Nous n'avons pas pu exporter les dons. Veuillez réessayer.");
     } finally {
-      setExporting(false);
+      setTimeout(() => setExporting(false), 1500);
     }
   }
 

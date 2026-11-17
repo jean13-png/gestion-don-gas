@@ -1,16 +1,40 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 
-const DEFAULT_FROM = "onboarding@resend.dev";
-const ADMIN_EMAIL = process.env.MAIL_ADMIN_EMAIL || "tossajean13@gmail.com";
+/**
+ * Envoi des e-mails de la plateforme via la boîte officielle de l'ONG
+ * (infos@ongglobalactionsolidarite.com) sur le SMTP Hostinger.
+ * Toutes les notifications internes arrivent sur cette meme boite.
+ */
 
-export const OWNER_EMAIL = "tossajean13@gmail.com";
+const SMTP_HOST = process.env.SMTP_HOST || "smtp.hostinger.com";
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+const SMTP_USER = process.env.SMTP_USER || "infos@ongglobalactionsolidarite.com";
+const SMTP_PASS = process.env.SMTP_PASS || "";
 
-let resend: Resend | null = null;
+const DOMAINE_OFFICIEL = "ongglobalactionsolidarite.com";
 
-function getResend() {
-  if (!resend) resend = new Resend(process.env.RESEND_API_KEY);
-  return resend;
+/** Boite officielle de l'ONG : receptions des notifications et retours. */
+export const OWNER_EMAIL =
+  process.env.OWNER_EMAIL || `infos@${DOMAINE_OFFICIEL}`;
+
+const ADMIN_EMAIL = process.env.MAIL_ADMIN_EMAIL || OWNER_EMAIL;
+
+let transport: nodemailer.Transporter | null = null;
+
+function getTransport() {
+  if (!transport) {
+    if (!SMTP_PASS) {
+      throw new Error("SMTP_PASS manquante : mot de passe de la boite infos@ requis");
+    }
+    transport = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    });
+  }
+  return transport;
 }
 
 export async function getExpediteur() {
@@ -18,11 +42,25 @@ export async function getExpediteur() {
     prisma.parametre.findUnique({ where: { cle: "MAIL_FROM_EMAIL" } }),
     prisma.parametre.findUnique({ where: { cle: "MAIL_FROM_NAME" } }),
   ]);
-  return { email: email?.valeur || DEFAULT_FROM, nom: nom?.valeur || "ONG-GAS" };
+
+  // L'adresse d'expedition doit rester sur le domaine officiel de l'ONG
+  // (exigence du fournisseur SMTP) ; par defaut : la boite infos@.
+  const emailParametre = email?.valeur || "";
+  const adresse =
+    emailParametre.endsWith(`@${DOMAINE_OFFICIEL}`)
+      ? emailParametre
+      : process.env.MAIL_FROM_EMAIL && process.env.MAIL_FROM_EMAIL.endsWith(`@${DOMAINE_OFFICIEL}`)
+        ? process.env.MAIL_FROM_EMAIL
+        : SMTP_USER;
+
+  return {
+    email: adresse,
+    nom: nom?.valeur || process.env.MAIL_FROM_NAME || "ONG Global Actions Solidarité",
+  };
 }
 
 export function templateEmail(contenu: string) {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F5F9FD;"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;border:1px solid #DCE5EC;border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#fff;"><tr><td style="height:7px;background:#0F3A5F;font-size:0;line-height:0;">&nbsp;</td></tr><tr><td align="center" style="padding:25px 24px 21px;background:#FFFFFF;"><div style="font-size:13px;line-height:18px;letter-spacing:2px;color:#0F3A5F;font-weight:bold;">ONG-GAS</div><div style="margin-top:8px;font-size:24px;line-height:30px;color:#0F3A5F;font-weight:bold;">ONG GLOBAL ACTIONS SOLIDARITÉ</div><div style="margin-top:7px;font-size:16px;line-height:22px;color:#0087A8;">Projet Informatique Pour Tous</div><div style="margin:17px auto 0;width:72px;height:3px;background:#00A0B8;font-size:0;line-height:0;">&nbsp;</div></td></tr><tr><td style="padding:24px 32px;color:#22323B;font-size:15px;line-height:1.6;">${contenu}</td></tr><tr><td style="padding:18px 32px;background:#0F3A5F;color:#B9C9D6;font-size:12px;line-height:1.7;">ONG Global Actions Solidarité · Abomey-Calavi, Bénin<br/>+229 01 46 46 66 56 · infos@ongglobalactionsolidarite.com<br/>N° 2025/372/MISP/DC/SGM/DAIC/SACC/SA</td></tr></table></td></tr></table>`;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F5F9FD;"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;border:1px solid #DCE5EC;border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#fff;"><tr><td style="height:7px;background:#0F3A5F;font-size:0;line-height:0;">&nbsp;</td></tr><tr><td align="center" style="padding:25px 24px 21px;background:#FFFFFF;"><div style="font-size:13px;line-height:18px;letter-spacing:2px;color:#0F3A5F;font-weight:bold;">ONG-GAS</div><div style="margin-top:8px;font-size:24px;line-height:30px;color:#0F3A5F;font-weight:bold;">ONG GLOBAL ACTIONS SOLIDARITÉ</div><div style="margin-top:7px;font-size:16px;line-height:22px;color:#0087A8;">Projet Informatique Pour Tous</div><div style="margin:17px auto 0;width:72px;height:3px;background:#00A0B8;font-size:0;line-height:0;">&nbsp;</td></tr><tr><td style="padding:24px 32px;color:#22323B;font-size:15px;line-height:1.6;">${contenu}</td></tr><tr><td style="padding:18px 32px;background:#0F3A5F;color:#B9C9D6;font-size:12px;line-height:1.7;">ONG Global Actions Solidarité · Abomey-Calavi, Bénin<br/>+229 01 46 46 66 56 · infos@ongglobalactionsolidarite.com<br/>N° 2025/372/MISP/DC/SGM/DAIC/SACC/SA</td></tr></table></td></tr></table>`;
 }
 
 export async function envoyerMail(opts: {
@@ -33,20 +71,23 @@ export async function envoyerMail(opts: {
   donId?: string;
 }) {
   try {
-    if (!process.env.RESEND_API_KEY) throw new Error("RESEND_API_KEY manquante");
     const exp = await getExpediteur();
-    const { error } = await getResend().emails.send({
+    const info = await getTransport().sendMail({
       from: `${exp.nom} <${exp.email}>`,
       to: opts.to,
       subject: opts.sujet,
       html: opts.html,
       attachments: opts.pieceJointe
-        ? [{ filename: opts.pieceJointe.nom, content: opts.pieceJointe.contenu }]
+        ? [{
+            filename: opts.pieceJointe.nom,
+            content: opts.pieceJointe.contenu,
+            contentType: "application/pdf",
+          }]
         : undefined,
     });
-    if (error) throw new Error(JSON.stringify(error));
+
     await prisma.historique.create({
-      data: { type: "MAIL", donId: opts.donId, destinataire: opts.to, sujet: opts.sujet, contenuHtml: opts.html, statut: "ENVOYE" },
+      data: { type: "MAIL", donId: opts.donId, destinataire: opts.to, sujet: opts.sujet, contenuHtml: opts.html, statut: "ENVOYE", message: `Message-ID ${info.messageId}` },
     });
     return { sent: true };
   } catch (error) {

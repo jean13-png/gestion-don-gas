@@ -15,7 +15,6 @@ import sharp from "sharp";
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
-import * as XLSX from "xlsx";
 
 const PHOTOS_MAX = 10;
 const PHOTO_TAILLE_MAX = 5 * 1024 * 1024;
@@ -348,9 +347,7 @@ export async function envoyerAttestationDonateur(formData: FormData) {
 
   if (!resultat.sent) {
     const raison = String(resultat.error || "");
-    const message = raison.includes("testing emails")
-      ? "L'envoi a échoué : la messagerie est encore en mode test et ne peut écrire qu'à l'adresse de test. En attendant le basculement vers infos@, téléchargez l'attestation et envoyez-la depuis votre boîte mail."
-      : `L'envoi a échoué : ${raison.slice(0, 200)}`;
+    const message = `L'envoi a échoué : ${raison.slice(0, 220)}`;
     return { success: false, error: message };
   }
 
@@ -669,74 +666,5 @@ export async function getAdminDons(filter: AdminDonsFilter = {}): Promise<AdminD
     page,
     limit,
     totalPages: Math.max(1, Math.ceil(total / limit)),
-  };
-}
-
-export async function exportAdminDonsCsv(filter: Omit<AdminDonsFilter, "page" | "limit"> = {}) {
-  await requireAdmin();
-
-  const result = await getAdminDons({ ...filter, page: 1, limit: 1000 });
-
-  const rows = [[
-    "N°",
-    "Référence",
-    "Nom",
-    "Prénom",
-    "Date de soumission",
-    "Date de validation",
-    "Nature",
-    "Statut",
-    "Localisation",
-    "Objectif",
-    "Ce à quoi le don a servi",
-    "Email",
-  ]];
-
-  for (const [index, don] of result.dons.entries()) {
-    const donData = await prisma.don.findUnique({
-      where: { id: don.id },
-      select: {
-        ville: true,
-        pays: true,
-        localisation: true,
-        objectif: true,
-        objectifAutre: true,
-        aQuoiServi: true,
-        validatedAt: true,
-      },
-    });
-
-    rows.push([
-      index + 1,
-      don.reference,
-      don.donateur.nom,
-      don.donateur.prenom,
-      new Date(don.createdAt).toLocaleDateString("fr-FR"),
-      donData?.validatedAt ? new Date(donData.validatedAt).toLocaleDateString("fr-FR") : "",
-      don.nature,
-      don.statut,
-      donData?.localisation || [donData?.ville, donData?.pays].filter(Boolean).join(" - ") || "",
-      donData?.objectif === "AUTRES" && donData.objectifAutre ? donData.objectifAutre : donData?.objectif || "",
-      donData?.aQuoiServi || "",
-      don.donateur.email,
-    ]);
-  }
-
-  const worksheet = XLSX.utils.aoa_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Dons");
-
-  const buffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "buffer",
-  });
-
-  revalidatePath("/admin/dons");
-  revalidatePath("/admin/dashboard");
-
-  return {
-    content: buffer,
-    filename: `dons-ong-gas-${new Date().toISOString().slice(0, 10)}.xlsx`,
-    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   };
 }
