@@ -2,13 +2,14 @@ import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { saveFile } from "@/lib/storage";
 import {
+  envoyerAttestationDonateur,
   markDonFicheGenerated,
   mettreAJourDonDetails,
   repondreMessageAdmin,
   updateDonStatus,
 } from "@/app/actions/admin";
 import { genererFicheReceptionDon } from "@/lib/pdf";
-import { envoyerMail, templateEmail } from "@/lib/mail";
+import { envoyerMail, journaliserAction, templateEmail } from "@/lib/mail";
 import { deletePhoto, uploadPhoto } from "@/app/actions/upload";
 import Icon from "@/components/ui/Icon";
 import fs from "fs/promises";
@@ -19,6 +20,7 @@ import Supprimer from "./supprimer/Supprimer";
 import GenererFicheButton from "./generer-fiche/GenererFicheButton";
 import PhotoUploadForm from "./PhotoUploadForm";
 import PhotoProofs from "./PhotoProofs";
+import EnvoyerAttestationButton from "./EnvoyerAttestationButton";
 import { DON_STATUS_LABELS, DON_STATUS_STYLES } from "@/lib/don-status";
 import ProgrammerDonateurPage from "./PorgrammerDonnateur";
 import RefuserDon from "./RefuserDon";
@@ -103,38 +105,57 @@ export default async function AdminDonDetailPage({ params }) {
       natureDetail = NATURE_LABELS[donorNature] || undefined;
     }
 
-    const validationPdf = await genererFicheReceptionDon({
-      donateur: {
-        nomRaisonSociale:
-          [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
-          undefined,
-        representant: don.donateur.organisme || undefined,
-        adresse: don.localisation || undefined,
-        telephone: don.donateur.telephone,
-        email: don.donateur.email,
-      },
-      nature: naturePdf,
-      natureAutresDetail: natureDetail,
-      description: don.description,
-      objectif: don.objectif,
-      objectifAutresDetail:
-        don.objectif === "AUTRES" ? don.objectifAutre : undefined,
-      faitA: don.faitA || "Abomey-Calavi",
-      dateReception: don.dateReception
-        ? new Date(don.dateReception).toLocaleDateString("fr-FR")
-        : new Date().toLocaleDateString("fr-FR"),
-      responsable: don.responsable || "HEDJE ZINSOU RAOUL",
-    });
+    // La fiche PDF est un document important mais son echec ne doit jamais
+    // faire echouer la validation elle-meme : le don reste valide et le
+    // donateur est prevenu par mail (avec ou sans piece jointe).
+    let validationPdf = null;
+    try {
+      validationPdf = await genererFicheReceptionDon({
+        donateur: {
+          nomRaisonSociale:
+            [don.donateur.prenom, don.donateur.nom].filter(Boolean).join(" ") ||
+            undefined,
+          representant: don.donateur.organisme || undefined,
+          adresse: don.localisation || undefined,
+          telephone: don.donateur.telephone,
+          email: don.donateur.email,
+        },
+        nature: naturePdf,
+        natureAutresDetail: natureDetail,
+        description: don.description,
+        objectif: don.objectif,
+        objectifAutresDetail:
+          don.objectif === "AUTRES" ? don.objectifAutre : undefined,
+        faitA: don.faitA || "Abomey-Calavi",
+        dateReception: don.dateReception
+          ? new Date(don.dateReception).toLocaleDateString("fr-FR")
+          : new Date().toLocaleDateString("fr-FR"),
+        responsable: don.responsable || "HEDJE ZINSOU RAOUL",
+      });
+    } catch (pdfError) {
+      console.error("[admin] Génération de la fiche lors de la validation échouée:", pdfError);
+      await journaliserAction(
+        don.id,
+        `Échec de génération de la fiche lors de la validation : ${String(pdfError).slice(0, 200)}`,
+      );
+    }
+
     await envoyerMail({
       to: don.donateur.email,
       sujet: `Votre don ${don.reference} a été validé`,
       html: templateEmail(
-        `<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Bonne nouvelle : votre don (réf. ${don.reference}) vient d'être validé par notre équipe.</p><p>Vous trouverez en pièce jointe la fiche officielle de réception de votre don.</p><p>Au nom des enfants, des écoles et des familles que nous accompagnons : merci.</p><p>L'équipe ONG-GAS</p>`,
+        `<p>Bonjour ${don.donateur.prenom} ${don.donateur.nom},</p><p>Bonne nouvelle : votre don (réf. ${don.reference}) vient d'être validé par notre équipe.</p>${
+          validationPdf
+            ? "<p>Vous trouverez en pièce jointe la fiche officielle de réception de votre don.</p>"
+            : "<p>La fiche officielle de réception de votre don vous sera transmise très prochainement.</p>"
+        }<p>Au nom des enfants, des écoles et des familles que nous accompagnons : merci.</p><p>L'équipe ONG-GAS</p>`,
       ),
-      pieceJointe: {
-        nom: `fiche-${don.reference}.pdf`,
-        contenu: validationPdf,
-      },
+      pieceJointe: validationPdf
+        ? {
+            nom: `fiche-${don.reference}.pdf`,
+            contenu: validationPdf,
+          }
+        : undefined,
       donId: don.id,
     });
   }
@@ -199,18 +220,23 @@ export default async function AdminDonDetailPage({ params }) {
       await Promise.all(
         don.photos.slice(0, 10).map(async (photo, index) => {
           try {
-            const response = await fetch(photo.url);
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`);
-            }
-            const source = Buffer.from(await response.arrayBuffer());
-            const preview = source.subarray(0, 100).toString("utf8");
-            if (preview.startsWith("{") || preview.startsWith("<")) {
-              console.error(
-                `[admin] Réponse Blob non-image (${photo.url}):`,
-                preview,
-              );
-              throw new Error("Réponse Blob invalide");
+            // Lecture directe depuis le stockage local : les URLs relatives
+            // (/uploads/...) ne sont pas interpretables par fetch cote serveur.
+            let source;
+            if (photo.url && photo.url.startsWith("/uploads/")) {
+              source = await fs.readFile(path.join(process.cwd(), photo.url));
+            } else if (/^https?:\/\//.test(photo.url || "")) {
+              const response = await fetch(photo.url);
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+              }
+              source = Buffer.from(await response.arrayBuffer());
+              const preview = source.subarray(0, 100).toString("utf8");
+              if (preview.startsWith("{") || preview.startsWith("<")) {
+                throw new Error("Réponse non-image");
+              }
+            } else {
+              throw new Error(`Chemin de photo non supporté (${photo.url})`);
             }
             const temporaryPath = path.join(
               os.tmpdir(),
@@ -318,6 +344,12 @@ export default async function AdminDonDetailPage({ params }) {
     await mettreAJourDonDetails(don.id, formData);
   }
 
+  async function handleEnvoyerAttestation(formData) {
+    "use server";
+    formData.set("donId", don.id);
+    return envoyerAttestationDonateur(formData);
+  }
+
   return (
     <div className="max-w-4xl">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -342,6 +374,43 @@ export default async function AdminDonDetailPage({ params }) {
           {DON_STATUS_LABELS[don.statut] || "Statut inconnu"}
         </span>
       </div>
+
+      {don.ficheUrl && (
+        <div className="mt-6 bg-white border border-ong-bordure rounded-lg p-6">
+          <h2 className="font-display font-semibold text-ong-bleu text-[16px] mb-4 flex items-center gap-2">
+            <span>📄</span>
+            <span>Attestation de don</span>
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={don.ficheUrl}
+              download={`attestation-${don.reference}.pdf`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 h-11 px-5 rounded-md uppercase bg-ong-bleu text-white text-[14px] font-medium cursor-pointer hover:bg-ong-bleu-fonce transition-colors"
+            >
+              <Icon className="text-white" name="file-pdf" fixedWidth />
+              Télécharger l&apos;attestation (PDF)
+            </a>
+            <EnvoyerAttestationButton
+              formAction={handleEnvoyerAttestation}
+              email={don.donateur.email}
+            />
+          </div>
+          <div className="mt-5 rounded-md border border-ong-bordure overflow-hidden bg-ong-fond">
+            <iframe
+              src={don.ficheUrl}
+              title={`Attestation ${don.reference}`}
+              className="w-full h-[560px]"
+            />
+          </div>
+          <p className="mt-2 text-[12px] text-ong-muted">
+            Aperçu de l&apos;attestation telle qu&apos;elle sera imprimée. Si le
+            visualiseur ne s&apos;affiche pas, utilisez le bouton de
+            téléchargement.
+          </p>
+        </div>
+      )}
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white border border-ong-bordure rounded-lg p-6">

@@ -68,7 +68,8 @@ const DIR = __dirname;
  * Résolution des assets et polices :
  *  1. en priorité `public/fiche-don/` à la racine du projet (Next.js —
  *     contenu du zip assets-fiche-don.zip extrait dans `public/`) ;
- *  2. sinon `lib/pdf/{assets,fonts}` à côté de ce fichier (exécution autonome).
+ *  2. sinon `public/images/` à la racine du projet ;
+ *  3. sinon `lib/pdf/{assets,fonts}` à côté de ce fichier (exécution autonome).
  */
 function resolveBase(sousDossier: string, sonde: string): string {
   const pub = path.join(process.cwd(), "public", "fiche-don", sousDossier);
@@ -78,11 +79,27 @@ function resolveBase(sousDossier: string, sonde: string): string {
 const FONTS = resolveBase("fonts", "TimesNewRoman-subset.ttf");
 const ASSET_LOGO_PNG = path.join(process.cwd(), "public", "images", "logo-ong-gas.png");
 const ASSET_LOGO_JPG = path.join(process.cwd(), "public", "fiche-don", "logo-ong-gas.jpg");
-const ASSETS = fs.existsSync(ASSET_LOGO_PNG)
-  ? path.join(process.cwd(), "public", "images")
-  : fs.existsSync(ASSET_LOGO_JPG)
-    ? path.join(process.cwd(), "public", "fiche-don")
-    : resolveBase("", "logo-ong-gas.jpg");
+
+/**
+ * Résolution IMAGE PAR IMAGE (et non par dossier) : les fichiers du modèle
+ * (fond-central.jpg, bandeau-titre.png, cachet…) vivent dans `public/fiche-don/`
+ * tandis que le logo PNG vit dans `public/images/`. L'ancienne résolution par
+ * dossier unique choisissait `public/images` dès que le logo PNG y était
+ * présent, et tous les autres assets devenaient introuvables (ENOENT) :
+ * c'était la cause des erreurs « Génération impossible » et « erreur serveur »
+ * à la validation des dons.
+ */
+function resolveAsset(nomFichier: string): string {
+  const candidats = [
+    path.join(process.cwd(), "public", "fiche-don", nomFichier),
+    path.join(process.cwd(), "public", "images", nomFichier),
+    path.join(DIR, "assets", nomFichier),
+  ];
+  for (const candidat of candidats) {
+    if (fs.existsSync(candidat)) return candidat;
+  }
+  return candidats[0];
+}
 
 /**
  * Polices du texte STATIQUE : sous-ensembles extraits du PDF modèle.
@@ -115,14 +132,14 @@ const F = {
 };
 
 const IMG = {
-  logo: fs.existsSync(ASSET_LOGO_PNG) ? ASSET_LOGO_PNG : path.join(ASSETS, "logo-ong-gas.jpg"),
-  iconeMail: path.join(ASSETS, "icone-mail.png"),
-  iconeTel: path.join(ASSETS, "icone-telephone.png"),
-  fondCentral: path.join(ASSETS, "fond-central.jpg"),
-  bandeauTitre: path.join(ASSETS, "bandeau-titre.png"),
-  colonneCreme: path.join(ASSETS, "fond-colonne-creme.png"),
-  colonneLilas: path.join(ASSETS, "fond-colonne-lilas.png"),
-  cachet: path.join(ASSETS, "cachet-ong-gas.png"),
+  logo: fs.existsSync(ASSET_LOGO_PNG) ? ASSET_LOGO_PNG : resolveAsset("logo-ong-gas.jpg"),
+  iconeMail: resolveAsset("icone-mail.png"),
+  iconeTel: resolveAsset("icone-telephone.png"),
+  fondCentral: resolveAsset("fond-central.jpg"),
+  bandeauTitre: resolveAsset("bandeau-titre.png"),
+  colonneCreme: resolveAsset("fond-colonne-creme.png"),
+  colonneLilas: resolveAsset("fond-colonne-lilas.png"),
+  cachet: resolveAsset("cachet-ong-gas.png"),
 };
 
 /* ---------------------------------------------------------------------------

@@ -3,7 +3,8 @@ const nextConfig = {
   reactCompiler: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: "8mb",
+      // 10 photos de preuve x 5 Mo + marge pour les champs du formulaire
+      bodySizeLimit: "52mb",
     },
   },
   async headers() {
@@ -22,14 +23,17 @@ const nextConfig = {
               "connect-src 'self' https: http: localhost:*",
               "object-src 'none'",
               "base-uri 'self'",
-              "frame-ancestors 'none'",
+              "frame-ancestors 'self'",
               "form-action 'self'",
               "upgrade-insecure-requests",
             ].join("; "),
           },
           {
+            // SAMEORIGIN (et non DENY) pour permettre l'aperçu intégré des
+            // attestations PDF (meme origine) tout en bloquant l'inclusion
+            // par des sites tiers.
             key: "X-Frame-Options",
-            value: "DENY",
+            value: "SAMEORIGIN",
           },
           {
             key: "X-Content-Type-Options",
