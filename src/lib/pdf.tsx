@@ -56,7 +56,8 @@ export interface DonFicheData {
   /**
    * Photos preuves (validation du don par l'admin) — chemins de fichiers
    * image accessibles côté serveur. Jusqu'à 2 photos restent dans la première
-   * page ; au-delà, elles sont placées sur des pages dédiées.
+   * page ; au-delà, la colonne affiche un renvoi et les photos sont
+   * regroupées sur des pages dédiées (titre simple, sans entête).
    */
   photosPreuves?: string[];
   /** Cachet du Secrétaire Général (défaut : apposé). Mettre false pour l'omettre. */
@@ -551,6 +552,18 @@ function dessiner(doc: Doc, d: DonFicheData): void {
         console.error(`[pdf] Photo preuve ignorée (${p}):`, error);
       }
     });
+  } else if (photos.length > 2) {
+    /* Plus de 2 photos : elles ne tiennent pas dans la colonne ; la zone
+     * affiche un renvoi vers la page qui les regroupe. */
+    const PX0 = XMILIEU + 7.5, PX1 = CADRE.x + CADRE.w - 7.5;
+    const PY0 = CADRE.y + 6, PY1 = CADRE.y + CADRE.h - 6;
+    const message = "Les photos preuves de ce don sont présentées sur la deuxième page.";
+    const largeurMessage = PX1 - PX0 - 12;
+    doc.font(F.Dyn).fontSize(10.5).fillColor(C.noir);
+    const hauteurMessage = doc.heightOfString(message, { width: largeurMessage });
+    doc.text(message, PX0 + 6, PY0 + (PY1 - PY0 - hauteurMessage) / 2, {
+      width: largeurMessage, align: "center",
+    });
   }
 
   /* 8. Ligne « OBJECTIF DU DON : » */
@@ -645,25 +658,43 @@ function dessinerPagesPhotos(doc: Doc, photos: string[]): void {
   const parPage = 6;
   for (let offset = 0; offset < photos.length; offset += parPage) {
     doc.addPage({ size: [PAGE.W, PAGE.H], margins: 0 });
-    dessinerEnteteInstitutionnel(doc);
-    texte(doc, "PHOTOS PREUVES DU DON", 169, 112, "Georgia", 18);
 
+    /* Seul écrit de la page : le titre. Aucun entête institutionnel,
+     * aucun autre texte — juste les photos, bien alignées. */
+    const titre = "Les photos Preuves du don";
+    doc.font(F.DynBold).fontSize(16);
+    const largeurTitre = doc.widthOfString(titre);
+    const xTitre = (PAGE.W - largeurTitre) / 2;
+    texte(doc, titre, xTitre, 58, "DynBold", 16, C.marine);
+    trait(doc, xTitre, 84, xTitre + largeurTitre, 84, C.marine, 1);
+
+    /* Grille ordonnée : 2 colonnes, vignettes de taille identique,
+     * dernière rangée incomplète centrée, bloc centré verticalement. */
     const pagePhotos = photos.slice(offset, offset + parPage);
     const left = 45;
     const right = PAGE.W - 45;
-    const top = 145;
+    const top = 120;
     const bottom = PAGE.H - 55;
     const columns = 2;
+    const gap = 18;
     const rows = Math.ceil(pagePhotos.length / columns);
-    const gap = 16;
     const cellWidth = (right - left - gap) / columns;
-    const cellHeight = (bottom - top - gap * (rows - 1)) / rows;
+    const cellHeight = Math.min((bottom - top - gap * (rows - 1)) / rows, 330);
+    const blocHauteur = rows * cellHeight + gap * (rows - 1);
+    const yDepart = top + (bottom - top - blocHauteur) / 2;
 
     pagePhotos.forEach((photo, index) => {
       const column = index % columns;
       const row = Math.floor(index / columns);
-      const x = left + column * (cellWidth + gap);
-      const y = top + row * (cellHeight + gap);
+      const dansRangee = Math.min(columns, pagePhotos.length - row * columns);
+      let x: number;
+      if (dansRangee < columns) {
+        const largeurRangee = dansRangee * cellWidth + (dansRangee - 1) * gap;
+        x = (PAGE.W - largeurRangee) / 2 + column * (cellWidth + gap);
+      } else {
+        x = left + column * (cellWidth + gap);
+      }
+      const y = yDepart + row * (cellHeight + gap);
       try {
         const signature = fs.readFileSync(photo).subarray(0, 8);
         const isJpeg = signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff;
