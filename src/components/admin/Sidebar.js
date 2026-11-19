@@ -67,6 +67,7 @@ export default function Sidebar({ permissions = [], adminNom = "" }) {
         {peut("contenu.gerer") && lien("/admin/parametres", "gear", "Paramètres")}
         {peut("contenu.gerer") && lien("/admin/actions", "list-check", "Nos actions")}
         {peut("contenu.gerer") && lien("/admin/partenaires", "handshake", "Partenaires")}
+        {lien("/admin/contact", "envelope", "Contact")}
         {peut("comptes.gerer") && lien("/admin/comptes", "users", "Comptes")}
       </nav>
       <div className="p-4 border-t border-ong-bordure">

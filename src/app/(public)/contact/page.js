@@ -6,16 +6,45 @@ import Swal from "sweetalert2";
 
 export default function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setSent(true);
-    await Swal.fire({
-      title: "Message pris en compte",
-      text: "L'équipe ONG-GAS vous répondra dans les meilleurs délais.",
-      icon: "success",
-      confirmButtonColor: "#4278E1",
-    });
+    const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+    setEnvoi(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.ok) {
+        setSent(true);
+        await Swal.fire({
+          title: "Message envoyé",
+          text: "L'équipe ONG-GAS vous répondra dans les meilleurs délais.",
+          icon: "success",
+          confirmButtonColor: "#4278E1",
+        });
+      } else {
+        await Swal.fire({
+          title: "Envoi impossible",
+          text: json?.erreur || "Une erreur est survenue, réessayez plus tard.",
+          icon: "error",
+          confirmButtonColor: "#4278E1",
+        });
+      }
+    } catch {
+      await Swal.fire({
+        title: "Envoi impossible",
+        text: "Connexion indisponible, réessayez plus tard.",
+        icon: "error",
+        confirmButtonColor: "#4278E1",
+      });
+    } finally {
+      setEnvoi(false);
+    }
   }
 
   return (
@@ -147,6 +176,15 @@ export default function ContactPage() {
                   </select>
                 </div>
 
+                <input
+                  type="text"
+                  name="site"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="hidden"
+                  style={{ position: "absolute", left: "-9999px" }}
+                />
                 <div>
                   <label htmlFor="message" className="block text-[12px] font-medium text-ong-muted uppercase tracking-wider mb-1.5">
                     Message
@@ -156,9 +194,10 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full h-12 px-6 rounded-md cursor-pointer bg-ong-bleu text-white text-[14px] font-semibold hover:bg-ong-bleu-fonce transition-colors"
+                  disabled={envoi}
+                  className="w-full h-12 px-6 rounded-md cursor-pointer bg-ong-bleu text-white text-[14px] font-semibold hover:bg-ong-bleu-fonce transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Envoyer le message
+                  {envoi ? "Envoi en cours…" : "Envoyer le message"}
                 </button>
               </form>
             )}
