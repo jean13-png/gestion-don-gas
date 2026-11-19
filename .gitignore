@@ -45,3 +45,4 @@ next-env.d.ts
 
 # fichiers televerses (stockage serveur)
 /uploads
+*.bak-*
