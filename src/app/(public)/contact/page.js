@@ -65,8 +65,8 @@ export default function ContactPage() {
           </div>
           <div className="flex justify-center lg:justify-end" aria-label="Action de terrain de l'ONG-GAS">
             <img
-              src="/images/images-dons/don-enfant.jpg"
-              alt="Enfants bénéficiaires accompagnés par l'ONG-GAS"
+              src="/images/reels/contact-enfants-ong.jpg"
+              alt="Enfants bénéficiaires tenant les affiches de l'ONG-GAS lors d'une distribution de kits scolaires"
               loading="eager"
               className="h-56 w-full max-w-md object-cover rounded-xl border border-ong-bordure sm:h-64 lg:h-72"
             />
