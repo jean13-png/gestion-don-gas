@@ -26,18 +26,18 @@ export default async function HomePage() {
   }
 
   const actionsFallback = [
-    ["don-enfant.jpg", "La joie des enfants bénéficiaires"],
-    ["don-sacs-scolaires.jpg", "Des sacs scolaires pour bien démarrer l'année"],
-    ["don-tables-bancs.jpg", "Des salles de classe équipées"],
-    ["don-habits.jpg", "Des vêtements pour les enfants"],
-    ["don-informatique.jpg", "Du matériel informatique pour les écoles"],
+    ["action-joie-enfants.jpg", "La joie des enfants bénéficiaires"],
+    ["action-remise-kits-enfants.jpg", "Remise de kits scolaires aux élèves"],
+    ["action-remise-classe.jpg", "Une remise directe, au sein de la classe"],
+    ["action-kits-prets.jpg", "Des kits scolaires prêts à être distribués"],
+    ["action-distribution-familles.jpg", "Une distribution partagée avec les familles"],
   ];
 
   const actionsAffichees = actions.length > 0 ? actions : actionsFallback.map(([image, title]) => ({
     id: image,
     titre: title,
     description: null,
-    imageUrl: `/images/images-dons/${image}`,
+    imageUrl: `/images/reels/${image}`,
   }));
 
   return (
@@ -67,8 +67,8 @@ export default async function HomePage() {
             </div>
             <div className="hero-image">
               <Image
-                src="/images/image-hero.avif"
-                alt="Apprenants dans une salle de formation informatique"
+                src="/images/reels/hero-kits-scolaires.jpg"
+                alt="Enfants et bénévoles devant la banderole « Un enfant… Un kit scolaire »"
                 width={640}
                 height={345}
                 className="w-full h-[345px] object-cover rounded-[13px]"
@@ -106,11 +106,11 @@ export default async function HomePage() {
         <div className="container presentation">
           <div className="presentation-image">
             <Image
-              src="/images/ecoliers-numerique.png"
-              alt="Écoliers découvrant le numérique ensemble sur un ordinateur portable"
-              width={640}
-              height={640}
-              className="w-full h-auto object-contain rounded-lg"
+              src="/images/reels/presentation-distribution-enfants.jpg"
+              alt="Enfants recevant leurs kits scolaires lors d'une distribution communautaire"
+              width={1080}
+              height={599}
+              className="w-full h-auto object-cover rounded-lg"
               style={{ width: "100%", height: "auto" }}
             />
           </div>
@@ -275,8 +275,8 @@ export default async function HomePage() {
                 </div>
               </div>
               <img
-                src="/images/remerciementsp.jpg"
-                alt="Partenaire remercié pour son soutien aux actions de l'ONG-GAS"
+                src="/images/reels/remerciements-distribution.jpg"
+                alt="Remise de kits scolaires aux enfants et aux familles devant la banderole de l'ONG-GAS"
                 loading="lazy"
                 className="w-full h-72 object-cover rounded-lg border border-ong-bordure"
               />
