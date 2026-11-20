@@ -76,6 +76,13 @@ export default function Sidebar({ permissions = [], adminNom = "" }) {
             Connecté : <span className="font-medium text-ong-texte">{adminNom}</span>
           </p>
         )}
+        <Link
+          href="/"
+          className="flex items-center gap-3 w-full px-3 py-2 mb-1 rounded-md text-[14px] font-medium text-ong-bleu hover:bg-ong-bleu-pale"
+        >
+          <Icon name="house" />
+          Voir le site
+        </Link>
         <form action={signOutAction}>
           <button type="submit" className="cursor-pointer flex items-center gap-3 w-full px-3 py-2 rounded-md text-[14px] font-medium text-red-600 hover:bg-red-50">
             <Icon name="right-from-bracket" />
