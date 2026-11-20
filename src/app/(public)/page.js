@@ -106,12 +106,12 @@ export default async function HomePage() {
         <div className="container presentation">
           <div className="presentation-image">
             <Image
-              src="/images/enfant_en_pleine_etude.jpg"
-              alt="Jeunes apprenants réunis autour d'un ordinateur"
+              src="/images/ecoliers-numerique.png"
+              alt="Écoliers découvrant le numérique ensemble sur un ordinateur portable"
               width={640}
-              height={330}
-              className="w-full h-[330px] object-cover rounded-lg"
-              style={{ width: "100%", height: "330px" }}
+              height={640}
+              className="w-full h-auto object-contain rounded-lg"
+              style={{ width: "100%", height: "auto" }}
             />
           </div>
           <div className="presentation-text">
