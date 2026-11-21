@@ -24,15 +24,12 @@ export default async function RecherchePage({ searchParams }) {
   const params = await searchParams;
   const q = typeof params?.q === "string" ? params.q.trim() : "";
 
+  /* Recherche publique : uniquement la reference complete du don (correspondance exacte).
+     Pas de recherche partielle, ni par nom ou e-mail de donateur (donnees personnelles). */
   const result = q
     ? await prisma.don.findFirst({
         where: {
-          OR: [
-            { reference: { contains: q, mode: "insensitive" } },
-            { donateur: { prenom: { contains: q, mode: "insensitive" } } },
-            { donateur: { nom: { contains: q, mode: "insensitive" } } },
-            { donateur: { email: { contains: q, mode: "insensitive" } } },
-          ],
+          reference: { equals: q, mode: "insensitive" },
         },
         include: { donateur: true },
       })
